@@ -1,4 +1,4 @@
-# Grapevine 4.0
+# Coterie v0.1
 
 A modern Python port of Grapevine - A World of Darkness character and chronicle management system. This version is based on the original Grapevine 3.01 by Adam Cerling.
 
@@ -24,9 +24,7 @@ A modern Python port of Grapevine - A World of Darkness character and chronicle 
 
 ## Installation
 
-```bash
-pip install grapevine
-```
+PENDING
 
 ## Development Setup
 
@@ -38,8 +36,13 @@ pip install grapevine
    ```
 3. Install dependencies:
    ```bash
-   pip install -e .
+   pip install -r requirements.py
    ```
+4. Run
+   ```bash
+   python main.py
+   ```
+
 
 ## Usage
 
