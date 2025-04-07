@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlalchemy import String, Integer
+from sqlalchemy import String, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Character, Trait
@@ -19,7 +19,7 @@ class Vampire(Character):
     sire: Mapped[Optional[str]] = mapped_column(String(100))
     
     # Path of Enlightenment
-    path: Mapped[str] = mapped_column(String(100))
+    path: Mapped[str] = mapped_column(String(100), default="Humanity")
     path_traits: Mapped[int] = mapped_column(Integer, default=0)
     temp_path_traits: Mapped[int] = mapped_column(Integer, default=0)
     

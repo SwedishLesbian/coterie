@@ -1,0 +1,29 @@
+{
+    "natures": [
+        {
+            "name": "Architect",
+            "description": "You have a vision of how things should be and wish to make it reality.",
+            "recovery": "Successfully establish order out of chaos or implement a plan that improves a situation."
+        },
+        {
+            "name": "Autocrat",
+            "description": "You need to be in charge, as only you know what's best.",
+            "recovery": "Successfully lead others in endeavors where your leadership was crucial."
+        },
+        {
+            "name": "Caregiver",
+            "description": "You feel compelled to help those in need.",
+            "recovery": "Successfully protect or nurture someone else at risk to yourself."
+        },
+        {
+            "name": "Conformist",
+            "description": "You follow the crowd and seek safety in numbers.",
+            "recovery": "Find acceptance and comfort by doing what is expected of you by your peers."
+        },
+        {
+            "name": "Conniver",
+            "description": "Why work hard when you can work smart?",
+            "recovery": "Gain something important by outsmarting someone."
+        }
+    ]
+} 

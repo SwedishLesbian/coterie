@@ -11,9 +11,9 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 
-from grapevine.database.engine import DB_PATH
-from grapevine.models.base import Base
-from grapevine.models.vampire import Vampire, Discipline, Ritual, Bond
+from coterie.database.engine import DB_PATH
+from coterie.models.base import Base
+from coterie.models.vampire import Vampire, Discipline, Ritual, Bond
 
 # Import all models that should be included in migrations here
 # This is necessary for Alembic to detect model changes

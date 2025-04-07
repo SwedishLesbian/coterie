@@ -34,6 +34,13 @@ class Character(Base):
     # Discriminator column for polymorphic identity
     type: Mapped[str] = mapped_column(String(50))
     
+    # Relationships
+    traits: Mapped[List["Trait"]] = relationship(
+        "Trait",
+        back_populates="character",
+        cascade="all, delete-orphan"
+    )
+    
     __mapper_args__ = {
         "polymorphic_identity": "character",
         "polymorphic_on": "type",
@@ -51,10 +58,10 @@ class Trait(Base):
     category: Mapped[str] = mapped_column(String(50))  # physical, social, mental, etc.
     type: Mapped[str] = mapped_column(String(50))  # ability, influence, background, etc.
     
-    character: Mapped["Character"] = relationship(back_populates="traits")
-
-# Add the relationship to Character
-Character.traits: Mapped[List[Trait]] = relationship(
-    back_populates="character",
-    cascade="all, delete-orphan"
-) 
+    # Relationships
+    character: Mapped["Character"] = relationship("Character", back_populates="traits")
+    
+    __mapper_args__ = {
+        "polymorphic_identity": "trait",
+        "polymorphic_on": "type",
+    } 

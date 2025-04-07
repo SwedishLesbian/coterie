@@ -16,6 +16,13 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Topic :: Games/Entertainment :: Role-Playing"
 ]
+dependencies = [
+    "PyQt6>=6.6.0",
+    "SQLAlchemy>=2.0.0",
+    "alembic>=1.13.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0.1"
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -23,10 +30,3 @@ build-backend = "hatchling.build"
 
 [tool.hatch.metadata]
 allow-direct-references = true
-
-[project.dependencies]
-PyQt6 = "^6.6.0"
-SQLAlchemy = "^2.0.0"
-alembic = "^1.13.0"
-python-dotenv = "^1.0.0"
-pyyaml = "^6.0.1"

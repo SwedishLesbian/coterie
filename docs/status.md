@@ -197,4 +197,4 @@
 1. Initial project setup
 2. Basic UI implementation
 3. Database foundation
-4. Character creation system 
+4. Character creation system

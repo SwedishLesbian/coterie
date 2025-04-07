@@ -1,0 +1,5 @@
+PyQt6>=6.6.0
+SQLAlchemy>=2.0.0
+alembic>=1.13.0
+python-dotenv>=1.0.0
+pyyaml>=6.0.1

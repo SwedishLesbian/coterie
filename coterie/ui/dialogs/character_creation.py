@@ -60,7 +60,7 @@ class CharacterCreationDialog(QDialog):
         # Nature and Demeanor
         self.nature = QComboBox()
         self.nature.setEditable(True)
-        self.nature.addItems([
+        nature_items = [
             "Architect", "Autocrat", "Bon Vivant", "Bravo",
             "Caregiver", "Celebrant", "Conformist", "Conniver",
             "Curmudgeon", "Defender", "Deviant", "Director",
@@ -68,12 +68,13 @@ class CharacterCreationDialog(QDialog):
             "Martyr", "Masochist", "Monster", "Pedagogue",
             "Penitent", "Perfectionist", "Rebel", "Rogue",
             "Survivor", "Traditionalist", "Trickster", "Visionary"
-        ])
+        ]
+        self.nature.addItems(nature_items)
         basic_layout.addRow("N&ature:", self.nature)
         
         self.demeanor = QComboBox()
         self.demeanor.setEditable(True)
-        self.demeanor.addItems(self.nature.items())
+        self.demeanor.addItems(nature_items)
         basic_layout.addRow("&Demeanor:", self.demeanor)
         
         # Player information

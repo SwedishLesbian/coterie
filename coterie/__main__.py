@@ -10,9 +10,9 @@ from typing import NoReturn
 
 from PyQt6.QtWidgets import QApplication
 
-from grapevine.database.engine import engine, APP_DATA
-from grapevine.models.base import Base
-from grapevine.ui.main_window import MainWindow
+from coterie.database.engine import engine, APP_DATA
+from coterie.models.base import Base
+from coterie.ui.main_window import MainWindow
 
 
 def setup_logging() -> None:

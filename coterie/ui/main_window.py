@@ -1,4 +1,4 @@
-"""Main application window for Grapevine.
+"""Main application window for Coterie.
 
 This module implements the main window interface, providing access to character management,
 chronicle tools, and other core functionality.
@@ -15,14 +15,14 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtCore import Qt
 
-from grapevine.database.engine import get_session
-from grapevine.models.vampire import Vampire
-from grapevine.ui.dialogs.character_creation import CharacterCreationDialog
+from coterie.database.engine import get_session
+from coterie.models.vampire import Vampire
+from coterie.ui.dialogs.character_creation import CharacterCreationDialog
 
 logger = logging.getLogger(__name__)
 
 class MainWindow(QMainWindow):
-    """Main application window providing access to all Grapevine functionality."""
+    """Main application window providing access to all Coterie functionality."""
     
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         """Initialize the main window.
@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
         """
         super().__init__(parent)
         
-        self.setWindowTitle("Grapevine 4.0")
+        self.setWindowTitle("Coterie 4.0")
         self.setMinimumSize(1024, 768)
         
         # Create the central widget and layout
@@ -179,6 +179,7 @@ class MainWindow(QMainWindow):
                     clan=data["clan"],
                     generation=data["generation"],
                     sect=data["sect"],
+                    status="Active",  # Set default status
                     start_date=datetime.now(),
                     last_modified=datetime.now()
                 )
@@ -198,12 +199,10 @@ class MainWindow(QMainWindow):
                 )
                 
         except Exception as e:
-            logger.error(f"Failed to create character: {e}")
-            QMessageBox.critical(
-                self,
-                "Error",
-                f"Failed to create character: {str(e)}"
-            )
-            session.rollback()
+            error_msg = f"Failed to create character: {str(e)}"
+            logger.error(error_msg)
+            QMessageBox.critical(self, "Error", error_msg)
+            if session:
+                session.rollback()
         finally:
             session.close() 

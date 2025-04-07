@@ -14,8 +14,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 
-from grapevine.models.vampire import Vampire, Discipline, Ritual, Bond
-from grapevine.models.base import Trait
+from coterie.models.vampire import Vampire, Discipline, Ritual, Bond
+from coterie.models.base import Trait
 
 class TraitTable(QTableWidget):
     """Table widget for displaying character traits."""
