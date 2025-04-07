@@ -1,4 +1,4 @@
-"""Vampire character sheet display for Grapevine.
+"""Vampire character sheet display for Coterie.
 
 This module implements the character sheet interface for Vampire: The Masquerade
 characters, displaying all relevant attributes, abilities, and other traits.

@@ -1,4 +1,4 @@
-"""Grapevine main application entry point.
+"""Coterie main application entry point.
 
 This module initializes the database, sets up logging, and starts the PyQt6 application.
 It serves as the main entry point when running the package as a module.
@@ -20,7 +20,7 @@ def setup_logging() -> None:
     
     Creates a log file in the application data directory and sets up console logging.
     """
-    log_file = APP_DATA / 'grapevine.log'
+    log_file = APP_DATA / 'coterie.log'
     
     logging.basicConfig(
         level=logging.INFO,
@@ -46,7 +46,7 @@ def main() -> NoReturn:
     # Set up logging
     setup_logging()
     logger = logging.getLogger(__name__)
-    logger.info("Starting Grapevine")
+    logger.info("Starting Coterie v0.1")
     
     # Initialize database
     try:

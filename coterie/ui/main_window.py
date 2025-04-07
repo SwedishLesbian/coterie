@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
         """
         super().__init__(parent)
         
-        self.setWindowTitle("Coterie 4.0")
+        self.setWindowTitle("Coterie v0.1")
         self.setMinimumSize(1024, 768)
         
         # Create the central widget and layout

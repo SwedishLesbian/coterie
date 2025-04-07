@@ -1,6 +1,6 @@
 [project]
-name = "grapevine"
-version = "4.0.0"
+name = "coterie"
+version = "0.1.0"
 description = "A modern Python port of Grapevine - A World of Darkness character and chronicle management system"
 authors = [
     {name = "Based on Grapevine by Adam Cerling"}

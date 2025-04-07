@@ -1,4 +1,4 @@
-"""Alembic environment configuration for Grapevine database migrations.
+"""Alembic environment configuration for Coterie database migrations.
 
 This module configures the Alembic migration environment, setting up the database
 connection and migration context for both offline and online migrations.
