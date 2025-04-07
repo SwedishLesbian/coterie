@@ -1,0 +1,32 @@
+[project]
+name = "grapevine"
+version = "4.0.0"
+description = "A modern Python port of Grapevine - A World of Darkness character and chronicle management system"
+authors = [
+    {name = "Based on Grapevine by Adam Cerling"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "Creative Commons Attribution-NonCommercial 2.5"}
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "License :: Other/Proprietary License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Games/Entertainment :: Role-Playing"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[project.dependencies]
+PyQt6 = "^6.6.0"
+SQLAlchemy = "^2.0.0"
+alembic = "^1.13.0"
+python-dotenv = "^1.0.0"
+pyyaml = "^6.0.1"

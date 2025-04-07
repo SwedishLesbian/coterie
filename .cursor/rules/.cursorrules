@@ -1,0 +1,117 @@
+# Python Cursor Development Rules & AI Collaboration Guide
+
+## 📜 Core Philosophy
+
+1.  **Simplicity:** Prioritize simple, clear, and maintainable Python solutions. Avoid unnecessary complexity or over-engineering. Follow the Zen of Python (`import this`).
+2.  **Iterate:** Prefer iterating on existing, working code rather than building entirely new solutions from scratch, unless fundamentally necessary or explicitly requested.
+3.  **Focus:** Concentrate efforts on the specific task assigned. Avoid unrelated changes or scope creep.
+4.  **Quality:** Strive for a clean, organized, well-tested, secure, and Pythonic codebase.
+5.  **Collaboration:** This document guides both human developers and the AI assistant for effective teamwork.
+
+## 📚 Project Context & Understanding
+
+1.  **Documentation First:**
+    * **Always** check for and thoroughly review relevant project documentation *before* starting any task. This includes:
+        * Product Requirements Documents (PRDs)
+        * `README.md` (Project overview, setup, patterns, technology stack, dependencies)
+        * Anything in the appropriate `docs/` folder (Repository root or current module).
+        * Project wikis or knowledge bases (e.g., Confluence, Obsidian if used).
+    * If documentation is missing, unclear, or conflicts with the request, **ask for clarification**.
+2.  **Architecture Adherence:**
+    * Understand and respect module boundaries, data flow, system interfaces, and component dependencies outlined in `docs/architecture.md` (or equivalent).
+    * Validate that changes comply with the established architecture. Warn and propose compliant solutions if a violation is detected.
+3.  **Pattern & Tech Stack Awareness:**
+    * Reference `README.md` and `docs/technical.md` (or equivalent) to understand and utilize existing patterns (e.g., design patterns, framework conventions) and technologies (libraries, frameworks like Django/Flask/FastAPI, databases).
+    * Exhaust options using existing implementations before proposing new patterns or libraries (check `requirements.txt` or `pyproject.toml`).
+
+## ⚙️ Task Execution & Workflow
+
+1.  **Task Definition:**
+    * Clearly understand the task requirements, acceptance criteria, and any dependencies from project management tools (e.g., TODOs, `tasks/tasks.md`) and the PRD.
+2.  **Systematic Change Protocol:** Before making significant changes:
+    * **Identify Impact:** Determine affected modules, functions, classes, dependencies, and potential side effects.
+    * **Plan:** Outline the steps. Tackle one logical change or file at a time.
+    * **Verify Testing:** Confirm how the change will be tested. Add tests if necessary *before* implementing (see TDD).
+3.  **Progress Tracking:**
+    * Keep project status documentation (e.g., `docs/status.md`, task tracker) updated with task progress (in-progress, completed, blocked), issues encountered, and completed items.
+    * Update task definitions if requirements change during implementation.
+
+## 🤖 AI Collaboration & Prompting
+
+1.  **Clarity is Key:** Provide clear, specific, and unambiguous instructions to the AI. Define the desired outcome, constraints, and context (e.g., specific Python version, relevant libraries).
+2.  **Context Referencing:** If a task spans multiple interactions, explicitly remind the AI of relevant previous context, decisions, or code snippets.
+3.  **Suggest vs. Apply:** Clearly state whether the AI should *suggest* a change for human review or *apply* a change directly (use only when high confidence and task is well-defined). Use prefixes like "Suggestion:" or "Applying fix:".
+4.  **Question AI Output:** Human developers should critically review AI-generated Python code. Question assumptions, verify logic (especially for edge cases and error handling), check for non-Pythonic approaches, and don't blindly trust confident-sounding but potentially incorrect suggestions (hallucinations).
+5.  **Focus the AI:** Guide the AI to work on specific, focused parts of the task (e.g., "Refactor this function", "Add type hints to this class"). Avoid overly broad requests that might lead to architectural or logical errors.
+6.  **Leverage Strengths:** Use the AI for tasks it excels at (boilerplate generation, refactoring specific patterns, finding syntax errors, generating test cases using `pytest` or `unittest`, adding docstrings/type hints) but maintain human oversight for complex logic, architecture, and security.
+7.  **Incremental Interaction:** Break down complex tasks into smaller steps for the AI. Review and confirm each step before proceeding.
+8.  **Standard Check-in (for AI on large tasks):** Before providing significant code suggestions:
+    * "Confirming understanding: I've reviewed [specific document/previous context]. The goal is [task goal], adhering to [key pattern/constraint like PEP 8]. Proceeding with [planned step like adding type hints]." (This replaces the more robotic "STOP AND VERIFY").
+
+## ✨ Code Quality & Style
+
+1.  **Python Typing & Docstrings:** Use type hints (`typing` module) extensively. Validate with `mypy`. Document modules, classes, functions, and methods using clear docstrings following PEP 257 conventions. Avoid `Any` unless strictly necessary and justified.
+2.  **Readability & Maintainability:** Write clean, well-organized, Pythonic code. Follow PEP 8 guidelines strictly. Use meaningful variable and function names (snake_case).
+3.  **Small Files & Modules/Classes:**
+    * Keep Python files (`.py`) reasonably sized (aim for under 300-500 lines). Refactor proactively.
+    * Break down large classes and functions into smaller, single-responsibility units.
+4.  **Avoid Duplication (DRY):** Actively look for and reuse existing functionality (functions, classes, constants). Refactor to eliminate duplication.
+5.  **Dependency Management:** Use the project's specified tool (`pip` with `requirements.txt` / `setup.py`, `Poetry`, `PDM`, `conda`). Do not introduce new dependencies without discussion.
+6.  **Linting/Formatting:** Ensure all code conforms to project's linting (`flake8`, `pylint`, `ruff`) and formatting (`black`, `yapf`) rules. Run these tools before committing.
+7.  **Pattern Consistency:** Adhere to established project patterns and framework conventions. Don't introduce new ones without discussion/explicit instruction. If replacing an old pattern, ensure the old implementation is fully removed.
+8.  **File Naming:** Use clear, descriptive, lowercase `snake_case` names for Python files (`.py`) and modules/packages. Avoid "temp", "refactored", "improved", etc., in permanent file names.
+9.  **No One-Time Scripts:** Do not commit one-time utility scripts into the main codebase unless they are part of a defined tooling/scripting directory and intended for reuse.
+10. **No Placeholders:** Write complete code. If unsure about implementation details, ask for clarification or further documentation rather than leaving `pass`, `# TODO: Implement later`, or incomplete logic.
+11. **No Simulated Data Unless Specified:** Only use simulated or hardcoded data if specifically directed (e.g., for initial setup, specific test scenarios).
+
+## ♻️ Refactoring
+
+1.  **Purposeful Refactoring:** Refactor to improve clarity, reduce duplication, simplify complexity, enhance performance (if profiled), or adhere to architectural goals and Python best practices.
+2.  **Holistic Check:** When refactoring, look for duplicate code, similar classes/functions, and opportunities for consolidation across the affected area or related modules.
+3.  **Edit, Don't Copy:** Modify existing files directly. Do not duplicate files and rename them (e.g., `my_module_v2.py`). Use version control for history.
+4.  **Verify Integrations:** After refactoring, ensure all callers, dependent modules, and integration points function correctly. Run relevant tests (`pytest` or `unittest`).
+
+## ✅ Testing & Validation
+
+1.  **Test-Driven Development (TDD) / Test-Guided Development:**
+    * **New Features:** Outline tests, write failing tests (using `pytest` or `unittest`), implement code to make tests pass, refactor.
+    * **Bug Fixes:** Write a test reproducing the bug *before* fixing it. Ensure the test fails, then apply the fix and confirm the test passes.
+2.  **Comprehensive Tests:** Write thorough unit, integration tests covering critical paths, edge cases, error handling, and major functionality. Use libraries like `pytest-cov` for coverage analysis.
+3.  **Tests Must Pass:** All tests **must** pass before committing or considering a task complete. Notify the human developer immediately if tests fail and cannot be easily fixed.
+4.  **No Mock Data (Except Tests):** Use mock data (e.g., using `unittest.mock` or `pytest-mock`) *only* within test environments. Development and production should use real or realistic data sources.
+5.  **Manual Verification:** Supplement automated tests with manual checks where appropriate, especially for user interfaces (if applicable) or complex workflows.
+
+## 🐛 Debugging & Troubleshooting
+
+1.  **Fix the Root Cause:** Prioritize fixing the underlying issue causing an error, rather than just masking it with broad `try...except pass` blocks, unless a temporary workaround is explicitly agreed upon.
+2.  **Log Analysis:** Always check terminal output, application logs (configured via Python's `logging` module), and stack traces for errors, warnings, or relevant information after making changes or when debugging. Report findings.
+3.  **Targeted Logging/Debugging:** For persistent or complex issues, add specific `logging` statements or use a debugger (`pdb`, IDE debugger) to trace execution and variable states. *Remember to remove excessive debug logging/prints before commit.*
+4.  **Check the `fixes/` Directory:** Before deep-diving into a complex or recurring bug, check `fixes/` for documented solutions to similar past issues.
+5.  **Document Complex Fixes:** If a bug requires significant effort (multiple iterations, complex logic) to fix, create a concise `.md` file in the `fixes/` directory detailing the problem, investigation steps (including relevant code snippets/tracebacks), and the solution. Name it descriptively (e.g., `fixes/resolve-race-condition-in-db-update.md`).
+6.  **Research:** Use available tools (documentation search, PyPI, Stack Overflow, official Python/library docs) to research solutions or best practices when stuck or unsure.
+
+## 🔒 Security
+
+1.  **Server-Side Authority (if applicable):** Keep sensitive logic, validation, and data manipulation strictly on the server-side (e.g., in your Django/Flask/FastAPI backend). Use secure API endpoints.
+2.  **Input Sanitization/Validation:** Always sanitize and validate user/external input on the server-side before processing or storing it. Use framework validators or libraries like `Pydantic`. Beware of injection vulnerabilities (SQL, command, etc.).
+3.  **Dependency Awareness:** Be mindful of the security implications of adding or updating dependencies (check PyPI, use tools like `safety` or `pip-audit`). Pin dependency versions.
+4.  **Credentials:** Never hardcode secrets (API keys, passwords, tokens) in the codebase. Use environment variables (loaded via `os.environ` or libraries like `python-dotenv`) or a secure secrets management solution (e.g., HashiCorp Vault, cloud provider secrets managers).
+
+## 🌳 Version Control & Environment
+
+1.  **Git Hygiene:**
+    * Commit frequently with clear, atomic messages following conventional commit formats if used.
+    * Keep the working directory clean; ensure no unrelated files, `__pycache__` directories, or virtual environment files are staged or committed.
+    * Use `.gitignore` effectively (include `__pycache__/`, `*.pyc`, virtual environment directories like `venv/`, `.venv/`, `.env*` except `.env.example`).
+2.  **Branching Strategy:** Follow the project's established branching strategy (e.g., Gitflow, GitHub Flow). Do not create new branches unless requested or necessary for the workflow.
+3.  **`.env` Files:** **Never** commit `.env` files containing secrets. Use `.env.example` as a template. Do not overwrite local `.env` files without confirmation.
+4.  **Environment Awareness:** Code should function correctly across different environments (dev, test, prod). Use environment variables for configuration (database URLs, API keys, feature flags). Use virtual environments (`venv`, `conda`) to isolate dependencies.
+5.  **Process Management (if applicable):** Ensure conflicting processes (e.g., multiple instances of a development server) are stopped before starting new ones. Restart servers/services after relevant configuration or backend changes.
+
+## 📄 Documentation Maintenance
+
+1.  **Update Docs:** If code changes impact architecture, technical decisions, established patterns, usage instructions, or task status, update the relevant documentation (`README.md`, `docs/architecture.md`, `docs/technical.md`, task trackers, docstrings).
+2.  **Keep Rules Updated:** This `.cursorrules` file should be reviewed and updated periodically to reflect learned best practices and project evolution in the Python context.
+3.  **Docstrings & Comments:** Ensure public APIs (modules, classes, functions) have clear, up-to-date docstrings (PEP 257). Use inline comments (`#`) judiciously to explain complex or non-obvious logic.
+4.  **Changelog & Versioning:** Maintain a `CHANGELOG.md` file. When completing a feature or fix, update the changelog and consider incrementing the project version (e.g., in `pyproject.toml` or a `__version__` variable), following semantic versioning (SemVer) if applicable.
+5.  **TODOS:** Mark `# TODO:` comments with your name/ticket number and date if possible. Remove or resolve them as tasks are completed. Regularly review TODOs.
