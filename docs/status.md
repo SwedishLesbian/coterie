@@ -1,4 +1,4 @@
-# Grapevine 4.0 Project Status
+# Coterie Project Status
 
 ## Overall Progress
 
@@ -8,39 +8,41 @@
 - [x] Database initialization
 - [x] Main window UI
 - [x] Character creation dialog
-- [x] Basic vampire character sheet
-- [x] Trait widget implementation
+- [x] Basic vampire character model
+- [x] Trait system foundation
 
 ### In Progress
-- [ ] Complete vampire character sheet
-- [ ] Experience point tracking
+- [ ] Vampire character sheet implementation
+- [ ] Trait widget implementation
 - [ ] Character list view
-- [ ] Data import/export
-- [ ] Chronicle management
+- [ ] Data validation
 
 ### Not Started
 - [ ] Other character types (Werewolf, Mage, etc.)
 - [ ] Plot management
 - [ ] Rumor system
-- [ ] Web interface
+- [ ] Chronicle management
+- [ ] Experience point tracking
 - [ ] Multi-user support
+- [ ] Web interface
 
 ## Component Details
 
-### Data Layer (70% Complete)
+### Data Layer (40% Complete)
 - [x] Base character model
 - [x] Vampire character model
-- [x] Trait system
+- [x] Basic trait system
 - [x] Database configuration
-- [x] Migration system
+- [x] Migration system setup
 - [ ] Chronicle models
 - [ ] Plot/Rumor models
 - [ ] Data validation
 - [ ] Import/Export functionality
+- [ ] Other character type models
 
-### Business Logic (40% Complete)
-- [x] Character creation
-- [x] Basic trait management
+### Business Logic (20% Complete)
+- [x] Basic character creation
+- [ ] Complete trait management
 - [ ] Experience point calculations
 - [ ] Character advancement
 - [ ] Game mechanics implementation
@@ -48,12 +50,12 @@
 - [ ] Plot/Rumor management
 - [ ] Data validation rules
 
-### User Interface (30% Complete)
+### User Interface (15% Complete)
 - [x] Main window layout
 - [x] Menu system
-- [x] Basic character creation
-- [x] Trait widgets
-- [ ] Complete character sheets
+- [x] Basic character creation dialog
+- [ ] Trait widgets
+- [ ] Character sheets
 - [ ] Character list view
 - [ ] Chronicle interface
 - [ ] Plot/Rumor interface
@@ -61,48 +63,49 @@
 - [ ] Settings dialog
 - [ ] Help system
 
-## Current Sprint
+## Current Sprint Goals
 
-### Goals
-1. Complete vampire character sheet
-2. Implement experience point tracking
-3. Add character list view
-4. Create basic chronicle management
+1. Complete trait widget implementation
+2. Implement vampire character sheet
+3. Add character list view to main window
+4. Add validation to character creation dialog
 
-### Blockers
+## Blockers
+
 - None currently
 
-### Known Issues
+## Known Issues
+
 1. Character creation dialog needs validation
-2. Trait widget dots not properly aligned
-3. Missing error handling in database operations
+2. Missing error handling in database operations
+3. No character loading functionality implemented yet
 
 ## Next Steps
 
 ### Short Term
-1. Add validation to character creation
+1. Create trait widget components
 2. Complete vampire character sheet
 3. Implement character list view
-4. Add experience point tracking
+4. Add validation to character creation dialog
 
 ### Medium Term
-1. Implement other character types
-2. Add chronicle management
-3. Create plot/rumor system
-4. Improve UI styling
+1. Add experience point tracking
+2. Implement werewolf character type
+3. Create chronicle management
+4. Add import/export functionality
 
 ### Long Term
-1. Develop web interface
-2. Add multi-user support
-3. Implement cloud synchronization
-4. Create mobile companion app
+1. Implement remaining character types
+2. Create plot/rumor system
+3. Develop web interface
+4. Add multi-user support
 
 ## Testing Status
 
 ### Unit Tests
 - Coverage: 0%
+- Test framework not implemented yet
 - Priority areas identified
-- Framework setup needed
 
 ### Integration Tests
 - Not started
@@ -110,8 +113,7 @@
 - UI integration secondary
 
 ### UI Tests
-- Basic framework setup
-- No tests implemented
+- Not started
 - PyQt6 testing tools identified
 
 ## Documentation Status
@@ -126,26 +128,34 @@
 - [x] Architecture overview
 - [x] Technical specifications
 - [x] Project status
-- [ ] API documentation
-- [ ] Contributing guide
+- [x] API documentation
+- [x] Contributing guide
+- [x] Conversion roadmap
+- [x] Conversion checklist
 
 ## Release Planning
 
-### Version 4.0.0-alpha
+### Version 0.1.0-alpha
 - Target: Q2 2024
 - Basic vampire character management
 - Core UI components
 - Database foundation
 
-### Version 4.0.0-beta
+### Version 0.2.0-alpha
 - Target: Q3 2024
-- All character types
+- Additional character types
+- Experience system
+- Character list view
+- Import/Export
+
+### Version 0.3.0-beta
+- Target: Q4 2024
 - Chronicle management
 - Plot/Rumor system
 - Complete UI
 
-### Version 4.0.0
-- Target: Q4 2024
+### Version 1.0.0
+- Target: Q1 2025
 - Full feature set
 - Comprehensive testing
 - Complete documentation
@@ -161,23 +171,8 @@
 
 ### Needs Attention
 - Testing framework
-- Documentation
 - Error handling
-- User feedback
-
-## Metrics
-
-### Code Quality
-- Type coverage: 90%
-- Documentation coverage: 80%
-- Test coverage: 0%
-- Linting: Passing
-
-### Performance
-- Startup time: < 2s
-- Database operations: < 100ms
-- UI responsiveness: Good
-- Memory usage: < 100MB
+- User documentation
 
 ## Notes
 
@@ -187,14 +182,10 @@
 3. UI needs styling consistency
 4. Documentation requires expansion
 
-### Decisions Pending
-1. Web framework selection
-2. Mobile development approach
-3. Cloud service provider
-4. Distribution method
-
 ### Recent Changes
 1. Initial project setup
 2. Basic UI implementation
 3. Database foundation
 4. Character creation system
+5. Creation of conversion roadmap
+6. Creation of conversion checklist
