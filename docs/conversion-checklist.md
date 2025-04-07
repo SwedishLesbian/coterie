@@ -56,7 +56,7 @@ This document provides a detailed checklist for the conversion of Grapevine from
 - [ ] Chronicle dialog
 
 ### Character Sheets
-- [ ] Vampire sheet
+- [x] Vampire sheet
 - [ ] Werewolf sheet
 - [ ] Mage sheet
 - [ ] Wraith sheet
@@ -67,7 +67,8 @@ This document provides a detailed checklist for the conversion of Grapevine from
 - [ ] Mortal sheet
 
 ### Widgets
-- [ ] Trait dot widget
+- [x] Trait dot widget
+- [x] Trait group widget
 - [ ] Character list widget
 - [ ] XP history widget
 - [ ] Notes widget
@@ -118,6 +119,7 @@ This document provides a detailed checklist for the conversion of Grapevine from
 - [x] API documentation
 - [x] Contributing guide
 - [x] Conversion guide
+- [x] JSON data structure documentation
 
 ## Distribution
 
@@ -131,7 +133,7 @@ This document provides a detailed checklist for the conversion of Grapevine from
 ### Main Screens
 - [x] frmMain.frm → main_window.py
 - [x] frmNewCharacter.frm → dialogs/character_creation.py
-- [ ] frmVampire.frm → sheets/vampire.py
+- [x] frmVampire.frm → sheets/vampire.py
 - [ ] frmWerewolf.frm → sheets/werewolf.py
 - [ ] frmMage.frm → sheets/mage.py
 - [ ] frmWraith.frm → sheets/wraith.py

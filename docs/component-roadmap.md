@@ -28,7 +28,7 @@ This document outlines the specific components that need to be developed for the
 | Component | Description | Priority | Status | Dependencies |
 |-----------|-------------|----------|--------|--------------|
 | BaseCharacterSheet | Base character sheet framework | High | Not Started | Character model |
-| VampireSheet | Vampire character sheet | High | Not Started | Vampire model, TraitWidget |
+| VampireSheet | Vampire character sheet | High | Completed | Vampire model, TraitWidget |
 | WerewolfSheet | Werewolf character sheet | Medium | Not Started | Werewolf model, TraitWidget |
 | MageSheet | Mage character sheet | Medium | Not Started | Mage model, TraitWidget |
 | WraithSheet | Wraith character sheet | Low | Not Started | Wraith model, TraitWidget |
@@ -42,8 +42,8 @@ This document outlines the specific components that need to be developed for the
 
 | Component | Description | Priority | Status | Dependencies |
 |-----------|-------------|----------|--------|--------------|
-| TraitWidget | Trait dots display/editor | High | Not Started | - |
-| TraitGroupWidget | Group of related traits | High | Not Started | TraitWidget |
+| TraitWidget | Trait dots display/editor | High | Completed | - |
+| TraitGroupWidget | Group of related traits | High | Completed | TraitWidget |
 | NotesWidget | Character notes editor | Medium | Not Started | - |
 | XPHistoryWidget | Experience history display | Medium | Not Started | Experience model |
 | PathTracker | Path/Road/Humanity tracker | Medium | Not Started | - |
@@ -116,6 +116,7 @@ This document outlines the specific components that need to be developed for the
 | ValidationService | Data validation | High | Not Started | - |
 | ExperienceService | XP calculations | Medium | Not Started | Experience model |
 | ImportExportService | Data import/export | Medium | Not Started | All models |
+| DataLoader | JSON data loading | High | Completed | - |
 
 ### Game Mechanics
 
@@ -134,6 +135,7 @@ This document outlines the specific components that need to be developed for the
 | DatabaseEngine | Database connection management | High | Completed | - |
 | Repository | Data access patterns | High | Not Started | All models |
 | MigrationSystem | Database schema management | High | Completed | - |
+| JSONDataStorage | Static game data storage | High | Completed | - |
 
 ### Application Services
 
@@ -147,23 +149,26 @@ This document outlines the specific components that need to be developed for the
 ## Development Phases
 
 ### Phase 1: Foundation (Current)
-- Core UI framework
-- Base character model
-- Vampire character model
-- Basic character creation
+- Core UI framework ✓
+- Base character model ✓
+- Vampire character model ✓
+- Basic character creation ✓
+- Trait widget implementation ✓
+- Trait group widget implementation ✓
+- Vampire sheet implementation ✓
+- JSON data integration ✓
 
 ### Phase 2: Basic Functionality
 - Character list view
-- Vampire character sheet
-- Trait widgets
 - Data validation
 - Character CRUD operations
+- Additional character types (Werewolf, Mage)
 
 ### Phase 3: Extended Functionality
 - Experience system
-- Additional character types (Werewolf, Mage)
 - Import/Export functionality
 - Notes system
+- Character sheet printing
 
 ### Phase 4: Game Tools
 - Chronicle management

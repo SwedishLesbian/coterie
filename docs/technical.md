@@ -65,6 +65,42 @@
 - Factory pattern for character creation
 - Strategy pattern for character type-specific behavior
 
+## Data Files
+
+### JSON Data Structure
+Static game data is stored in JSON files in the `data/` directory. This includes:
+
+- `attributes.json`: Physical, social, and mental attributes
+- `abilities.json`: Talents, skills, and knowledges
+- `backgrounds.json`: Character backgrounds
+- `disciplines.json`: Vampire disciplines and clan associations
+- `clans.json`: Vampire clans
+- `natures.json`: Character natures
+- `demeanors.json`: Character demeanors
+- `paths.json`: Paths of enlightenment
+
+### JSON Format
+Each data file follows a consistent structure:
+```json
+{
+    "category1": [
+        "Item1",
+        "Item2"
+    ],
+    "category2": [
+        "Item3",
+        "Item4"
+    ],
+    "descriptions": {
+        "Item1": "Description for Item1",
+        "Item2": "Description for Item2"
+    }
+}
+```
+
+### Data Loading
+Data from JSON files is loaded at application startup and cached for performance. Changes to these files require an application restart to take effect.
+
 ## Database Schema
 
 ### Core Tables
