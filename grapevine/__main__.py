@@ -6,7 +6,6 @@ It serves as the main entry point when running the package as a module.
 
 import sys
 import logging
-from pathlib import Path
 from typing import NoReturn
 
 from PyQt6.QtWidgets import QApplication
@@ -14,6 +13,7 @@ from PyQt6.QtWidgets import QApplication
 from grapevine.database.engine import engine, APP_DATA
 from grapevine.models.base import Base
 from grapevine.ui.main_window import MainWindow
+
 
 def setup_logging() -> None:
     """Configure application logging.
@@ -65,4 +65,4 @@ def main() -> NoReturn:
     sys.exit(app.exec())
 
 if __name__ == '__main__':
-    main() 
+    main()
