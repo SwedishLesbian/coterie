@@ -7,6 +7,10 @@ import xml.etree.ElementTree as ET
 from typing import Dict, List, Any, Optional, Union, Tuple
 from pathlib import Path
 
+# Add import for the trait converter
+from coterie.utils.trait_converter import TraitConverter
+from coterie.models.larp_trait import LarpTrait, TraitCategory
+
 class DataLoader:
     """Utility for loading and caching game data from JSON files."""
     
@@ -357,4 +361,553 @@ class DataLoader:
         with open(target_file, 'w', encoding='utf-8') as f:
             json.dump(character_data, f, indent=2)
             
-        return target_file 
+        return target_file
+
+    @staticmethod
+    def load_grapevine_file(file_path: str) -> Dict:
+        """Load a Grapevine character file (.gvc or .gex).
+        
+        Args:
+            file_path: Path to the Grapevine file
+            
+        Returns:
+            Dictionary containing character data
+        """
+        # Check file extension to determine type
+        if file_path.lower().endswith('.gex'):
+            return DataLoader.load_grapevine_xml(file_path)
+        else:
+            return DataLoader.load_grapevine_data(file_path)
+    
+    @staticmethod
+    def load_grapevine_data(file_path: str) -> Dict:
+        """Load data from a Grapevine 3.x character file (.gvc).
+        
+        Args:
+            file_path: Path to the Grapevine character file
+            
+        Returns:
+            Dictionary containing character data
+        """
+        data = {}
+        current_section = None
+        
+        try:
+            with open(file_path, 'r', encoding='latin-1') as f:
+                for line in f:
+                    line = line.strip()
+                    
+                    # Skip empty lines
+                    if not line:
+                        continue
+                    
+                    # Check for section header
+                    if line.startswith('[') and line.endswith(']'):
+                        current_section = line[1:-1]
+                        data[current_section] = {}
+                        continue
+                    
+                    # Process data within a section
+                    if current_section and '=' in line:
+                        key, value = line.split('=', 1)
+                        data[current_section][key.strip()] = value.strip()
+        
+        except Exception as e:
+            # Handle errors
+            print(f"Error loading Grapevine file: {e}")
+            return {}
+        
+        # Process the raw data into a more usable format
+        return DataLoader._process_grapevine_data(data)
+    
+    @staticmethod
+    def load_grapevine_xml(file_path: str) -> Dict:
+        """Load data from a Grapevine XML export file (.gex).
+        
+        Args:
+            file_path: Path to the Grapevine XML file
+            
+        Returns:
+            Dictionary containing character data
+        """
+        try:
+            # Parse the XML file
+            tree = ET.parse(file_path)
+            root = tree.getroot()
+            
+            # Create a dictionary to store character data
+            data = {}
+            
+            # Process the XML data
+            for element in root:
+                if element.tag == 'character':
+                    # Process character data
+                    character = {}
+                    for child in element:
+                        if child.tag == 'traits':
+                            # Process traits
+                            traits = {}
+                            for trait in child:
+                                trait_type = trait.get('type')
+                                if trait_type not in traits:
+                                    traits[trait_type] = {}
+                                
+                                trait_name = trait.get('name')
+                                trait_value = trait.get('value')
+                                traits[trait_type][trait_name] = trait_value
+                            
+                            character['traits'] = traits
+                        else:
+                            # Process other character data
+                            character[child.tag] = child.text
+                    
+                    # Add the character to the data dictionary
+                    data['character'] = character
+            
+            # Process the raw XML data into a more usable format
+            return DataLoader._process_grapevine_xml_data(data)
+            
+        except Exception as e:
+            # Handle errors
+            print(f"Error loading Grapevine XML file: {e}")
+            return {}
+    
+    @staticmethod
+    def _process_grapevine_data(raw_data: Dict) -> Dict:
+        """Process raw Grapevine data into a standardized format.
+        
+        Args:
+            raw_data: Raw data from a Grapevine file
+            
+        Returns:
+            Processed character data
+        """
+        character = {}
+        
+        # Extract basic character information
+        if 'Character' in raw_data:
+            char_data = raw_data['Character']
+            character['name'] = char_data.get('Name', '')
+            character['player'] = char_data.get('Player', '')
+            character['nature'] = char_data.get('Nature', '')
+            character['demeanor'] = char_data.get('Demeanor', '')
+            character['clan'] = char_data.get('Clan', '')
+            character['generation'] = int(char_data.get('Generation', '13'))
+            character['status'] = 'Active'  # Default status
+            
+            # Extract other character info
+            for key, value in char_data.items():
+                if key not in character and value:
+                    character[key] = value
+        
+        # Extract traits
+        character['traits'] = DataLoader._extract_grapevine_traits(raw_data)
+        
+        # Extract LARP traits (already in adjective format)
+        character['larp_traits'] = DataLoader._extract_grapevine_larp_traits(raw_data)
+        
+        return character
+    
+    @staticmethod
+    def _process_grapevine_xml_data(raw_data: Dict) -> Dict:
+        """Process raw Grapevine XML data into a standardized format.
+        
+        Args:
+            raw_data: Raw data from a Grapevine XML file
+            
+        Returns:
+            Processed character data
+        """
+        character = {}
+        
+        # Extract character data from XML
+        if 'character' in raw_data:
+            char_data = raw_data['character']
+            
+            # Basic character info
+            character['name'] = char_data.get('name', '')
+            character['player'] = char_data.get('player', '')
+            character['nature'] = char_data.get('nature', '')
+            character['demeanor'] = char_data.get('demeanor', '')
+            character['clan'] = char_data.get('clan', '')
+            
+            # Extract generation
+            try:
+                character['generation'] = int(char_data.get('generation', '13'))
+            except ValueError:
+                character['generation'] = 13
+            
+            character['status'] = 'Active'  # Default status
+            
+            # Extract other character info
+            for key, value in char_data.items():
+                if key not in character and key != 'traits' and value:
+                    character[key] = value
+            
+            # Extract traits
+            if 'traits' in char_data:
+                character['traits'] = DataLoader._extract_xml_traits(char_data['traits'])
+                
+                # Also extract as LARP traits
+                character['larp_traits'] = DataLoader._extract_xml_larp_traits(char_data['traits'])
+        
+        return character
+    
+    @staticmethod
+    def _extract_grapevine_traits(raw_data: Dict) -> Dict:
+        """Extract traits from raw Grapevine data.
+        
+        Args:
+            raw_data: Raw Grapevine data
+            
+        Returns:
+            Dictionary of traits categorized by type
+        """
+        traits = {
+            'physical': {},
+            'social': {},
+            'mental': {},
+            'talents': {},
+            'skills': {},
+            'knowledges': {},
+            'disciplines': {},
+            'backgrounds': {},
+            'virtues': {},
+            'merits': {},
+            'flaws': {}
+        }
+        
+        # Extract physical attributes
+        if 'Physical' in raw_data:
+            for key, value in raw_data['Physical'].items():
+                if value and value.isdigit():
+                    traits['physical'][key] = int(value)
+        
+        # Extract social attributes
+        if 'Social' in raw_data:
+            for key, value in raw_data['Social'].items():
+                if value and value.isdigit():
+                    traits['social'][key] = int(value)
+        
+        # Extract mental attributes
+        if 'Mental' in raw_data:
+            for key, value in raw_data['Mental'].items():
+                if value and value.isdigit():
+                    traits['mental'][key] = int(value)
+        
+        # Extract abilities
+        if 'Abilities' in raw_data:
+            abilities = raw_data['Abilities']
+            
+            # Talents
+            for key in ['Alertness', 'Athletics', 'Brawl', 'Dodge', 'Empathy', 
+                        'Expression', 'Intimidation', 'Leadership', 'Streetwise', 'Subterfuge']:
+                if key in abilities and abilities[key] and abilities[key].isdigit():
+                    traits['talents'][key] = int(abilities[key])
+            
+            # Skills
+            for key in ['Animal Ken', 'Crafts', 'Drive', 'Etiquette', 'Firearms', 'Melee', 
+                       'Performance', 'Security', 'Stealth', 'Survival']:
+                if key in abilities and abilities[key] and abilities[key].isdigit():
+                    traits['skills'][key] = int(abilities[key])
+            
+            # Knowledges
+            for key in ['Academics', 'Computer', 'Finance', 'Investigation', 'Law', 'Linguistics',
+                       'Medicine', 'Occult', 'Politics', 'Science']:
+                if key in abilities and abilities[key] and abilities[key].isdigit():
+                    traits['knowledges'][key] = int(abilities[key])
+        
+        # Extract backgrounds
+        if 'Backgrounds' in raw_data:
+            for key, value in raw_data['Backgrounds'].items():
+                if value and value.isdigit():
+                    traits['backgrounds'][key] = int(value)
+        
+        # Extract disciplines
+        if 'Disciplines' in raw_data:
+            for key, value in raw_data['Disciplines'].items():
+                if value and value.isdigit():
+                    traits['disciplines'][key] = int(value)
+        
+        # Extract virtues
+        if 'Virtues' in raw_data:
+            for key, value in raw_data['Virtues'].items():
+                if value and value.isdigit():
+                    traits['virtues'][key] = int(value)
+        
+        # Extract merits/flaws
+        if 'Merits' in raw_data:
+            for key, value in raw_data['Merits'].items():
+                if value:
+                    # Merits/flaws might have descriptions instead of values
+                    traits['merits'][key] = value
+        
+        if 'Flaws' in raw_data:
+            for key, value in raw_data['Flaws'].items():
+                if value:
+                    traits['flaws'][key] = value
+        
+        return traits
+    
+    @staticmethod
+    def _extract_grapevine_larp_traits(raw_data: Dict) -> Dict:
+        """Extract LARP traits from raw Grapevine data.
+        
+        Args:
+            raw_data: Raw Grapevine data
+            
+        Returns:
+            Dictionary of LARP traits as adjectives categorized by type
+        """
+        larp_traits = {
+            'physical': [],
+            'social': [],
+            'mental': [],
+            'talents': [],
+            'skills': [],
+            'knowledges': [],
+            'disciplines': [],
+            'backgrounds': [],
+            'virtues': [],
+            'merits': [],
+            'flaws': []
+        }
+        
+        # Extract dot-based traits and convert to adjectives
+        traits = DataLoader._extract_grapevine_traits(raw_data)
+        
+        # Convert physical attributes to adjectives
+        for trait_name, value in traits['physical'].items():
+            adjectives = TraitConverter.dot_rating_to_adjectives(trait_name, value, 'physical')
+            larp_traits['physical'].extend(adjectives)
+        
+        # Convert social attributes to adjectives
+        for trait_name, value in traits['social'].items():
+            adjectives = TraitConverter.dot_rating_to_adjectives(trait_name, value, 'social')
+            larp_traits['social'].extend(adjectives)
+        
+        # Convert mental attributes to adjectives
+        for trait_name, value in traits['mental'].items():
+            adjectives = TraitConverter.dot_rating_to_adjectives(trait_name, value, 'mental')
+            larp_traits['mental'].extend(adjectives)
+        
+        # Convert abilities to adjectives
+        for category in ['talents', 'skills', 'knowledges']:
+            for trait_name, value in traits[category].items():
+                # Normalize trait name for lookup
+                normalized_name = trait_name.lower().replace(' ', '_')
+                adjectives = TraitConverter.dot_rating_to_adjectives(normalized_name, value, category)
+                larp_traits[category].extend(adjectives)
+        
+        # Convert other traits similarly
+        for category in ['disciplines', 'backgrounds', 'virtues']:
+            for trait_name, value in traits[category].items():
+                if isinstance(value, int):
+                    # Use generic adjectives for these
+                    adjectives = [f"{trait_name} {i}" for i in range(1, value + 1)]
+                    larp_traits[category].extend(adjectives)
+        
+        # Add merits/flaws as is (they're often just descriptive)
+        for trait_name in traits['merits']:
+            larp_traits['merits'].append(trait_name)
+        
+        for trait_name in traits['flaws']:
+            larp_traits['flaws'].append(trait_name)
+        
+        return larp_traits
+    
+    @staticmethod
+    def _extract_xml_traits(traits_data: Dict) -> Dict:
+        """Extract traits from Grapevine XML trait data.
+        
+        Args:
+            traits_data: Trait data from Grapevine XML
+            
+        Returns:
+            Dictionary of traits categorized by type
+        """
+        traits = {
+            'physical': {},
+            'social': {},
+            'mental': {},
+            'talents': {},
+            'skills': {},
+            'knowledges': {},
+            'disciplines': {},
+            'backgrounds': {},
+            'virtues': {},
+            'merits': {},
+            'flaws': {}
+        }
+        
+        # Map trait types to categories
+        type_to_category = {
+            'physical': 'physical',
+            'social': 'social', 
+            'mental': 'mental',
+            'talent': 'talents',
+            'skill': 'skills',
+            'knowledge': 'knowledges',
+            'discipline': 'disciplines',
+            'background': 'backgrounds',
+            'virtue': 'virtues',
+            'merit': 'merits',
+            'flaw': 'flaws'
+        }
+        
+        # Process each trait
+        for trait_type, trait_dict in traits_data.items():
+            category = type_to_category.get(trait_type.lower(), 'other')
+            
+            if category in traits:
+                for name, value in trait_dict.items():
+                    try:
+                        # Try to convert value to int if possible
+                        int_value = int(value)
+                        traits[category][name] = int_value
+                    except (ValueError, TypeError):
+                        # If not a number, just store as is
+                        traits[category][name] = value
+        
+        return traits
+    
+    @staticmethod
+    def _extract_xml_larp_traits(traits_data: Dict) -> Dict:
+        """Extract LARP traits from Grapevine XML trait data.
+        
+        Args:
+            traits_data: Trait data from Grapevine XML
+            
+        Returns:
+            Dictionary of LARP traits as adjectives categorized by type
+        """
+        # First get dot-based traits
+        traits = DataLoader._extract_xml_traits(traits_data)
+        
+        # Now convert to LARP traits the same way as with non-XML version
+        larp_traits = {
+            'physical': [],
+            'social': [],
+            'mental': [],
+            'talents': [],
+            'skills': [],
+            'knowledges': [],
+            'disciplines': [],
+            'backgrounds': [],
+            'virtues': [],
+            'merits': [],
+            'flaws': []
+        }
+        
+        # Convert physical attributes to adjectives
+        for trait_name, value in traits['physical'].items():
+            if isinstance(value, int):
+                adjectives = TraitConverter.dot_rating_to_adjectives(trait_name, value, 'physical')
+                larp_traits['physical'].extend(adjectives)
+        
+        # Convert social attributes to adjectives
+        for trait_name, value in traits['social'].items():
+            if isinstance(value, int):
+                adjectives = TraitConverter.dot_rating_to_adjectives(trait_name, value, 'social')
+                larp_traits['social'].extend(adjectives)
+        
+        # Convert mental attributes to adjectives
+        for trait_name, value in traits['mental'].items():
+            if isinstance(value, int):
+                adjectives = TraitConverter.dot_rating_to_adjectives(trait_name, value, 'mental')
+                larp_traits['mental'].extend(adjectives)
+        
+        # Convert abilities to adjectives
+        for category in ['talents', 'skills', 'knowledges']:
+            for trait_name, value in traits[category].items():
+                if isinstance(value, int):
+                    # Normalize trait name for lookup
+                    normalized_name = trait_name.lower().replace(' ', '_')
+                    adjectives = TraitConverter.dot_rating_to_adjectives(normalized_name, value, category)
+                    larp_traits[category].extend(adjectives)
+        
+        # Convert other traits similarly
+        for category in ['disciplines', 'backgrounds', 'virtues']:
+            for trait_name, value in traits[category].items():
+                if isinstance(value, int):
+                    # Use generic adjectives for these
+                    adjectives = [f"{trait_name} {i}" for i in range(1, value + 1)]
+                    larp_traits[category].extend(adjectives)
+        
+        # Add merits/flaws as is (they're often just descriptive)
+        for trait_name in traits['merits']:
+            larp_traits['merits'].append(trait_name)
+        
+        for trait_name in traits['flaws']:
+            larp_traits['flaws'].append(trait_name)
+        
+        return larp_traits
+    
+    @staticmethod
+    def create_larp_traits_from_dict(character_id: int, larp_traits_dict: Dict) -> List[LarpTrait]:
+        """
+        Create LarpTrait objects from a dictionary of trait lists.
+        
+        Args:
+            character_id: The ID of the character to associate traits with
+            larp_traits_dict: Dictionary mapping categories to lists of trait adjectives
+            
+        Returns:
+            List of LarpTrait objects
+        """
+        # Create a dictionary to store trait categories
+        trait_categories = {}
+        larp_trait_objects = []
+        
+        # Process each trait category
+        for category_name, traits in larp_traits_dict.items():
+            # Get or create the category
+            if category_name not in trait_categories:
+                category = TraitCategory(name=category_name)
+                trait_categories[category_name] = category
+            else:
+                category = trait_categories[category_name]
+            
+            # Create a trait object for each adjective
+            for trait_name in traits:
+                # Check if it's a negative trait
+                is_negative = False
+                if category_name in ['flaws'] or trait_name.startswith('Negative:'):
+                    is_negative = True
+                    if trait_name.startswith('Negative:'):
+                        trait_name = trait_name[9:].strip()
+                
+                # Create the trait object
+                trait = LarpTrait(
+                    name=trait_name,
+                    character_id=character_id,
+                    is_negative=is_negative,
+                    is_temporary=False,
+                    is_custom=False,
+                    is_spent=False
+                )
+                
+                # Add the category to the trait
+                trait.categories.append(category)
+                
+                # Add to the result list
+                larp_trait_objects.append(trait)
+        
+        return larp_trait_objects
+        
+    @staticmethod
+    def load_json_file(file_path: str) -> Dict:
+        """Load data from a JSON file.
+        
+        Args:
+            file_path: Path to the JSON file
+            
+        Returns:
+            Dictionary containing the JSON data
+        """
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading JSON file: {e}")
+            return {} 

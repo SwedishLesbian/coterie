@@ -244,4 +244,60 @@ CoterieError
 - Check for updates on startup
 - Automatic database migrations
 - Configuration updates
-- Preserve user settings 
+- Preserve user settings
+
+## Mind's Eye Theater LARP Trait System
+
+Coterie is designed specifically for Mind's Eye Theater LARP character management, which uses a fundamentally different trait system than the tabletop World of Darkness games. Understanding this system is critical for developers working on the project.
+
+### LARP vs. Tabletop Trait Systems
+
+#### LARP Adjective-Based System:
+- Characters are defined by collections of **descriptive adjective traits** (e.g., "Ferocious", "Intimidating", "Clever")
+- Traits are organized into categories (Physical, Social, Mental, etc.)
+- Tests are resolved by comparing appropriate traits between characters or against difficulty challenges
+- Quantity and quality of traits matter, rather than numeric ratings
+- Players select traits that best describe their character's strengths and weaknesses
+
+#### Tabletop Dot-Based System:
+- Characters have attributes, abilities, disciplines, etc. rated from 1-5 dots
+- Ratings represent numeric values for character capabilities
+- Dice pools are formed based on these ratings
+- Tests are resolved by rolling dice equal to the combined value of relevant attributes+abilities
+
+### Implementation in Coterie
+
+For Coterie, we exclusively implement the LARP adjective-based system:
+
+1. **Trait Storage**: 
+   - Traits are stored as collections of string adjectives in character models
+   - Categories (Physical, Social, Mental) each have their own collections of traits
+   - Additional trait types include Abilities, Backgrounds, Influences, etc.
+
+2. **Trait Selection**:
+   - Character creation and advancement allows selection from predefined trait lists
+   - Custom traits can be added with Storyteller approval
+
+3. **Trait Testing System**:
+   - Implementation of the Mind's Eye Theater challenge resolution system
+   - Support for trait bidding, challenges, and retests
+   - Proper handling of negating, cancelling, and spending traits
+
+4. **UI Representation**:
+   - Traits are displayed as lists of adjectives rather than dot ratings
+   - Simple ways to add/remove/edit traits for character management
+   - Clear distinction between permanent and temporary traits
+
+### Technical Considerations
+
+- Trait adjectives must be stored as strings rather than numeric values
+- Character models need a different data structure to accommodate trait collections
+- UI widgets must be optimized for selecting from adjective lists
+- Import/export functionality needs to correctly translate between formats
+
+### Conversion Guidelines
+
+When importing from .gvc or .gex files that might have used a different system:
+- Convert each dot rating to an appropriate number of adjective traits
+- Maintain the character's core concept and capabilities
+- Follow Mind's Eye Theater conversion rules as outlined in the rulebook 

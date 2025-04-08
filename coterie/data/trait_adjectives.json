@@ -1,0 +1,44 @@
+{
+    "physical": {
+        "1": ["Brawny", "Enduring", "Rugged", "Steady", "Tough"],
+        "2": ["Brutish", "Energetic", "Stalwart", "Strapping", "Tenacious"],
+        "3": ["Athletic", "Agile", "Dexterous", "Resilient", "Vigorous"],
+        "4": ["Lithe", "Nimble", "Robust", "Swift", "Tireless"],
+        "5": ["Commanding", "Powerful", "Quick", "Relentless", "Mighty"]
+    },
+    "social": {
+        "1": ["Charming", "Eloquent", "Expressive", "Persuasive", "Sensual"],
+        "2": ["Alluring", "Graceful", "Magnetic", "Suave", "Tactful"],
+        "3": ["Beguiling", "Charismatic", "Dignified", "Elegant", "Seductive"],
+        "4": ["Captivating", "Dazzling", "Entrancing", "Fascinating", "Mesmerizing"],
+        "5": ["Bewitching", "Compelling", "Enchanting", "Irresistible", "Magnificent"]
+    },
+    "mental": {
+        "1": ["Attentive", "Clever", "Discerning", "Insightful", "Knowledgeable"],
+        "2": ["Analytical", "Astute", "Cunning", "Focused", "Intuitive"],
+        "3": ["Brilliant", "Erudite", "Perceptive", "Rational", "Shrewd"],
+        "4": ["Calculating", "Enlightened", "Ingenious", "Learned", "Visionary"],
+        "5": ["Creative", "Inspired", "Mastermind", "Sagacious", "Wise"]
+    },
+    "negative_physical": {
+        "1": ["Clumsy", "Frail", "Lethargic", "Sluggish", "Weak"],
+        "2": ["Arthritic", "Flabby", "Feeble", "Sickly", "Uncoordinated"],
+        "3": ["Decrepit", "Haggard", "Infirm", "Sore", "Wimpy"],
+        "4": ["Crippled", "Exhausted", "Immobile", "Shattered", "Withered"],
+        "5": ["Broken", "Incapacitated", "Paralyzed", "Wasted", "Wrecked"]
+    },
+    "negative_social": {
+        "1": ["Awkward", "Coarse", "Dull", "Irritating", "Shy"],
+        "2": ["Abrasive", "Crass", "Offensive", "Unpleasant", "Vulgar"],
+        "3": ["Boorish", "Callous", "Obnoxious", "Repugnant", "Tactless"],
+        "4": ["Disgusting", "Loathsome", "Repellent", "Repulsive", "Vile"],
+        "5": ["Abhorrent", "Despicable", "Intolerable", "Revolting", "Unbearable"]
+    },
+    "negative_mental": {
+        "1": ["Confused", "Distracted", "Forgetful", "Slow", "Unintelligent"],
+        "2": ["Delusional", "Dim", "Ignorant", "Shortsighted", "Simpleminded"],
+        "3": ["Foolish", "Irrational", "Muddled", "Oblivious", "Vacant"],
+        "4": ["Addled", "Bewildered", "Dense", "Imbecilic", "Witless"],
+        "5": ["Brainless", "Feeble-minded", "Moronic", "Senseless", "Thoughtless"]
+    }
+} 

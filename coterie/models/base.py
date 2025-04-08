@@ -41,6 +41,13 @@ class Character(Base):
         cascade="all, delete-orphan"
     )
     
+    # LARP trait relationship
+    larp_traits: Mapped[List["LarpTrait"]] = relationship(
+        "LarpTrait",
+        back_populates="character",
+        cascade="all, delete-orphan"
+    )
+    
     __mapper_args__ = {
         "polymorphic_identity": "character",
         "polymorphic_on": "type",
