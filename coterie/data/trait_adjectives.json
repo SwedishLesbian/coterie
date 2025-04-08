@@ -1,44 +1,82 @@
 {
-    "physical": {
-        "1": ["Brawny", "Enduring", "Rugged", "Steady", "Tough"],
-        "2": ["Brutish", "Energetic", "Stalwart", "Strapping", "Tenacious"],
-        "3": ["Athletic", "Agile", "Dexterous", "Resilient", "Vigorous"],
-        "4": ["Lithe", "Nimble", "Robust", "Swift", "Tireless"],
-        "5": ["Commanding", "Powerful", "Quick", "Relentless", "Mighty"]
+    "physical": [
+        "Brawny", "Enduring", "Rugged", "Steady", "Tough",
+        "Brutish", "Energetic", "Stalwart", "Strapping", "Tenacious",
+        "Athletic", "Agile", "Dexterous", "Resilient", "Vigorous",
+        "Lithe", "Nimble", "Robust", "Swift", "Tireless",
+        "Commanding", "Powerful", "Quick", "Relentless", "Mighty"
+    ],
+    "social": [
+        "Charming", "Eloquent", "Expressive", "Persuasive", "Sensual",
+        "Alluring", "Graceful", "Magnetic", "Suave", "Tactful",
+        "Beguiling", "Charismatic", "Dignified", "Elegant", "Seductive",
+        "Captivating", "Dazzling", "Entrancing", "Fascinating", "Mesmerizing",
+        "Bewitching", "Compelling", "Enchanting", "Irresistible", "Magnificent"
+    ],
+    "mental": [
+        "Attentive", "Clever", "Discerning", "Insightful", "Knowledgeable",
+        "Analytical", "Astute", "Cunning", "Focused", "Intuitive",
+        "Brilliant", "Erudite", "Perceptive", "Rational", "Shrewd",
+        "Calculating", "Enlightened", "Ingenious", "Learned", "Visionary",
+        "Creative", "Inspired", "Mastermind", "Sagacious", "Wise"
+    ],
+    "negative": {
+        "physical": [
+            "Clumsy", "Frail", "Lethargic", "Sluggish", "Weak",
+            "Arthritic", "Flabby", "Feeble", "Sickly", "Uncoordinated",
+            "Decrepit", "Haggard", "Infirm", "Sore", "Wimpy",
+            "Crippled", "Exhausted", "Immobile", "Shattered", "Withered",
+            "Broken", "Incapacitated", "Paralyzed", "Wasted", "Wrecked"
+        ],
+        "social": [
+            "Awkward", "Coarse", "Dull", "Irritating", "Shy",
+            "Abrasive", "Crass", "Offensive", "Unpleasant", "Vulgar",
+            "Boorish", "Callous", "Obnoxious", "Repugnant", "Tactless",
+            "Disgusting", "Loathsome", "Repellent", "Repulsive", "Vile",
+            "Abhorrent", "Despicable", "Intolerable", "Revolting", "Unbearable"
+        ],
+        "mental": [
+            "Confused", "Distracted", "Forgetful", "Slow", "Unintelligent",
+            "Delusional", "Dim", "Ignorant", "Shortsighted", "Simpleminded",
+            "Foolish", "Irrational", "Muddled", "Oblivious", "Vacant",
+            "Addled", "Bewildered", "Dense", "Imbecilic", "Witless",
+            "Brainless", "Feeble-minded", "Moronic", "Senseless", "Thoughtless"
+        ]
     },
-    "social": {
-        "1": ["Charming", "Eloquent", "Expressive", "Persuasive", "Sensual"],
-        "2": ["Alluring", "Graceful", "Magnetic", "Suave", "Tactful"],
-        "3": ["Beguiling", "Charismatic", "Dignified", "Elegant", "Seductive"],
-        "4": ["Captivating", "Dazzling", "Entrancing", "Fascinating", "Mesmerizing"],
-        "5": ["Bewitching", "Compelling", "Enchanting", "Irresistible", "Magnificent"]
+    "talents": {
+        "alertness": ["Alert", "Vigilant", "Watchful", "Observant", "Perceptive"],
+        "athletics": ["Athletic", "Agile", "Nimble", "Coordinated", "Limber"],
+        "brawl": ["Scrappy", "Combative", "Tough", "Pugnacious", "Fierce"],
+        "dodge": ["Evasive", "Quick", "Elusive", "Agile", "Dexterous"],
+        "empathy": ["Empathic", "Sensitive", "Sympathetic", "Compassionate", "Understanding"],
+        "expression": ["Articulate", "Expressive", "Persuasive", "Eloquent", "Poetic"],
+        "intimidation": ["Intimidating", "Imposing", "Frightening", "Menacing", "Terrifying"],
+        "leadership": ["Commanding", "Inspiring", "Authoritative", "Decisive", "Influential"],
+        "streetwise": ["Streetwise", "Savvy", "Worldly", "Connected", "Shrewd"],
+        "subterfuge": ["Deceptive", "Cunning", "Sly", "Manipulative", "Devious"]
     },
-    "mental": {
-        "1": ["Attentive", "Clever", "Discerning", "Insightful", "Knowledgeable"],
-        "2": ["Analytical", "Astute", "Cunning", "Focused", "Intuitive"],
-        "3": ["Brilliant", "Erudite", "Perceptive", "Rational", "Shrewd"],
-        "4": ["Calculating", "Enlightened", "Ingenious", "Learned", "Visionary"],
-        "5": ["Creative", "Inspired", "Mastermind", "Sagacious", "Wise"]
+    "skills": {
+        "animal_ken": ["Animal-friendly", "Soothing", "Nurturing", "Familiar", "Connected"],
+        "crafts": ["Crafty", "Handy", "Skilled", "Meticulous", "Creative"],
+        "drive": ["Driver", "Operator", "Pilot", "Steady", "Quick"],
+        "etiquette": ["Proper", "Polite", "Refined", "Cultured", "Diplomatic"],
+        "firearms": ["Armed", "Accurate", "Precise", "Trained", "Marksman"],
+        "melee": ["Armed", "Trained", "Skilled", "Proficient", "Adept"],
+        "performance": ["Performer", "Entertaining", "Captivating", "Dramatic", "Showman"],
+        "security": ["Cautious", "Secure", "Locksmith", "Vigilant", "Protective"],
+        "stealth": ["Stealthy", "Silent", "Hidden", "Covert", "Sneaky"],
+        "survival": ["Survivalist", "Hardy", "Adaptable", "Resourceful", "Prepared"]
     },
-    "negative_physical": {
-        "1": ["Clumsy", "Frail", "Lethargic", "Sluggish", "Weak"],
-        "2": ["Arthritic", "Flabby", "Feeble", "Sickly", "Uncoordinated"],
-        "3": ["Decrepit", "Haggard", "Infirm", "Sore", "Wimpy"],
-        "4": ["Crippled", "Exhausted", "Immobile", "Shattered", "Withered"],
-        "5": ["Broken", "Incapacitated", "Paralyzed", "Wasted", "Wrecked"]
-    },
-    "negative_social": {
-        "1": ["Awkward", "Coarse", "Dull", "Irritating", "Shy"],
-        "2": ["Abrasive", "Crass", "Offensive", "Unpleasant", "Vulgar"],
-        "3": ["Boorish", "Callous", "Obnoxious", "Repugnant", "Tactless"],
-        "4": ["Disgusting", "Loathsome", "Repellent", "Repulsive", "Vile"],
-        "5": ["Abhorrent", "Despicable", "Intolerable", "Revolting", "Unbearable"]
-    },
-    "negative_mental": {
-        "1": ["Confused", "Distracted", "Forgetful", "Slow", "Unintelligent"],
-        "2": ["Delusional", "Dim", "Ignorant", "Shortsighted", "Simpleminded"],
-        "3": ["Foolish", "Irrational", "Muddled", "Oblivious", "Vacant"],
-        "4": ["Addled", "Bewildered", "Dense", "Imbecilic", "Witless"],
-        "5": ["Brainless", "Feeble-minded", "Moronic", "Senseless", "Thoughtless"]
+    "knowledges": {
+        "academics": ["Academic", "Educated", "Scholarly", "Studious", "Knowledgeable"],
+        "computer": ["Technical", "Programmer", "Hacker", "Digital", "Analytical"],
+        "finance": ["Financial", "Economic", "Fiscal", "Resourceful", "Calculating"],
+        "investigation": ["Investigative", "Thorough", "Meticulous", "Analytical", "Deductive"],
+        "law": ["Legal", "Judicial", "Legislative", "Authoritative", "Constitutional"],
+        "linguistics": ["Linguistic", "Multilingual", "Fluent", "Articulate", "Expressive"],
+        "medicine": ["Medical", "Therapeutic", "Diagnostic", "Healing", "Scientific"],
+        "occult": ["Occult", "Mystical", "Arcane", "Esoteric", "Knowledgeable"],
+        "politics": ["Political", "Diplomatic", "Strategic", "Connected", "Influential"],
+        "science": ["Scientific", "Analytical", "Technical", "Experimental", "Methodical"]
     }
 } 

@@ -256,8 +256,9 @@ Coterie is designed specifically for Mind's Eye Theater LARP character managemen
 - Characters are defined by collections of **descriptive adjective traits** (e.g., "Ferocious", "Intimidating", "Clever")
 - Traits are organized into categories (Physical, Social, Mental, etc.)
 - Tests are resolved by comparing appropriate traits between characters or against difficulty challenges
-- Quantity and quality of traits matter, rather than numeric ratings
-- Players select traits that best describe their character's strengths and weaknesses
+- The number of traits a character possesses in a category represents their overall capability in that area
+- Players select specific traits that best describe their character's abilities and weaknesses
+- Negative traits represent weaknesses that can be exploited by opponents
 
 #### Tabletop Dot-Based System:
 - Characters have attributes, abilities, disciplines, etc. rated from 1-5 dots
@@ -270,13 +271,15 @@ Coterie is designed specifically for Mind's Eye Theater LARP character managemen
 For Coterie, we exclusively implement the LARP adjective-based system:
 
 1. **Trait Storage**: 
-   - Traits are stored as collections of string adjectives in character models
+   - Traits are stored as collections of string adjectives, not numeric ratings
    - Categories (Physical, Social, Mental) each have their own collections of traits
    - Additional trait types include Abilities, Backgrounds, Influences, etc.
+   - Negative traits are stored separately but linked to their categories
 
 2. **Trait Selection**:
    - Character creation and advancement allows selection from predefined trait lists
    - Custom traits can be added with Storyteller approval
+   - The focus is on which traits are selected, not how many "points" are spent
 
 3. **Trait Testing System**:
    - Implementation of the Mind's Eye Theater challenge resolution system
@@ -284,18 +287,41 @@ For Coterie, we exclusively implement the LARP adjective-based system:
    - Proper handling of negating, cancelling, and spending traits
 
 4. **UI Representation**:
-   - Traits are displayed as lists of adjectives rather than dot ratings
+   - Traits are displayed as lists of adjectives
    - Simple ways to add/remove/edit traits for character management
-   - Clear distinction between permanent and temporary traits
+   - Clear distinction between permanent, temporary, and spent traits
+   - Visual indicators for negative traits
 
 ### Technical Considerations
 
-- Trait adjectives must be stored as strings rather than numeric values
+- Trait adjectives must be stored as strings, not numeric values
 - Character models need a different data structure to accommodate trait collections
-- UI widgets must be optimized for selecting from adjective lists
-- Import/export functionality needs to correctly translate between formats
+- UI widgets must be optimized for selecting from adjective lists and managing trait collections
+- Import/export functionality needs to preserve the specific trait adjectives
+- The system must track which traits are spent during gameplay
 
-### Conversion Guidelines
+### Trait Categories
+
+The typical trait organization in Mind's Eye Theater includes:
+
+1. **Physical Traits**: Such as "Athletic", "Nimble", "Swift", "Robust"
+2. **Social Traits**: Such as "Charismatic", "Eloquent", "Charming", "Persuasive"
+3. **Mental Traits**: Such as "Perceptive", "Intuitive", "Clever", "Analytical"
+4. **Negative Traits**: Including "Clumsy", "Repugnant", "Forgetful" for each category
+5. **Abilities**: Talents, Skills, and Knowledges with appropriate descriptive traits
+6. **Backgrounds**: Represented as descriptive qualities
+7. **Disciplines and Powers**: Represented with suitable adjectives for vampire abilities
+
+### Character Testing Mechanics
+
+In Mind's Eye Theater, characters test against each other by:
+1. Each player bids a relevant trait
+2. The traits are compared or a randomizer (such as rock-paper-scissors) is used
+3. The winner succeeds at the action
+4. Traits can be spent (used up for the session) for retests or special effects
+5. Negative traits can be called by opponents to negate positive traits
+
+## Conversion Guidelines
 
 When importing from .gvc or .gex files that might have used a different system:
 - Convert each dot rating to an appropriate number of adjective traits

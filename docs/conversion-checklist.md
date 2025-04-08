@@ -209,4 +209,31 @@ This document tracks the progress of converting features from Grapevine 3.x to C
 - [ ] frmRumor.frm → dialogs/rumor.py
 - [ ] frmOptions.frm → dialogs/preferences.py
 - [ ] frmAbout.frm → dialogs/about.py
-- [x] frmImport.frm → dialogs/import_dialog.py 
+- [x] frmImport.frm → dialogs/import_dialog.py
+
+## Trait System Conversion
+
+- [x] Document Mind's Eye Theater LARP trait system in technical documentation
+- [x] Create models for LARP trait system (`LarpTrait` and `TraitCategory`)
+- [x] Implement UI widgets for adjective-based traits (`LarpTraitWidget`)
+- [x] Create trait adjective data files and utilities
+- [ ] Update character sheets to use LARP trait widgets
+- [ ] Implement proper trait testing and bidding mechanics
+- [ ] Add support for spending traits during gameplay
+- [ ] Create proper trait filtering and selection in character creation
+
+## Important Notes
+
+1. **Mind's Eye Theater LARP vs. Tabletop**: Coterie exclusively supports the Mind's Eye Theater LARP system, which uses adjective-based traits rather than numeric ratings. The implementation must reflect this fundamental difference.
+
+2. **Trait Handling**: Traits in LARP are collections of adjectives (not ratings) organized into categories. Proper handling includes:
+   - Physical/Social/Mental trait collections
+   - Negative traits for each category
+   - Abilities as descriptive traits
+   - Tracking spent traits during gameplay
+
+3. **Testing System**: The challenge resolution system in LARP is based on trait bidding, not dice rolls. The implementation should allow for:
+   - Trait selection during challenges
+   - Comparing traits between characters
+   - Challenge resolution mechanics
+   - Trait retesting options 
