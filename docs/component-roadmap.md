@@ -1,185 +1,74 @@
-# Coterie Component Roadmap
+# Component Roadmap
 
-This document outlines the specific components that need to be developed for the Coterie project, organized by category and priority.
+This document outlines the specific components that need to be developed for Coterie, and their current implementation status.
 
-## UI Components
+## Core Components
 
-### Core UI Components
+### Data Models
 
-| Component | Description | Priority | Status | Dependencies |
-|-----------|-------------|----------|--------|--------------|
-| MainWindow | Application main window | High | Completed | - |
-| MenuSystem | Application menus | High | Completed | - |
-| ToolBar | Application toolbar | High | Completed | - |
-| StatusBar | Status information display | High | Completed | - |
-| TabSystem | Tab navigation control | High | Completed | - |
+- ✅ **Base Character Model** - Core character data structure
+- ✅ **Trait Models** - Traditional trait handling
+- ✅ **LARP Trait Models** - Adjective-based trait handling for Mind's Eye Theater
+- ⬜ **Experience System** - Track and spend experience points
+- ⬜ **Chronicle Model** - Organize characters into chronicles
+- ⬜ **Notes System** - Attach notes to characters
 
-### Character Management UI
+### UI Framework
 
-| Component | Description | Priority | Status | Dependencies |
-|-----------|-------------|----------|--------|--------------|
-| CharacterList | Character list/grid view | High | Not Started | Character model |
-| CharacterCreationDialog | New character dialog | High | Completed | Character models |
-| CharacterFilterBar | Character filtering toolbar | Medium | Not Started | CharacterList |
-| SearchBar | Character search component | Medium | Not Started | CharacterList |
+- ✅ **Main Window** - Application shell and navigation
+- ✅ **Dialog Base Classes** - Standard dialog templates
+- ✅ **Character Creation Flow** - Guided character creation
+- ✅ **Import/Export Systems** - Data interchange with Grapevine
+- ⬜ **Settings Dialog** - Application configuration
 
-### Character Sheet UI
+## Character Sheet Components
 
-| Component | Description | Priority | Status | Dependencies |
-|-----------|-------------|----------|--------|--------------|
-| BaseCharacterSheet | Base character sheet framework | High | Not Started | Character model |
-| VampireSheet | Vampire character sheet | High | Completed | Vampire model, TraitWidget |
-| WerewolfSheet | Werewolf character sheet | Medium | Not Started | Werewolf model, TraitWidget |
-| MageSheet | Mage character sheet | Medium | Not Started | Mage model, TraitWidget |
-| WraithSheet | Wraith character sheet | Low | Not Started | Wraith model, TraitWidget |
-| ChangelingSheet | Changeling character sheet | Low | Not Started | Changeling model, TraitWidget |
-| HunterSheet | Hunter character sheet | Low | Not Started | Hunter model, TraitWidget |
-| MummySheet | Mummy character sheet | Low | Not Started | Mummy model, TraitWidget |
-| DemonSheet | Demon character sheet | Low | Not Started | Demon model, TraitWidget |
-| MortalSheet | Mortal character sheet | Medium | Not Started | Character model, TraitWidget |
+### Character Types
 
-### Common Widgets
+- ✅ **Vampire Sheet** - Vampire: The Masquerade character display
+- ⬜ **Werewolf Sheet** - Werewolf: The Apocalypse character display
+- ⬜ **Mage Sheet** - Mage: The Ascension character display
+- ⬜ **Other Character Types** - Additional WoD character types
 
-| Component | Description | Priority | Status | Dependencies |
-|-----------|-------------|----------|--------|--------------|
-| TraitWidget | Trait dots display/editor | High | Completed | - |
-| TraitGroupWidget | Group of related traits | High | Completed | TraitWidget |
-| NotesWidget | Character notes editor | Medium | Not Started | - |
-| XPHistoryWidget | Experience history display | Medium | Not Started | Experience model |
-| PathTracker | Path/Road/Humanity tracker | Medium | Not Started | - |
-| BloodPoolWidget | Blood pool display (Vampire) | High | Not Started | - |
-| RageWidget | Rage tracker (Werewolf) | Medium | Not Started | - |
-| GnosisWidget | Gnosis tracker (Werewolf) | Medium | Not Started | - |
-| AreteMeter | Arete tracker (Mage) | Medium | Not Started | - |
+### Sheet Sections
 
-### Game Tools UI
+- ✅ **Basic Info** - Name, nature, demeanor, etc.
+- ✅ **Attributes** - Physical, Social, Mental traits
+- ✅ **Abilities** - Talents, Skills, Knowledge
+- ✅ **Advantages** - Backgrounds, Disciplines, Gifts, etc.
+- ⬜ **Health/Damage Tracking** - Track character damage
+- ⬜ **Notes Section** - Character-specific notes
+- ⬜ **Experience Log** - Track experience gain/spending
 
-| Component | Description | Priority | Status | Dependencies |
-|-----------|-------------|----------|--------|--------------|
-| ChronicleManager | Chronicle management UI | Medium | Not Started | Chronicle model |
-| PlotManager | Plot management UI | Low | Not Started | Plot model |
-| RumorManager | Rumor management UI | Low | Not Started | Rumor model |
-| ExperienceDialog | XP management UI | Medium | Not Started | Experience model |
-| FilterDialogs | Advanced filtering | Medium | Not Started | - |
-| CharacterListDialog | Character browse/select | Medium | Not Started | - |
-| DiceRoller | Dice rolling utility | Low | Not Started | - |
-| RelationshipGraph | Character relationship viewer | Low | Not Started | Relationship model |
+### Trait Components
 
-### Settings and Utilities
+- ✅ **Dot-based Trait Widget** - Traditional trait display
+- ✅ **Trait Group Widget** - Group of related traits
+- ✅ **LARP Trait Widget** - Adjective-based trait display
+- ✅ **LARP Trait Category Widget** - Organized trait categories
+- ⬜ **Challenge Resolution Widget** - LARP trait bidding interface
 
-| Component | Description | Priority | Status | Dependencies |
-|-----------|-------------|----------|--------|--------------|
-| PreferencesDialog | Application settings | Medium | Not Started | - |
-| ImportExportDialog | Data import/export | Medium | In Progress | Import functionality implemented for .gvc and .gex files, export pending |
-| AboutDialog | Application information | Low | Not Started | - |
-| BackupManager | Database backup UI | Medium | Not Started | - |
+## Game Management Components
 
-## Data Models
+- ⬜ **Character List View** - Browse and filter characters
+- ⬜ **Chronicle Management** - Organize characters by chronicle
+- ⬜ **Relationship Tracker** - Track character relationships
+- ⬜ **NPC Generator** - Create quick NPCs
+- ⬜ **Experience Calculator** - Calculate and award XP
 
-### Core Models
+## Utility Components
 
-| Model | Description | Priority | Status | Dependencies |
-|-------|-------------|----------|--------|--------------|
-| Character | Base character model | High | Completed | - |
-| Trait | Character trait model | High | Completed | Character |
-| Experience | XP tracking model | Medium | Not Started | Character |
-| Note | Character notes model | Medium | Not Started | Character |
+- ✅ **Data Loader** - Load JSON and Grapevine data
+- ✅ **Trait Converter** - Convert between trait systems
+- ⬜ **Dice Roller** - Handle dice rolling for tabletop WoD
+- ⬜ **Name Generator** - Generate character names
+- ⬜ **Printing System** - Print character sheets
 
-### Character Type Models
+## Mind's Eye Theater LARP Support
 
-| Model | Description | Priority | Status | Dependencies |
-|-------|-------------|----------|--------|--------------|
-| Vampire | Vampire character model | High | Completed | Character |
-| Werewolf | Werewolf character model | Medium | Not Started | Character |
-| Mage | Mage character model | Medium | Not Started | Character |
-| Wraith | Wraith character model | Low | Not Started | Character |
-| Changeling | Changeling character model | Low | Not Started | Character |
-| Hunter | Hunter character model | Low | Not Started | Character |
-| Mummy | Mummy character model | Low | Not Started | Character |
-| Demon | Demon character model | Low | Not Started | Character |
-| Mortal | Mortal character model | Medium | Not Started | Character |
-
-### Game System Models
-
-| Model | Description | Priority | Status | Dependencies |
-|-------|-------------|----------|--------|--------------|
-| Chronicle | Chronicle management model | Medium | Not Started | - |
-| Plot | Plot management model | Low | Not Started | Chronicle |
-| Rumor | Rumor management model | Low | Not Started | Chronicle |
-| Relationship | Character relationship model | Low | Not Started | Character |
-
-## Business Logic Components
-
-### Core Logic
-
-| Component | Description | Priority | Status | Dependencies |
-|-----------|-------------|----------|--------|--------------|
-| CharacterService | Character CRUD operations | High | Not Started | Character models |
-| ValidationService | Data validation | High | Not Started | - |
-| ExperienceService | XP calculations | Medium | Not Started | Experience model |
-| ImportExportService | Data import/export | Medium | Not Started | All models |
-| DataLoader | JSON data loading | High | Completed | - |
-
-### Game Mechanics
-
-| Component | Description | Priority | Status | Dependencies |
-|-----------|-------------|----------|--------|--------------|
-| DiceService | Dice rolling mechanics | Low | Not Started | - |
-| CombatService | Combat resolution | Low | Not Started | Character models |
-| RuleService | Game rules enforcement | Low | Not Started | Character models |
-
-## Infrastructure Components
-
-### Data Layer
-
-| Component | Description | Priority | Status | Dependencies |
-|-----------|-------------|----------|--------|--------------|
-| DatabaseEngine | Database connection management | High | Completed | - |
-| Repository | Data access patterns | High | Not Started | All models |
-| MigrationSystem | Database schema management | High | Completed | - |
-| JSONDataStorage | Static game data storage | High | Completed | - |
-
-### Application Services
-
-| Component | Description | Priority | Status | Dependencies |
-|-----------|-------------|----------|--------|--------------|
-| ConfigService | Configuration management | Medium | Not Started | - |
-| LoggingService | Application logging | Medium | Not Started | - |
-| BackupService | Database backup/restore | Medium | Not Started | DatabaseEngine |
-| UpdateService | Application updates | Low | Not Started | - |
-
-## Development Phases
-
-### Phase 1: Foundation (Current)
-- Core UI framework ✓
-- Base character model ✓
-- Vampire character model ✓
-- Basic character creation ✓
-- Trait widget implementation ✓
-- Trait group widget implementation ✓
-- Vampire sheet implementation ✓
-- JSON data integration ✓
-
-### Phase 2: Basic Functionality
-- Character list view
-- Data validation
-- Character CRUD operations
-- Additional character types (Werewolf, Mage)
-
-### Phase 3: Extended Functionality
-- Experience system
-- Import/Export functionality
-- Notes system
-- Character sheet printing
-
-### Phase 4: Game Tools
-- Chronicle management
-- Plot/Rumor system
-- Relationship tracking
-- Advanced game mechanics
-
-### Phase 5: Advanced Features
-- Web interface
-- Multi-user support
-- Cloud synchronization
-- Mobile companion app 
+- ✅ **Adjective Trait System** - Implement LARP trait system
+- ✅ **Trait Category Management** - Organize traits by category
+- ✅ **Negative Trait Support** - Support for flaws/negative traits
+- ✅ **Trait Spending Tracking** - Track spent traits
+- ⬜ **Challenge System** - Implement trait bidding for challenges
+- ⬜ **Trait Refresh** - Handle trait refresh mechanics 

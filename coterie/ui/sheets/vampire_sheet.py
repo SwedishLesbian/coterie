@@ -16,119 +16,92 @@ from PyQt6.QtGui import QFont
 
 from coterie.models.vampire import Vampire, Discipline, Ritual, Bond
 from coterie.models.base import Trait
+from coterie.models.larp_trait import LarpTrait, TraitCategory
 from coterie.utils.data_loader import DataLoader
 from coterie.ui.widgets.trait_group_widget import TraitGroupWidget
 from coterie.ui.widgets.trait_widget import TraitWidget
+from coterie.ui.widgets.larp_trait_widget import LarpTraitWidget, LarpTraitCategoryWidget
 
 class VampireSheet(QWidget):
     """Character sheet display for Vampire: The Masquerade characters."""
     
-    modified = pyqtSignal()  # Emitted when the character is modified
+    modified = pyqtSignal()
     
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
+    def __init__(self, parent=None):
         """Initialize the vampire character sheet.
         
         Args:
-            parent: Optional parent widget
+            parent: Parent widget
         """
         super().__init__(parent)
         
-        # Create the layout
-        layout = QVBoxLayout(self)
+        # Set up main layout
+        self.main_layout = QVBoxLayout(self)
         
-        # Create a scroll area
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        layout.addWidget(scroll)
+        # Create character info header
+        self._create_character_info_section()
         
-        # Create the main content widget
-        content = QWidget()
-        scroll.setWidget(content)
-        content_layout = QVBoxLayout(content)
+        # Create the main content area with scrolling
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.main_layout.addWidget(self.scroll_area)
         
-        # Character information section
-        self._create_character_info_section(content_layout)
+        # Create content widget for scroll area
+        self.content_widget = QWidget()
+        self.content_layout = QVBoxLayout(self.content_widget)
+        self.scroll_area.setWidget(self.content_widget)
         
-        # Create tab widget for different sections
-        tabs = QTabWidget()
-        content_layout.addWidget(tabs)
+        # Add trait sections
+        self._create_attributes_section(self.content_layout)
+        self._create_abilities_section(self.content_layout)
+        self._create_disciplines_section(self.content_layout)
+        self._create_backgrounds_section(self.content_layout)
+        self._create_virtues_section(self.content_layout)
+        self._create_stats_section(self.content_layout)
+        self._create_description_section(self.content_layout)
         
-        # Attributes & Abilities tab
-        attributes_tab = QWidget()
-        attributes_layout = QVBoxLayout(attributes_tab)
-        tabs.addTab(attributes_tab, "Attributes & Abilities")
+    def _create_character_info_section(self) -> None:
+        """Create the character information section."""
+        # Character info group
+        info_group = QGroupBox("Character Information")
+        info_layout = QFormLayout(info_group)
+        self.main_layout.addWidget(info_group)
         
-        # Attributes section
-        self._create_attributes_section(attributes_layout)
-        
-        # Abilities section
-        self._create_abilities_section(attributes_layout)
-        
-        # Advantages tab
-        advantages_tab = QWidget()
-        advantages_layout = QVBoxLayout(advantages_tab)
-        tabs.addTab(advantages_tab, "Advantages")
-        
-        # Disciplines section
-        self._create_disciplines_section(advantages_layout)
-        
-        # Backgrounds section
-        self._create_backgrounds_section(advantages_layout)
-        
-        # Virtues & Path section
-        self._create_virtues_section(advantages_layout)
-        
-        # Character tab
-        character_tab = QWidget()
-        character_layout = QVBoxLayout(character_tab)
-        tabs.addTab(character_tab, "Character")
-        
-        # Stats section (Willpower, Blood, etc.)
-        self._create_stats_section(character_layout)
-        
-        # Character description section
-        self._create_description_section(character_layout)
-        
-    def _create_character_info_section(self, parent_layout: QVBoxLayout) -> None:
-        """Create the character information section.
-        
-        Args:
-            parent_layout: Parent layout to add to
-        """
-        header = QGroupBox("Character Information")
-        header_layout = QFormLayout(header)
-        parent_layout.addWidget(header)
-        
-        # Basic information
+        # Character name
         self.name = QLineEdit()
         self.name.textChanged.connect(lambda: self.modified.emit())
-        header_layout.addRow("Name:", self.name)
+        info_layout.addRow("Name:", self.name)
         
+        # Player name
         self.player = QLineEdit()
         self.player.textChanged.connect(lambda: self.modified.emit())
-        header_layout.addRow("Player:", self.player)
+        info_layout.addRow("Player:", self.player)
         
+        # Nature and Demeanor
         self.nature = QLineEdit()
         self.nature.textChanged.connect(lambda: self.modified.emit())
-        header_layout.addRow("Nature:", self.nature)
+        info_layout.addRow("Nature:", self.nature)
         
         self.demeanor = QLineEdit()
         self.demeanor.textChanged.connect(lambda: self.modified.emit())
-        header_layout.addRow("Demeanor:", self.demeanor)
+        info_layout.addRow("Demeanor:", self.demeanor)
         
-        # Vampire-specific information
+        # Clan
         self.clan = QLineEdit()
         self.clan.textChanged.connect(lambda: self.modified.emit())
-        header_layout.addRow("Clan:", self.clan)
+        info_layout.addRow("Clan:", self.clan)
         
+        # Generation
         self.generation = QSpinBox()
-        self.generation.setRange(4, 15)
+        self.generation.setRange(3, 15)
+        self.generation.setValue(13)
         self.generation.valueChanged.connect(lambda: self.modified.emit())
-        header_layout.addRow("Generation:", self.generation)
+        info_layout.addRow("Generation:", self.generation)
         
+        # Sect
         self.sect = QLineEdit()
         self.sect.textChanged.connect(lambda: self.modified.emit())
-        header_layout.addRow("Sect:", self.sect)
+        info_layout.addRow("Sect:", self.sect)
         
     def _create_attributes_section(self, parent_layout: QVBoxLayout) -> None:
         """Create the attributes section.
@@ -137,47 +110,20 @@ class VampireSheet(QWidget):
             parent_layout: Parent layout to add to
         """
         attributes_group = QGroupBox("Attributes")
-        attributes_layout = QHBoxLayout(attributes_group)
+        attributes_layout = QVBoxLayout(attributes_group)
         parent_layout.addWidget(attributes_group)
         
-        # Data paths for attributes
-        attributes_file = DataLoader.get_data_path("attributes.json")
-        
-        # Physical attributes
-        self.physical_attributes = TraitGroupWidget(
-            title="Physical",
-            max_value=5,
-            data_file=attributes_file,
-            category="physical",
-            editable=True,
-            show_temp=True
+        # Create LARP trait category widget for attributes
+        self.attributes = LarpTraitCategoryWidget(
+            category_name="Attributes",
+            trait_categories={
+                "Physical": [],
+                "Social": [],
+                "Mental": []
+            }
         )
-        self.physical_attributes.trait_changed.connect(lambda n, v: self.modified.emit())
-        attributes_layout.addWidget(self.physical_attributes)
-        
-        # Social attributes
-        self.social_attributes = TraitGroupWidget(
-            title="Social",
-            max_value=5,
-            data_file=attributes_file,
-            category="social",
-            editable=True,
-            show_temp=True
-        )
-        self.social_attributes.trait_changed.connect(lambda n, v: self.modified.emit())
-        attributes_layout.addWidget(self.social_attributes)
-        
-        # Mental attributes
-        self.mental_attributes = TraitGroupWidget(
-            title="Mental",
-            max_value=5,
-            data_file=attributes_file,
-            category="mental",
-            editable=True,
-            show_temp=True
-        )
-        self.mental_attributes.trait_changed.connect(lambda n, v: self.modified.emit())
-        attributes_layout.addWidget(self.mental_attributes)
+        self.attributes.categoryChanged.connect(lambda c, t: self.modified.emit())
+        attributes_layout.addWidget(self.attributes)
         
     def _create_abilities_section(self, parent_layout: QVBoxLayout) -> None:
         """Create the abilities section.
@@ -186,47 +132,20 @@ class VampireSheet(QWidget):
             parent_layout: Parent layout to add to
         """
         abilities_group = QGroupBox("Abilities")
-        abilities_layout = QHBoxLayout(abilities_group)
+        abilities_layout = QVBoxLayout(abilities_group)
         parent_layout.addWidget(abilities_group)
         
-        # Data paths for abilities
-        abilities_file = DataLoader.get_data_path("abilities.json")
-        
-        # Talents
-        self.talents = TraitGroupWidget(
-            title="Talents",
-            max_value=5,
-            data_file=abilities_file,
-            category="talents",
-            editable=True,
-            allow_custom=True
+        # Create LARP trait category widget for abilities
+        self.abilities = LarpTraitCategoryWidget(
+            category_name="Abilities",
+            trait_categories={
+                "Talents": [],
+                "Skills": [],
+                "Knowledges": []
+            }
         )
-        self.talents.trait_changed.connect(lambda n, v: self.modified.emit())
-        abilities_layout.addWidget(self.talents)
-        
-        # Skills
-        self.skills = TraitGroupWidget(
-            title="Skills",
-            max_value=5,
-            data_file=abilities_file,
-            category="skills",
-            editable=True,
-            allow_custom=True
-        )
-        self.skills.trait_changed.connect(lambda n, v: self.modified.emit())
-        abilities_layout.addWidget(self.skills)
-        
-        # Knowledges
-        self.knowledges = TraitGroupWidget(
-            title="Knowledges",
-            max_value=5,
-            data_file=abilities_file,
-            category="knowledges",
-            editable=True,
-            allow_custom=True
-        )
-        self.knowledges.trait_changed.connect(lambda n, v: self.modified.emit())
-        abilities_layout.addWidget(self.knowledges)
+        self.abilities.categoryChanged.connect(lambda c, t: self.modified.emit())
+        abilities_layout.addWidget(self.abilities)
         
     def _create_disciplines_section(self, parent_layout: QVBoxLayout) -> None:
         """Create the disciplines section.
@@ -234,18 +153,14 @@ class VampireSheet(QWidget):
         Args:
             parent_layout: Parent layout to add to
         """
-        disciplines_file = DataLoader.get_data_path("disciplines.json")
+        disciplines_group = QGroupBox("Disciplines")
+        disciplines_layout = QVBoxLayout(disciplines_group)
+        parent_layout.addWidget(disciplines_group)
         
-        self.disciplines = TraitGroupWidget(
-            title="Disciplines",
-            max_value=5,
-            data_file=disciplines_file,
-            category="disciplines",
-            editable=True,
-            allow_custom=True
-        )
-        self.disciplines.trait_changed.connect(lambda n, v: self.modified.emit())
-        parent_layout.addWidget(self.disciplines)
+        # Create LARP trait widget for disciplines
+        self.disciplines = LarpTraitWidget("Disciplines")
+        self.disciplines.traitChanged.connect(lambda n, t: self.modified.emit())
+        disciplines_layout.addWidget(self.disciplines)
         
     def _create_backgrounds_section(self, parent_layout: QVBoxLayout) -> None:
         """Create the backgrounds section.
@@ -253,17 +168,14 @@ class VampireSheet(QWidget):
         Args:
             parent_layout: Parent layout to add to
         """
-        backgrounds_file = DataLoader.get_data_path("backgrounds.json")
+        backgrounds_group = QGroupBox("Backgrounds")
+        backgrounds_layout = QVBoxLayout(backgrounds_group)
+        parent_layout.addWidget(backgrounds_group)
         
-        self.backgrounds = TraitGroupWidget(
-            title="Backgrounds",
-            max_value=5,
-            data_file=backgrounds_file,
-            editable=True,
-            allow_custom=True
-        )
-        self.backgrounds.trait_changed.connect(lambda n, v: self.modified.emit())
-        parent_layout.addWidget(self.backgrounds)
+        # Create LARP trait widget for backgrounds
+        self.backgrounds = LarpTraitWidget("Backgrounds")
+        self.backgrounds.traitChanged.connect(lambda n, t: self.modified.emit())
+        backgrounds_layout.addWidget(self.backgrounds)
         
     def _create_virtues_section(self, parent_layout: QVBoxLayout) -> None:
         """Create the virtues and path section.
@@ -308,8 +220,6 @@ class VampireSheet(QWidget):
         path_group = QGroupBox("Path of Enlightenment")
         path_layout = QFormLayout(path_group)
         parent_layout.addWidget(path_group)
-        
-        paths_file = DataLoader.get_data_path("paths.json")
         
         # Path name
         self.path = QLineEdit("Humanity")
@@ -386,8 +296,8 @@ class VampireSheet(QWidget):
         self.generation.setValue(character.generation)
         self.sect.setText(character.sect)
         
-        # Load traits
-        self._load_traits_by_category(character)
+        # Load LARP traits
+        self._load_larp_traits(character)
         
         # Virtues and Path
         self.conscience.set_value(character.conscience)
@@ -410,77 +320,62 @@ class VampireSheet(QWidget):
         self.blood.set_value(character.blood)
         self.blood.set_temp_value(character.temp_blood)
         
-    def _load_traits_by_category(self, character: Vampire) -> None:
-        """Load character traits into appropriate widgets by category.
+    def _load_larp_traits(self, character: Vampire) -> None:
+        """Load LARP traits into appropriate widgets by category.
         
         Args:
             character: Vampire character to load traits from
         """
-        # Clear existing traits
-        for trait_group in [
-            self.physical_attributes, self.social_attributes, self.mental_attributes,
-            self.talents, self.skills, self.knowledges,
-            self.disciplines, self.backgrounds
-        ]:
-            trait_group.set_traits({})
+        # Initialize trait category dictionaries
+        attribute_traits = {
+            "Physical": [],
+            "Social": [],
+            "Mental": []
+        }
         
-        # Process all traits
-        for trait in character.traits:
-            category = trait.category.lower()
-            trait_type = trait.type.lower()
-            
-            # Handle attributes
-            if category == "physical":
-                self.physical_attributes.add_trait(
-                    trait.name, trait.value, 
-                    getattr(trait, 'temp_value', trait.value), 
-                    getattr(trait, 'note', "")
-                )
-            elif category == "social":
-                self.social_attributes.add_trait(
-                    trait.name, trait.value, 
-                    getattr(trait, 'temp_value', trait.value), 
-                    getattr(trait, 'note', "")
-                )
-            elif category == "mental":
-                self.mental_attributes.add_trait(
-                    trait.name, trait.value, 
-                    getattr(trait, 'temp_value', trait.value), 
-                    getattr(trait, 'note', "")
-                )
-            # Handle abilities
-            elif trait_type == "talent":
-                self.talents.add_trait(
-                    trait.name, trait.value, 
-                    getattr(trait, 'temp_value', trait.value), 
-                    getattr(trait, 'note', "")
-                )
-            elif trait_type == "skill":
-                self.skills.add_trait(
-                    trait.name, trait.value, 
-                    getattr(trait, 'temp_value', trait.value), 
-                    getattr(trait, 'note', "")
-                )
-            elif trait_type == "knowledge":
-                self.knowledges.add_trait(
-                    trait.name, trait.value, 
-                    getattr(trait, 'temp_value', trait.value), 
-                    getattr(trait, 'note', "")
-                )
-            # Handle disciplines and backgrounds
-            elif trait_type == "discipline" or isinstance(trait, Discipline):
-                self.disciplines.add_trait(
-                    trait.name, trait.value, 
-                    getattr(trait, 'temp_value', trait.value), 
-                    getattr(trait, 'note', "")
-                )
-            elif trait_type == "background":
-                self.backgrounds.add_trait(
-                    trait.name, trait.value, 
-                    getattr(trait, 'temp_value', trait.value), 
-                    getattr(trait, 'note', "")
-                )
+        ability_traits = {
+            "Talents": [],
+            "Skills": [],
+            "Knowledges": []
+        }
+        
+        discipline_traits = []
+        background_traits = []
+        
+        # Process all LARP traits
+        for trait in character.larp_traits:
+            # Check each trait's categories
+            for category in trait.categories:
+                category_name = category.name.lower()
                 
+                # Handle attributes
+                if category_name == "physical":
+                    attribute_traits["Physical"].append(trait.display_name)
+                elif category_name == "social":
+                    attribute_traits["Social"].append(trait.display_name)
+                elif category_name == "mental":
+                    attribute_traits["Mental"].append(trait.display_name)
+                
+                # Handle abilities
+                elif category_name == "talents":
+                    ability_traits["Talents"].append(trait.display_name)
+                elif category_name == "skills":
+                    ability_traits["Skills"].append(trait.display_name)
+                elif category_name == "knowledges":
+                    ability_traits["Knowledges"].append(trait.display_name)
+                
+                # Handle other types
+                elif category_name == "disciplines":
+                    discipline_traits.append(trait.display_name)
+                elif category_name == "backgrounds":
+                    background_traits.append(trait.display_name)
+        
+        # Update widgets with collected traits
+        self.attributes.set_category_traits(attribute_traits)
+        self.abilities.set_category_traits(ability_traits)
+        self.disciplines.set_traits(discipline_traits)
+        self.backgrounds.set_traits(background_traits)
+        
     def get_character_data(self) -> Dict:
         """Get the character data from the sheet.
         
@@ -514,43 +409,32 @@ class VampireSheet(QWidget):
             "blood": self.blood.get_value(),
             "temp_blood": self.blood.get_temp_value(),
             
-            # Traits
-            "traits": self._collect_all_traits()
+            # LARP Traits
+            "larp_traits": self._collect_all_larp_traits()
         }
         
         return data
         
-    def _collect_all_traits(self) -> List[Dict]:
-        """Collect all traits from the sheet.
+    def _collect_all_larp_traits(self) -> Dict:
+        """Collect all LARP traits from the sheet.
         
         Returns:
-            List of trait dictionaries
+            Dictionary of trait lists by category
         """
-        traits = []
+        larp_traits = {}
         
-        # Helper function to add traits from a trait group
-        def add_traits_from_group(group, category, trait_type):
-            for name, (value, temp_value) in group.get_trait_values().items():
-                traits.append({
-                    "name": name,
-                    "value": value,
-                    "temp_value": temp_value,
-                    "category": category,
-                    "type": trait_type
-                })
-                
-        # Add attributes
-        add_traits_from_group(self.physical_attributes, "physical", "attribute")
-        add_traits_from_group(self.social_attributes, "social", "attribute")
-        add_traits_from_group(self.mental_attributes, "mental", "attribute")
+        # Get attributes
+        attribute_traits = self.attributes.get_category_traits()
+        for subcategory, traits in attribute_traits.items():
+            larp_traits[subcategory.lower()] = traits
         
-        # Add abilities
-        add_traits_from_group(self.talents, "ability", "talent")
-        add_traits_from_group(self.skills, "ability", "skill")
-        add_traits_from_group(self.knowledges, "ability", "knowledge")
+        # Get abilities
+        ability_traits = self.abilities.get_category_traits()
+        for subcategory, traits in ability_traits.items():
+            larp_traits[subcategory.lower()] = traits
         
-        # Add disciplines and backgrounds
-        add_traits_from_group(self.disciplines, "vampire", "discipline")
-        add_traits_from_group(self.backgrounds, "general", "background")
+        # Get disciplines and backgrounds
+        larp_traits["disciplines"] = self.disciplines.get_traits()
+        larp_traits["backgrounds"] = self.backgrounds.get_traits()
         
-        return traits 
+        return larp_traits 

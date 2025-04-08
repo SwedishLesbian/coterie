@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
     QRadioButton, QButtonGroup
 )
 from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtWidgets import QApplication
 
 from coterie.utils.data_loader import DataLoader
 
@@ -55,6 +56,11 @@ class ImportDialog(QDialog):
         self._create_character_tab(tab_widget)
         self._create_game_data_tab(tab_widget)
         self._create_chronicle_tab(tab_widget)
+        
+        # Status label
+        self.status_label = QLabel("")
+        self.status_label.setWordWrap(True)
+        layout.addWidget(self.status_label)
         
         # Progress bar
         self.progress_bar = QProgressBar()
@@ -486,9 +492,11 @@ class ImportDialog(QDialog):
             try:
                 # Update progress
                 self.progress_bar.setValue(i + 1)
+                self.status_label.setText(f"Importing {os.path.basename(file_path)}...")
+                QApplication.processEvents()  # Allow GUI updates
                 
                 # Import character
-                imported_file = DataLoader.import_character(file_path)
+                imported_file = self._import_character_with_larp_traits(file_path)
                 imported_files.append(imported_file)
                 
             except Exception as e:
@@ -504,8 +512,9 @@ class ImportDialog(QDialog):
             # TODO: Implement game data import
             pass
                 
-        # Hide progress
+        # Hide progress and status message
         self.progress_bar.setVisible(False)
+        self.status_label.setText("")
         
         # Show success message
         if imported_files:
@@ -525,4 +534,71 @@ class ImportDialog(QDialog):
             )
             
             # Emit completion signal with failure
-            self.import_completed.emit(False) 
+            self.import_completed.emit(False)
+    
+    def _import_character_with_larp_traits(self, file_path: str) -> str:
+        """Import a character file with proper LARP trait handling.
+        
+        Args:
+            file_path: Path to the character file
+            
+        Returns:
+            The imported file path
+        
+        Raises:
+            Exception: If there was an error during import
+        """
+        # Import based on file type
+        file_extension = os.path.splitext(file_path)[1].lower()
+        
+        if file_extension == ".gvc":
+            # Update status
+            self.status_label.setText(f"Reading GVC data from {os.path.basename(file_path)}...")
+            QApplication.processEvents()  # Allow GUI updates
+            
+            # Import .gvc file
+            character_data = DataLoader.load_grapevine_character(file_path)
+            
+            # Extract LARP traits
+            self.status_label.setText("Converting dot ratings to LARP trait adjectives...")
+            QApplication.processEvents()  # Allow GUI updates
+            
+            # Ensure larp_traits are in the character data
+            if 'larp_traits' not in character_data:
+                # Convert traditional traits to LARP traits if needed
+                character_data['larp_traits'] = DataLoader._extract_grapevine_larp_traits(
+                    DataLoader._extract_raw_grapevine_data(file_path)
+                )
+            
+        elif file_extension == ".gex":
+            # Update status
+            self.status_label.setText(f"Parsing XML data from {os.path.basename(file_path)}...")
+            QApplication.processEvents()  # Allow GUI updates
+            
+            # Import .gex file
+            character_data = DataLoader.load_grapevine_xml_character(file_path)
+            
+            # Extract LARP traits
+            self.status_label.setText("Converting traits to LARP format...")
+            QApplication.processEvents()  # Allow GUI updates
+            
+            # Ensure larp_traits are in the character data
+            if 'larp_traits' not in character_data:
+                # Get raw XML data
+                raw_data = DataLoader._extract_raw_grapevine_xml_data(file_path)
+                # Convert traditional traits to LARP traits
+                character_data['larp_traits'] = DataLoader._extract_xml_larp_traits(raw_data)
+        else:
+            raise ValueError(f"Unsupported file type: {file_extension}")
+        
+        # Save the character to the database
+        self.status_label.setText("Saving character to database...")
+        QApplication.processEvents()  # Allow GUI updates
+        
+        # Create and save the character
+        vampire = DataLoader.create_vampire_from_dict(character_data)
+        
+        # Update status
+        self.status_label.setText(f"Successfully imported {vampire.name}")
+        
+        return file_path 

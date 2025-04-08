@@ -894,6 +894,98 @@ class DataLoader:
                 larp_trait_objects.append(trait)
         
         return larp_trait_objects
+    
+    @staticmethod
+    def create_vampire_from_dict(character_data: Dict) -> Vampire:
+        """
+        Create a Vampire character from a dictionary of character data.
+        
+        Args:
+            character_data: Dictionary containing character data from import
+            
+        Returns:
+            Vampire object ready to be added to the database
+        """
+        from datetime import datetime
+        from coterie.database.session import get_session
+        from coterie.models.vampire import Vampire
+        from coterie.models.base import Trait
+        from coterie.models.larp_trait import LarpTrait, TraitCategory
+        
+        # Get a database session
+        session = get_session()
+        
+        try:
+            # Create a new Vampire character with basic attributes
+            vampire = Vampire(
+                name=character_data.get('name', 'Unknown'),
+                player=character_data.get('player', ''),
+                nature=character_data.get('nature', ''),
+                demeanor=character_data.get('demeanor', ''),
+                clan=character_data.get('clan', ''),
+                generation=character_data.get('generation', 13),
+                sect=character_data.get('sect', ''),
+                status=character_data.get('status', 'Active'),
+                start_date=datetime.now(),
+                last_modified=datetime.now(),
+                
+                # Virtues
+                conscience=character_data.get('conscience', 0),
+                temp_conscience=character_data.get('temp_conscience', 0),
+                self_control=character_data.get('self_control', 0),
+                temp_self_control=character_data.get('temp_self_control', 0),
+                courage=character_data.get('courage', 0),
+                temp_courage=character_data.get('temp_courage', 0),
+                
+                # Path
+                path=character_data.get('path', 'Humanity'),
+                path_traits=character_data.get('path_traits', 0),
+                temp_path_traits=character_data.get('temp_path_traits', 0),
+                
+                # Stats
+                willpower=character_data.get('willpower', 0),
+                temp_willpower=character_data.get('temp_willpower', 0),
+                blood=character_data.get('blood', 0),
+                temp_blood=character_data.get('temp_blood', 0)
+            )
+            
+            # Add to session to get an ID
+            session.add(vampire)
+            session.flush()  # This assigns an ID without committing
+            
+            # Add LARP traits if present
+            if 'larp_traits' in character_data and character_data['larp_traits']:
+                larp_traits = DataLoader.create_larp_traits_from_dict(
+                    vampire.id, character_data['larp_traits']
+                )
+                for trait in larp_traits:
+                    session.add(trait)
+            
+            # Add legacy traits if present and no LARP traits were provided
+            elif 'traits' in character_data and character_data['traits']:
+                for trait_data in character_data['traits']:
+                    trait = Trait(
+                        character_id=vampire.id,
+                        name=trait_data['name'],
+                        value=trait_data['value'],
+                        note=trait_data.get('note', ''),
+                        category=trait_data['category'],
+                        type=trait_data['type']
+                    )
+                    if 'temp_value' in trait_data:
+                        trait.temp_value = trait_data['temp_value']
+                    session.add(trait)
+            
+            # Commit changes to DB
+            session.commit()
+            
+            return vampire
+            
+        except Exception as e:
+            session.rollback()
+            raise ValueError(f"Failed to create vampire from data: {str(e)}")
+        finally:
+            session.close()
         
     @staticmethod
     def load_json_file(file_path: str) -> Dict:
