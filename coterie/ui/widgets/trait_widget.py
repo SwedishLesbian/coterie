@@ -3,10 +3,10 @@
 from typing import Optional, Callable, Tuple
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QSpinBox,
-    QToolTip, QPushButton, QMenu, QAction
+    QToolTip, QPushButton, QMenu
 )
 from PyQt6.QtCore import pyqtSignal, Qt
-from PyQt6.QtGui import QMouseEvent, QContextMenuEvent
+from PyQt6.QtGui import QMouseEvent, QContextMenuEvent, QAction
 
 class TraitWidget(QWidget):
     """Widget for displaying a trait with dot rating in World of Darkness style."""
