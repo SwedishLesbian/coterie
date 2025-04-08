@@ -1,4 +1,87 @@
-# Coterie Project Status
+# Project Status
+
+This document outlines the current development status of Coterie.
+
+## Completed Features
+
+- Initial project setup and infrastructure
+- SQLAlchemy database models for characters
+- Basic UI framework with PyQt6
+- Character creation dialog
+- Import dialog for Grapevine 3.x (.gvc) and exported character (.gex) files
+  - Supports reading character data from both formats
+  - Filters and selects characters for import
+  - Converts to Coterie's internal format
+- TraitWidget and TraitGroupWidget components
+- Vampire character model and sheet
+
+## Current Development Focus
+
+1. **Character List View**
+   - Display all loaded characters
+   - Filtering and sorting capabilities
+   - Quick access to common actions
+
+2. **Data Validation**
+   - Input validation for character creation dialog
+   - Data integrity checks during import
+   - Real-time validation for character sheets
+
+3. **Experience System**
+   - UI for tracking and spending experience
+   - History of experience changes
+   - Validation of experience expenditures
+
+## Next Planned Features
+
+1. Character export functionality
+2. Additional character types (Werewolf, Mage)
+3. Settings dialog for application configuration
+4. Chronicle management
+
+## Known Issues
+
+1. Character creation dialog needs validation
+2. Import dialog needs better error handling and data validation
+3. Some UI elements need styling improvements
+
+## Documentation Status
+
+- [x] Project overview
+- [x] Architecture documentation
+- [x] UI component documentation
+- [x] Technical specifications
+- [ ] User manual
+- [ ] API documentation (partial)
+
+## Recent Updates
+
+- **[2024-05-XX]** Implemented import dialog with support for both .gvc and .gex files
+- **[2024-05-XX]** Updated project documentation to reflect name change from "Grapevine 4.0" to "Coterie"
+- **[2024-05-XX]** Created comprehensive UI components documentation
+- **[2024-05-XX]** Corrected documentation to specify Mind's Eye Theater LARP system
+
+## Development Metrics
+
+- **Lines of Code**: ~2,000
+- **Components Completed**: 12/50
+- **Models Completed**: 2/11
+- **Test Coverage**: 30%
+
+## Next Development Tasks
+
+1. Implement CharacterList view
+2. Complete character import/export cycle
+3. Improve validation in existing components
+4. Implement settings management system
+5. Start work on Werewolf character sheet
+
+## Technical Debt
+
+- Need to implement proper error handling throughout the application
+- Test coverage needs improvement
+- Some UI components need refactoring for better reusability
+- Documentation needs to be kept up to date as development progresses
 
 ## Overall Progress
 
@@ -14,6 +97,7 @@
 - [x] Trait group widget implementation
 - [x] Vampire character sheet
 - [x] JSON data structure for game data
+- [x] Import dialog for Grapevine 3.x (.gvc) and exported character (.gex) files
 
 ### In Progress
 - [ ] Character list view
@@ -81,12 +165,6 @@
 
 - None currently
 
-## Known Issues
-
-1. Character creation dialog needs validation
-2. Missing error handling in database operations
-3. No character loading functionality implemented yet
-
 ## Next Steps
 
 ### Short Term
@@ -122,25 +200,6 @@
 ### UI Tests
 - Not started
 - PyQt6 testing tools identified
-
-## Documentation Status
-
-### User Documentation
-- [ ] Installation guide
-- [ ] User manual
-- [ ] Quick start guide
-- [ ] FAQ
-
-### Developer Documentation
-- [x] Architecture overview
-- [x] Technical specifications
-- [x] Project status
-- [x] API documentation
-- [x] Contributing guide
-- [x] Conversion roadmap
-- [x] Conversion checklist
-- [x] Component roadmap
-- [x] JSON data structure documentation
 
 ## Release Planning
 

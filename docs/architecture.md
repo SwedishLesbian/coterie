@@ -1,8 +1,8 @@
-# Grapevine 4.0 Architecture
+# Coterie Architecture
 
 ## Overview
 
-Grapevine 4.0 is a modern Python port of the original Grapevine character management system. The application follows a layered architecture with clear separation of concerns between the data, business logic, and presentation layers.
+Coterie is a modern Python port of the original Grapevine character management system. The application follows a layered architecture with clear separation of concerns between the data, business logic, and presentation layers.
 
 ## Core Components
 
@@ -12,7 +12,7 @@ Grapevine 4.0 is a modern Python port of the original Grapevine character manage
 - SQLite database using SQLAlchemy ORM
 - Located in user's application data directory
 - Alembic for database migrations
-- Models defined in `grapevine/models/`
+- Models defined in `coterie/models/`
 
 #### Data Models
 - Base character model with common attributes
@@ -22,13 +22,13 @@ Grapevine 4.0 is a modern Python port of the original Grapevine character manage
 
 ### 2. Business Logic Layer
 
-#### Core Logic (`grapevine/core/`)
+#### Core Logic (`coterie/core/`)
 - Character creation and management
 - Experience point calculations
 - Game mechanics implementation
 - Data validation and business rules
 
-#### Utilities (`grapevine/utils/`)
+#### Utilities (`coterie/utils/`)
 - Common helper functions
 - Data conversion utilities
 - Configuration management
@@ -36,7 +36,7 @@ Grapevine 4.0 is a modern Python port of the original Grapevine character manage
 
 ### 3. Presentation Layer
 
-#### User Interface (`grapevine/ui/`)
+#### User Interface (`coterie/ui/`)
 - Modern PyQt6-based interface
 - Main window with tabbed interface
 - Character sheets
@@ -93,7 +93,7 @@ MainWindow
 ## Directory Structure
 
 ```
-grapevine/
+coterie/
 ├── core/           # Business logic
 ├── database/       # Database configuration and migrations
 ├── models/         # SQLAlchemy models

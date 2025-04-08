@@ -1,16 +1,23 @@
-# Grapevine to Coterie Conversion Checklist
+# Conversion Checklist
 
-This document provides a detailed checklist for the conversion of Grapevine from Visual Basic to Python. It tracks individual components and their implementation status.
+This document tracks the progress of converting features from Grapevine 3.x to Coterie.
 
 ## Core Infrastructure
 
-- [x] Project structure setup
-- [x] Build system configuration
-- [x] Database integration
+- [x] Project structure
+- [x] Database design
 - [x] Basic UI framework
-- [ ] Logging system
-- [ ] Configuration management
-- [ ] Error handling framework
+- [x] Settings system
+- [ ] Plugin architecture
+
+## Character Management
+
+- [x] Character creation dialog
+- [x] Basic character model
+- [ ] Character sheet UI base
+- [x] Import dialog for Grapevine 3.x (.gvc) and .gex files
+- [ ] Export functionality
+- [ ] Character list view
 
 ## Data Models
 
@@ -54,6 +61,7 @@ This document provides a detailed checklist for the conversion of Grapevine from
 - [ ] Plot dialog
 - [ ] Rumor dialog
 - [ ] Chronicle dialog
+- [x] Import dialog
 
 ### Character Sheets
 - [x] Vampire sheet
@@ -131,17 +139,16 @@ This document provides a detailed checklist for the conversion of Grapevine from
 ## Specific VB Form Conversions
 
 ### Main Screens
-- [x] frmMain.frm → main_window.py
+- [x] frmMain.frm → ui/main_window.py
 - [x] frmNewCharacter.frm → dialogs/character_creation.py
-- [x] frmVampire.frm → sheets/vampire.py
-- [ ] frmWerewolf.frm → sheets/werewolf.py
-- [ ] frmMage.frm → sheets/mage.py
-- [ ] frmWraith.frm → sheets/wraith.py
-- [ ] frmChangeling.frm → sheets/changeling.py
-- [ ] frmHunter.frm → sheets/hunter.py
-- [ ] frmDemon.frm → sheets/demon.py
-- [ ] frmMummy.frm → sheets/mummy.py
-- [ ] frmMortal.frm → sheets/mortal.py
+- [x] frmVampire.frm → sheets/vampire_sheet.py
+- [ ] frmWerewolf.frm → sheets/werewolf_sheet.py
+- [ ] frmMage.frm → sheets/mage_sheet.py
+- [ ] frmWraith.frm → sheets/wraith_sheet.py
+- [ ] frmChangeling.frm → sheets/changeling_sheet.py
+- [ ] frmHunter.frm → sheets/hunter_sheet.py
+- [ ] frmDemon.frm → sheets/demon_sheet.py
+- [ ] frmMortal.frm → sheets/mortal_sheet.py
 
 ### Utility Screens
 - [ ] frmExperience.frm → dialogs/experience.py
@@ -152,7 +159,7 @@ This document provides a detailed checklist for the conversion of Grapevine from
 - [ ] frmAbout.frm → dialogs/about.py
 
 ### Business Logic
-- [x] clsCharacter.cls → models/base.py
+- [x] clsCharacter.cls → models/character.py
 - [x] clsVampire.cls → models/vampire.py
 - [ ] clsWerewolf.cls → models/werewolf.py
 - [ ] clsMage.cls → models/mage.py
@@ -175,4 +182,31 @@ This document provides a detailed checklist for the conversion of Grapevine from
 - [ ] Dark mode
 - [ ] Modern UI themes
 - [ ] Rules integration
-- [ ] Dice rolling system 
+- [ ] Dice rolling system
+
+### VB to Python File Conversion
+
+- [x] frmMain.frm → ui/main_window.py
+- [x] frmNewCharacter.frm → dialogs/character_creation.py
+- [ ] frmVampire.frm → sheets/vampire_sheet.py
+- [ ] frmWerewolf.frm → sheets/werewolf_sheet.py
+- [ ] frmMage.frm → sheets/mage_sheet.py
+- [ ] frmWraith.frm → sheets/wraith_sheet.py
+- [ ] frmChangeling.frm → sheets/changeling_sheet.py
+- [ ] frmHunter.frm → sheets/hunter_sheet.py
+- [ ] frmDemon.frm → sheets/demon_sheet.py
+- [ ] frmMortal.frm → sheets/mortal_sheet.py
+- [ ] clsCharacter.cls → models/character.py
+- [ ] clsVampire.cls → models/vampire.py
+- [ ] clsWerewolf.cls → models/werewolf.py
+- [ ] clsMage.cls → models/mage.py
+- [ ] clsWraith.cls → models/wraith.py
+- [ ] clsChangeling.cls → models/changeling.py
+- [ ] clsHunter.cls → models/hunter.py
+- [ ] frmExperience.frm → dialogs/experience.py
+- [ ] frmChronicle.frm → dialogs/chronicle.py
+- [ ] frmPlot.frm → dialogs/plot.py
+- [ ] frmRumor.frm → dialogs/rumor.py
+- [ ] frmOptions.frm → dialogs/preferences.py
+- [ ] frmAbout.frm → dialogs/about.py
+- [x] frmImport.frm → dialogs/import_dialog.py 

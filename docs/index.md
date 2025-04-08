@@ -4,13 +4,13 @@ Welcome to the Coterie documentation. This serves as a central reference point f
 
 ## Project Overview
 
-Coterie is a modern Python port of the original Grapevine character and chronicle management system for World of Darkness tabletop roleplaying games. This project converts the original Visual Basic 6.0 codebase to modern Python with SQLAlchemy and PyQt6. The goal is to maintain compatibility with original Grapevine data while enhancing functionality and providing a modern user interface.
+Coterie is a modern Python port of the original Grapevine character and chronicle management system for Mind's Eye Theater LARP. This project converts the original Visual Basic 6.0 codebase to modern Python with SQLAlchemy and PyQt6. The goal is to maintain compatibility with original Grapevine data while enhancing functionality and providing a modern user interface.
 
 ## For AI Assistance (Cursor)
 
 ### Project Context
 
-We are converting the Grapevine 3.01 Visual Basic application to Python 3.8+. This is a character management system for World of Darkness tabletop roleplaying games. The original VB source code is available in the repository as a reference (`docs/VB-Grapevine-SourceCode.md`).
+We are converting the Grapevine 3.01 Visual Basic application to Python 3.8+. This is a character management system for Mind's Eye Theater LARP (Live Action Role-Playing) based on White Wolf's World of Darkness setting. The original VB source code is available in the repository as a reference (`docs/VB-Grapevine-SourceCode.md`).
 
 The project is named "Coterie" and follows a component-based architecture with:
 - SQLAlchemy ORM for database management
@@ -26,8 +26,9 @@ We are in the early stages of development (Phase 1), having completed:
 - Core UI framework with PyQt6
 - Character creation dialog
 - Basic application flow
+- Import dialog for both .gvc and .gex files
 
-Refer to `docs/status.md` for the complete and current status of the project.
+Refer to `docs/status.md` for the complete and current status of the project. For the most recent development session details and to pick up where we left off, see `docs/development-session-summary.md`.
 
 ### Development Guidelines
 
@@ -43,11 +44,11 @@ When working on this project:
 
 See `docs/conversion-checklist.md` and `docs/component-roadmap.md` for the complete task list. Current priorities:
 
-1. Implement the TraitWidget component for displaying character traits
-2. Complete the VampireSheet implementation
-3. Create the CharacterList view
-4. Add validation to the character creation dialog
-5. Implement character data loading/saving
+1. Implement the CharacterList view
+2. Complete character import/export cycle  
+3. Add validation to the character creation dialog
+4. Implement character data loading/saving
+5. Begin work on Werewolf character sheet
 
 ### Document Updates
 
@@ -55,13 +56,15 @@ As development progresses, please update:
 1. `docs/status.md` with completed items and new progress
 2. `docs/conversion-checklist.md` to mark completed tasks
 3. `docs/component-roadmap.md` to update component status
-4. Other relevant documentation as needed
+4. `docs/development-session-summary.md` to document session outcomes
+5. Other relevant documentation as needed
 
 ## Documentation Index
 
 ### Project Status and Planning
 
 - [Project Status](status.md) - Current status and progress
+- [Development Session Summary](development-session-summary.md) - Details of recent development work
 - [Conversion Roadmap](conversion-roadmap.md) - Overall plan for the conversion process
 - [Conversion Checklist](conversion-checklist.md) - Detailed checklist of tasks
 - [Component Roadmap](component-roadmap.md) - Component-specific development plan
@@ -72,6 +75,7 @@ As development progresses, please update:
 
 - [Architecture Overview](architecture.md) - Application architecture
 - [Technical Details](technical.md) - Technical specifications
+- [UI Components](ui-components.md) - UI component details
 - [API Documentation](api.md) - API reference
 - [Conversion Guide](conversion-guide.md) - Guide for developers working on the conversion
 
@@ -107,6 +111,7 @@ The application is in early development and not yet ready for general use. Check
 3. Explore the [Conversion Guide](conversion-guide.md) for implementation details
 4. Check the [Component Roadmap](component-roadmap.md) for priority components
 5. Find tasks to work on in the [Conversion Checklist](conversion-checklist.md)
+6. Review the [Development Session Summary](development-session-summary.md) to pick up where we left off
 
 ## Key Project Goals
 

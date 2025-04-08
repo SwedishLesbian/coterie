@@ -1,4 +1,4 @@
-# Grapevine 4.0 Issue Tracking
+# Coterie Issue Tracking
 
 ## High Priority Issues
 

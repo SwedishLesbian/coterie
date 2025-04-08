@@ -1,153 +1,86 @@
-# Coterie v0.1
+# Coterie
 
-  sSSs    sSSs_sSSs    sdSS_SSSSSSbs    sSSs   .S_sSSs     .S    sSSs
- d%%SP   d%%SP~YS%%b   YSSS~S%SSSSSP   d%%SP  .SS~YS%%b   .SS   d%%SP
-d%S'    d%S'     `S%b       S%S       d%S'    S%S   `S%b  S%S  d%S'
-S%S     S%S       S%S       S%S       S%S     S%S    S%S  S%S  S%S
-S&S     S&S       S&S       S&S       S&S     S%S    d*S  S&S  S&S
-S&S     S&S       S&S       S&S       S&S_Ss  S&S   .S*S  S&S  S&S_Ss
-S&S     S&S       S&S       S&S       S&S~SP  S&S_sdSSS   S&S  S&S~SP
-S&S     S&S       S&S       S&S       S&S     S&S~YSY%b   S&S  S&S
-S*b     S*b       d*S       S*S       S*b     S*S   `S%b  S*S  S*b
-S*S.    S*S.     .S*S       S*S       S*S.    S*S    S%S  S*S  S*S.
- SSSbs   SSSbs_sdSSS        S*S        SSSbs  S*S    S&S  S*S   SSSbs
-  YSSP    YSSP~YSSY         S*S         YSSP  S*S    SSS  S*S    YSSP
-                            SP                SP          SP
-                            Y                 Y           Y
+A modern Python port of the Grapevine character and chronicle management system for Mind's Eye Theater LARP.
 
+## Overview
 
-A modern Python port of Grapevine - A World of Darkness character and chronicle management system. This version is based on the original Grapevine 3.01 by Adam Cerling.
+Coterie is a modern, cross-platform reimplementation of the Grapevine character management system. It is built with Python, SQLAlchemy, and PyQt6, offering a fresh and maintainable codebase while preserving the functionality of the original application.
 
-## Features
+### Key Features
 
-### Current Features
-- Basic character management foundation
-- Vampire: The Masquerade character creation
-- SQLite database with SQLAlchemy ORM
-- Modern PyQt6-based interface
+- **Modern UI** - Clean, intuitive PyQt6-based interface
+- **Cross-Platform** - Runs on Windows, macOS, and Linux
+- **Data Preservation** - Import from original Grapevine files (.gvc and .gex)
+- **Enhanced Features** - Modern improvements while preserving original functionality
+- **Type Safety** - Fully type-hinted Python codebase
 
-### Planned Features
-- Complete character management for various World of Darkness games:
-  - Vampire: The Masquerade
-  - Werewolf: The Apocalypse
-  - Mage: The Ascension
-  - Wraith: The Oblivion
-  - Changeling: The Dreaming
-  - Hunter: The Reckoning
-  - Mummy: The Resurrection
-  - Demon: The Fallen
-  - Mortal
-- Chronicle management tools
-- Experience point tracking
-- Character relationships and histories
-- Plot and rumor management
-- JSON data format support
+## Current Status
+
+Coterie is in early development (Phase 1). Currently implemented:
+
+- Core application framework
+- Database models for characters
+- Character creation dialog
+- Import dialog for Grapevine 3.x (.gvc) and exported (.gex) files
+- Vampire character sheet
+- Trait widgets
+
+See `docs/status.md` for complete details on project status.
 
 ## Installation
 
 ### Requirements
-- Python 3.8+
-- Git
-- SQLite 3
+
+- Python 3.8 or higher
 - PyQt6
+- SQLAlchemy
+- Other dependencies as listed in requirements.txt
 
-### Setup
+### Development Setup
 
-#### Windows
-1. Clone the repository
-2. Create a virtual environment:
-   ```
-   python -m venv .venv
-   .venv\Scripts\activate
-   ```
-3. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-4. Run the application:
-   ```
-   python main.py
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/coterie.git
+   cd coterie
    ```
 
-#### Linux/Mac
-1. Clone the repository
 2. Create a virtual environment:
    ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
+   python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   venv\Scripts\activate     # Windows
    ```
+
 3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
+
 4. Run the application:
    ```bash
-   python main.py
+   python -m coterie
    ```
-
-## Development Setup
-
-1. Clone the repository
-2. Create a virtual environment:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-3. Install development dependencies:
-   ```bash
-   pip install -e .
-   ```
-4. Initialize the database:
-   ```bash
-   alembic upgrade head
-   ```
-5. Run the application:
-   ```bash
-   python main.py
-   ```
-
-## Project Structure
-
-```
-coterie/
-├── core/           # Business logic
-├── database/       # Database configuration and migrations
-├── models/         # SQLAlchemy models
-├── ui/             # User interface components
-│   ├── dialogs/    # Dialog windows
-│   ├── sheets/     # Character sheets
-│   └── widgets/    # Reusable widgets
-└── utils/          # Utility functions
-```
 
 ## Documentation
 
-For detailed documentation, see the following:
+Comprehensive documentation is available in the `/docs` directory:
 
-- [Architecture Overview](docs/architecture.md)
-- [Technical Specifications](docs/technical.md)
-- [API Documentation](docs/api.md)
-- [Project Status](docs/status.md)
-- [Conversion Roadmap](docs/conversion-roadmap.md)
-- [Conversion Checklist](docs/conversion-checklist.md)
-- [Contributing Guide](docs/contributing.md)
-
-## License
-
-This project is licensed under Creative Commons Attribution-NonCommercial 2.5.
-This is a derivative work based on Grapevine by Adam Cerling.
+- `docs/index.md` - Documentation index and overview
+- `docs/status.md` - Current project status
+- `docs/development-session-summary.md` - Latest development details
+- `docs/architecture.md` - Technical architecture
+- `docs/ui-components.md` - UI component documentation
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+Contributions are welcome! Please see `docs/contributing.md` for guidelines.
 
-For more details, see the [Contributing Guide](docs/contributing.md).
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Acknowledgments
 
-- Original Grapevine by Adam Cerling
-- World of Darkness by White Wolf Publishing
+- Original Grapevine developers for creating the foundation
+- Mind's Eye Theater by White Wolf Publishing
+- Contributors and supporters of this project

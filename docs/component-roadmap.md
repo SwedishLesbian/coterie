@@ -60,6 +60,8 @@ This document outlines the specific components that need to be developed for the
 | PlotManager | Plot management UI | Low | Not Started | Plot model |
 | RumorManager | Rumor management UI | Low | Not Started | Rumor model |
 | ExperienceDialog | XP management UI | Medium | Not Started | Experience model |
+| FilterDialogs | Advanced filtering | Medium | Not Started | - |
+| CharacterListDialog | Character browse/select | Medium | Not Started | - |
 | DiceRoller | Dice rolling utility | Low | Not Started | - |
 | RelationshipGraph | Character relationship viewer | Low | Not Started | Relationship model |
 
@@ -68,7 +70,7 @@ This document outlines the specific components that need to be developed for the
 | Component | Description | Priority | Status | Dependencies |
 |-----------|-------------|----------|--------|--------------|
 | PreferencesDialog | Application settings | Medium | Not Started | - |
-| ImportExportDialog | Data import/export | Medium | Not Started | - |
+| ImportExportDialog | Data import/export | Medium | In Progress | Import functionality implemented for .gvc and .gex files, export pending |
 | AboutDialog | Application information | Low | Not Started | - |
 | BackupManager | Database backup UI | Medium | Not Started | - |
 

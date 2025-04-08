@@ -1,4 +1,4 @@
-# Grapevine to Coterie Conversion Guide
+# Coterie Conversion Guide
 
 This guide provides detailed instructions and best practices for developers working on the conversion of Grapevine from Visual Basic to Python.
 

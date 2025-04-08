@@ -8,7 +8,8 @@ from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QPushButton, 
     QLabel, QFileDialog, QTreeWidget, QTreeWidgetItem,
     QMessageBox, QCheckBox, QComboBox, QProgressBar,
-    QTabWidget, QWidget, QGroupBox, QFormLayout
+    QTabWidget, QWidget, QGroupBox, QFormLayout,
+    QRadioButton, QButtonGroup
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 
@@ -35,13 +36,13 @@ class ImportDialog(QDialog):
         layout = QVBoxLayout(self)
         
         # Header
-        header_label = QLabel("Import data from Grapevine 3.x")
+        header_label = QLabel("Import data from Grapevine")
         header_label.setStyleSheet("font-size: 16px; font-weight: bold;")
         layout.addWidget(header_label)
         
         description_label = QLabel(
-            "This tool allows you to import data from Grapevine 3.x into Coterie. "
-            "You can select which types of data to import."
+            "This tool allows you to import data from Grapevine into Coterie. "
+            "You can import from Grapevine 3.x (.gvc) files or exported character (.gex) files."
         )
         description_label.setWordWrap(True)
         layout.addWidget(description_label)
@@ -75,8 +76,9 @@ class ImportDialog(QDialog):
         button_layout.addWidget(self.import_button)
         
         # Data storage
-        self.grapevine_path = ""
-        self.selected_files = []
+        self.gvc_files = []
+        self.gex_files = []
+        self.import_mode = "gvc"  # Default mode
         
     def _create_character_tab(self, parent: QTabWidget) -> None:
         """Create the character import tab.
@@ -87,44 +89,84 @@ class ImportDialog(QDialog):
         tab = QWidget()
         layout = QVBoxLayout(tab)
         
-        # Grapevine path selection
-        path_group = QGroupBox("Grapevine Installation")
-        path_layout = QVBoxLayout(path_group)
-        layout.addWidget(path_group)
+        # Import mode selection
+        mode_group = QGroupBox("Import Mode")
+        mode_layout = QVBoxLayout(mode_group)
+        layout.addWidget(mode_group)
         
-        path_desc = QLabel(
-            "Select the folder containing your Grapevine installation. "
-            "This should be the folder containing Grapevine.exe and the Characters folder."
+        self.mode_buttons = QButtonGroup()
+        
+        self.gvc_radio = QRadioButton("Import Grapevine 3.x Character Files (.gvc)")
+        self.gvc_radio.setChecked(True)
+        self.gvc_radio.toggled.connect(lambda checked: self._toggle_import_mode("gvc" if checked else "gex"))
+        self.mode_buttons.addButton(self.gvc_radio)
+        mode_layout.addWidget(self.gvc_radio)
+        
+        self.gex_radio = QRadioButton("Import Grapevine Exported Character Files (.gex)")
+        self.mode_buttons.addButton(self.gex_radio)
+        mode_layout.addWidget(self.gex_radio)
+        
+        # GVC files selection
+        self.gvc_group = QGroupBox("GVC Files")
+        self.gvc_layout = QVBoxLayout(self.gvc_group)
+        layout.addWidget(self.gvc_group)
+        
+        gvc_desc = QLabel(
+            "Select .gvc files to import. These are Grapevine 3.x character files."
         )
-        path_desc.setWordWrap(True)
-        path_layout.addWidget(path_desc)
+        gvc_desc.setWordWrap(True)
+        self.gvc_layout.addWidget(gvc_desc)
         
-        path_button_layout = QHBoxLayout()
-        path_layout.addLayout(path_button_layout)
+        gvc_button_layout = QHBoxLayout()
+        self.gvc_layout.addLayout(gvc_button_layout)
         
-        self.path_label = QLabel("No folder selected")
-        path_button_layout.addWidget(self.path_label)
+        self.gvc_files_label = QLabel("No files selected")
+        gvc_button_layout.addWidget(self.gvc_files_label)
         
-        path_button_layout.addStretch()
+        gvc_button_layout.addStretch()
         
-        self.browse_button = QPushButton("Browse...")
-        self.browse_button.clicked.connect(self._browse_grapevine_path)
-        path_button_layout.addWidget(self.browse_button)
+        self.gvc_browse_button = QPushButton("Browse...")
+        self.gvc_browse_button.clicked.connect(self._browse_gvc_files)
+        gvc_button_layout.addWidget(self.gvc_browse_button)
         
-        # Character selection
+        # GEX files selection
+        self.gex_group = QGroupBox("GEX Files")
+        self.gex_layout = QVBoxLayout(self.gex_group)
+        layout.addWidget(self.gex_group)
+        self.gex_group.setVisible(False)
+        
+        gex_desc = QLabel(
+            "Select .gex files to import. These are Grapevine exported character files, "
+            "which are in XML format and contain complete character information."
+        )
+        gex_desc.setWordWrap(True)
+        self.gex_layout.addWidget(gex_desc)
+        
+        gex_button_layout = QHBoxLayout()
+        self.gex_layout.addLayout(gex_button_layout)
+        
+        self.gex_files_label = QLabel("No files selected")
+        gex_button_layout.addWidget(self.gex_files_label)
+        
+        gex_button_layout.addStretch()
+        
+        self.gex_browse_button = QPushButton("Browse...")
+        self.gex_browse_button.clicked.connect(self._browse_gex_files)
+        gex_button_layout.addWidget(self.gex_browse_button)
+        
+        # Character selection tree (shared between modes)
         character_group = QGroupBox("Characters")
         character_layout = QVBoxLayout(character_group)
         layout.addWidget(character_group)
         
         character_desc = QLabel(
-            "Select the characters you want to import. "
-            "Only characters from the selected Grapevine installation will be shown."
+            "Select the characters you want to import."
         )
         character_desc.setWordWrap(True)
         character_layout.addWidget(character_desc)
         
         self.character_tree = QTreeWidget()
-        self.character_tree.setHeaderLabels(["Name", "Type", "Player"])
+        self.character_tree.setHeaderLabels(["Name", "Type", "Player", "Format"])
         self.character_tree.setAlternatingRowColors(True)
         character_layout.addWidget(self.character_tree)
         
@@ -209,95 +251,126 @@ class ImportDialog(QDialog):
         # Add tab
         parent.addTab(tab, "Chronicle")
         
-    def _browse_grapevine_path(self) -> None:
-        """Browse for Grapevine installation folder."""
-        folder = QFileDialog.getExistingDirectory(
-            self, 
-            "Select Grapevine Installation Folder",
+    def _toggle_import_mode(self, mode: str) -> None:
+        """Toggle between GVC and GEX import modes.
+        
+        Args:
+            mode: Import mode ("gvc" or "gex")
+        """
+        self.import_mode = mode
+        
+        # Toggle visibility of the appropriate groups
+        self.gvc_group.setVisible(mode == "gvc")
+        self.gex_group.setVisible(mode == "gex")
+        
+        # Clear the character tree
+        self.character_tree.clear()
+        
+    def _browse_gvc_files(self) -> None:
+        """Browse for .gvc files to import."""
+        files, _ = QFileDialog.getOpenFileNames(
+            self,
+            "Select Grapevine Character Files",
             "",
-            QFileDialog.Option.ShowDirsOnly
+            "Grapevine Character Files (*.gvc)"
         )
         
-        if not folder:
+        if not files:
             return
             
-        # Check if this is a valid Grapevine installation
-        characters_folder = os.path.join(folder, "Characters")
+        # Update UI
+        self.gvc_files_label.setText(f"{len(files)} files selected")
         
-        if not os.path.exists(characters_folder) or not os.path.isdir(characters_folder):
-            QMessageBox.warning(
-                self,
-                "Invalid Folder",
-                "The selected folder does not appear to be a valid Grapevine installation. "
-                "Please select a folder containing a 'Characters' subfolder."
-            )
+        # Store selected files
+        self.gvc_files = files
+        
+        # Load characters from these files
+        self._load_characters_from_gvc()
+        
+    def _browse_gex_files(self) -> None:
+        """Browse for .gex files to import."""
+        files, _ = QFileDialog.getOpenFileNames(
+            self,
+            "Select Grapevine Export Files",
+            "",
+            "Grapevine Export Files (*.gex)"
+        )
+        
+        if not files:
             return
             
-        # Save path and update UI
-        self.grapevine_path = folder
-        self.path_label.setText(folder)
+        # Update UI
+        self.gex_files_label.setText(f"{len(files)} files selected")
         
-        # Load characters
-        self._load_characters()
+        # Store selected files
+        self.gex_files = files
         
-    def _load_characters(self) -> None:
-        """Load characters from Grapevine installation."""
-        if not self.grapevine_path:
+        # Load characters from these files
+        self._load_characters_from_gex()
+        
+    def _load_characters_from_gvc(self) -> None:
+        """Load characters from selected .gvc files."""
+        if not self.gvc_files:
             return
             
         # Clear tree
         self.character_tree.clear()
         
-        characters_folder = os.path.join(self.grapevine_path, "Characters")
-        
-        # Get character files
-        character_files = []
-        for root, _, files in os.walk(characters_folder):
-            for file in files:
-                if file.lower().endswith(".gvc"):
-                    character_files.append(os.path.join(root, file))
-                    
         # Populate tree
-        for file_path in character_files:
-            # Try to extract basic info from file name
-            file_name = os.path.basename(file_path)
-            name_match = re.match(r"(.+)\.gvc", file_name, re.IGNORECASE)
-            
-            if name_match:
-                name = name_match.group(1)
-                
-                # Guess character type from containing folder
-                char_type = "Unknown"
-                parent_folder = os.path.basename(os.path.dirname(file_path))
-                
-                if parent_folder.lower() == "vampire":
-                    char_type = "Vampire"
-                elif parent_folder.lower() == "werewolf":
-                    char_type = "Werewolf"
-                elif parent_folder.lower() == "mage":
-                    char_type = "Mage"
-                elif parent_folder.lower() == "wraith":
-                    char_type = "Wraith"
-                elif parent_folder.lower() == "changeling":
-                    char_type = "Changeling"
-                elif parent_folder.lower() == "hunter":
-                    char_type = "Hunter"
-                elif parent_folder.lower() == "demon":
-                    char_type = "Demon"
-                elif parent_folder.lower() == "mummy":
-                    char_type = "Mummy"
-                elif parent_folder.lower() == "mortal":
-                    char_type = "Mortal"
+        for file_path in self.gvc_files:
+            # Try to extract basic info
+            try:
+                character_data, format_type = DataLoader.extract_character_info(file_path)
                 
                 # Create tree item
-                item = QTreeWidgetItem([name, char_type, "Unknown"])
+                item = QTreeWidgetItem([
+                    character_data.get("name", "Unknown"),
+                    character_data.get("type", "Unknown"),
+                    character_data.get("player", "Unknown"),
+                    "GV3 (.gvc)"
+                ])
                 item.setData(0, Qt.ItemDataRole.UserRole, file_path)
                 item.setCheckState(0, Qt.CheckState.Unchecked)
                 
                 self.character_tree.addTopLevelItem(item)
                 
+            except Exception as e:
+                print(f"Error loading character from {file_path}: {str(e)}")
+                
         # Update columns
-        for i in range(3):
+        for i in range(4):
+            self.character_tree.resizeColumnToContents(i)
+            
+    def _load_characters_from_gex(self) -> None:
+        """Load characters from selected .gex files."""
+        if not self.gex_files:
+            return
+            
+        # Clear tree
+        self.character_tree.clear()
+        
+        # Populate tree
+        for file_path in self.gex_files:
+            try:
+                character_data, format_type = DataLoader.extract_character_info(file_path)
+                
+                # Create tree item
+                item = QTreeWidgetItem([
+                    character_data.get("name", "Unknown"),
+                    character_data.get("type", "Unknown"),
+                    character_data.get("player", "Unknown"),
+                    "GEX (.gex)"
+                ])
+                item.setData(0, Qt.ItemDataRole.UserRole, file_path)
+                item.setCheckState(0, Qt.CheckState.Unchecked)
+                
+                self.character_tree.addTopLevelItem(item)
+                
+            except Exception as e:
+                print(f"Error loading character from {file_path}: {str(e)}")
+                
+        # Update columns
+        for i in range(4):
             self.character_tree.resizeColumnToContents(i)
             
     def _toggle_select_all(self, state: int) -> None:
@@ -349,12 +422,19 @@ class ImportDialog(QDialog):
         
     def _import_data(self) -> None:
         """Import selected data."""
-        # Check if Grapevine path is set
-        if not self.grapevine_path:
+        # Check if data source is set
+        if self.import_mode == "gvc" and not self.gvc_files:
             QMessageBox.warning(
                 self,
-                "No Grapevine Installation",
-                "Please select a Grapevine installation folder first."
+                "No GVC Files",
+                "Please select at least one .gvc file to import."
+            )
+            return
+        elif self.import_mode == "gex" and not self.gex_files:
+            QMessageBox.warning(
+                self,
+                "No GEX Files",
+                "Please select at least one .gex file to import."
             )
             return
             
@@ -396,19 +476,53 @@ class ImportDialog(QDialog):
             
         # Show progress
         self.progress_bar.setVisible(True)
+        self.progress_bar.setRange(0, len(selected_characters))
         self.progress_bar.setValue(0)
         
-        # TODO: Implement actual import logic
-        # For now, just show a message
-        QMessageBox.information(
-            self,
-            "Import Not Implemented",
-            "The import functionality is not yet fully implemented. "
-            "This is a placeholder for future development."
-        )
+        imported_files = []
         
+        # Import selected characters
+        for i, file_path in enumerate(selected_characters):
+            try:
+                # Update progress
+                self.progress_bar.setValue(i + 1)
+                
+                # Import character
+                imported_file = DataLoader.import_character(file_path)
+                imported_files.append(imported_file)
+                
+            except Exception as e:
+                QMessageBox.warning(
+                    self,
+                    "Import Error",
+                    f"Error importing {os.path.basename(file_path)}: {str(e)}"
+                )
+        
+        # Import game data if selected
+        if (import_traits or import_disciplines or import_backgrounds or 
+            import_merits_flaws or import_natures):
+            # TODO: Implement game data import
+            pass
+                
         # Hide progress
         self.progress_bar.setVisible(False)
         
-        # Emit completion signal
-        self.import_completed.emit(True) 
+        # Show success message
+        if imported_files:
+            QMessageBox.information(
+                self,
+                "Import Complete",
+                f"Successfully imported {len(imported_files)} characters."
+            )
+            
+            # Emit completion signal
+            self.import_completed.emit(True)
+        else:
+            QMessageBox.warning(
+                self,
+                "Import Warning",
+                "No characters were imported."
+            )
+            
+            # Emit completion signal with failure
+            self.import_completed.emit(False) 

@@ -1,4 +1,4 @@
-# Contributing to Grapevine 4.0
+# Contributing to Coterie
 
 ## Getting Started
 
@@ -11,8 +11,8 @@
 ### Development Environment Setup
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/grapevine.git
-cd grapevine
+git clone https://github.com/yourusername/coterie.git
+cd coterie
 ```
 
 2. Create virtual environment
@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 4. Initialize database
 ```bash
-python -m grapevine.db.init
+python -m coterie.db.init
 ```
 
 ## Development Process

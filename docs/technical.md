@@ -1,4 +1,4 @@
-# Grapevine 4.0 Technical Documentation
+# Coterie Technical Documentation
 
 ## Development Environment
 
@@ -22,7 +22,7 @@
 
 3. Initialize database:
    ```bash
-   python -m grapevine
+   python -m coterie
    ```
 
 ## Code Style & Standards
@@ -128,6 +128,7 @@ Data from JSON files is loaded at application startup and cached for performance
 
 ### Dialog Windows
 - CharacterCreationDialog
+- ImportDialog
 - ExperienceDialog
 - PlotDialog
 - RumorDialog
@@ -155,7 +156,7 @@ Data from JSON files is loaded at application startup and cached for performance
 
 ### Exception Hierarchy
 ```python
-GrapevineError
+CoterieError
 ├── DatabaseError
 ├── ValidationError
 ├── CharacterError
@@ -204,9 +205,9 @@ GrapevineError
 ### Application Structure
 ```
 <user_app_data>/
-└── Grapevine/
-    ├── grapevine.db
-    ├── grapevine.log
+└── Coterie/
+    ├── coterie.db
+    ├── coterie.log
     └── backups/
 ```
 

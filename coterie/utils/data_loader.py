@@ -2,7 +2,9 @@
 
 import json
 import os
-from typing import Dict, List, Any, Optional, Union
+import re
+import xml.etree.ElementTree as ET
+from typing import Dict, List, Any, Optional, Union, Tuple
 from pathlib import Path
 
 class DataLoader:
@@ -127,4 +129,232 @@ class DataLoader:
     @classmethod
     def clear_cache(cls) -> None:
         """Clear the data cache."""
-        cls._data_cache.clear() 
+        cls._data_cache.clear()
+    
+    @classmethod
+    def parse_gv3_character(cls, file_path: str) -> Dict[str, Any]:
+        """Parse a Grapevine 3 character file (.gvc).
+        
+        Args:
+            file_path: Path to the .gvc file
+            
+        Returns:
+            Dictionary containing character data
+            
+        Raises:
+            FileNotFoundError: If the file doesn't exist
+            ValueError: If the file is not a valid GV3 character file
+        """
+        # Basic character data structure
+        character = {
+            "name": "",
+            "player": "",
+            "chronicle": "",
+            "nature": "",
+            "demeanor": "",
+            "concept": "",
+            "clan": "",
+            "generation": 0,
+            "type": "Unknown",
+            "attributes": {},
+            "abilities": {},
+            "disciplines": {},
+            "backgrounds": {},
+            "virtues": {},
+            "merits": [],
+            "flaws": [],
+            "notes": "",
+            "source_file": file_path,
+            "source_format": "gv3"
+        }
+        
+        try:
+            # GV3 files are text-based with specific markers
+            with open(file_path, 'r', encoding='latin-1') as f:
+                content = f.read()
+                
+            # Extract character type from file path or content
+            if "vampire" in file_path.lower():
+                character["type"] = "Vampire"
+            elif "werewolf" in file_path.lower():
+                character["type"] = "Werewolf"
+            elif "mage" in file_path.lower():
+                character["type"] = "Mage"
+            
+            # Extract basic info
+            name_match = re.search(r"Name\s*:\s*([^\r\n]+)", content)
+            if name_match:
+                character["name"] = name_match.group(1).strip()
+                
+            player_match = re.search(r"Player\s*:\s*([^\r\n]+)", content)
+            if player_match:
+                character["player"] = player_match.group(1).strip()
+                
+            # Extract additional data based on character type
+            # This is a simplified implementation - a full parser would be more complex
+            if character["type"] == "Vampire":
+                clan_match = re.search(r"Clan\s*:\s*([^\r\n]+)", content)
+                if clan_match:
+                    character["clan"] = clan_match.group(1).strip()
+                    
+                gen_match = re.search(r"Generation\s*:\s*(\d+)", content)
+                if gen_match:
+                    character["generation"] = int(gen_match.group(1))
+                    
+            # TODO: Add more detailed parsing for traits, disciplines, etc.
+            
+            return character
+            
+        except Exception as e:
+            raise ValueError(f"Failed to parse GV3 file: {str(e)}")
+    
+    @classmethod
+    def parse_gex_character(cls, file_path: str) -> Dict[str, Any]:
+        """Parse a Grapevine exported character file (.gex).
+        
+        Args:
+            file_path: Path to the .gex file
+            
+        Returns:
+            Dictionary containing character data
+            
+        Raises:
+            FileNotFoundError: If the file doesn't exist
+            ValueError: If the file is not a valid GEX file
+        """
+        # Basic character data structure
+        character = {
+            "name": "",
+            "player": "",
+            "chronicle": "",
+            "nature": "",
+            "demeanor": "",
+            "concept": "",
+            "clan": "",
+            "generation": 0,
+            "type": "Unknown",
+            "attributes": {},
+            "abilities": {},
+            "disciplines": {},
+            "backgrounds": {},
+            "virtues": {},
+            "merits": [],
+            "flaws": [],
+            "notes": "",
+            "source_file": file_path,
+            "source_format": "gex"
+        }
+        
+        try:
+            # GEX files are XML-based
+            tree = ET.parse(file_path)
+            root = tree.getroot()
+            
+            # Check if this is a valid GEX file
+            if root.tag != "grapevine_character":
+                raise ValueError("Not a valid GEX file")
+                
+            # Extract basic info
+            basic_info = root.find("basic_info")
+            if basic_info is not None:
+                name_elem = basic_info.find("name")
+                if name_elem is not None:
+                    character["name"] = name_elem.text or ""
+                    
+                player_elem = basic_info.find("player")
+                if player_elem is not None:
+                    character["player"] = player_elem.text or ""
+                    
+                chronicle_elem = basic_info.find("chronicle")
+                if chronicle_elem is not None:
+                    character["chronicle"] = chronicle_elem.text or ""
+                    
+                # Determine character type
+                template_elem = root.find("template")
+                if template_elem is not None:
+                    type_elem = template_elem.find("type")
+                    if type_elem is not None:
+                        character["type"] = type_elem.text or "Unknown"
+                        
+                    # Extract type-specific info
+                    if character["type"] == "Vampire":
+                        clan_elem = template_elem.find("clan")
+                        if clan_elem is not None:
+                            character["clan"] = clan_elem.text or ""
+                            
+                        gen_elem = template_elem.find("generation")
+                        if gen_elem is not None and gen_elem.text:
+                            try:
+                                character["generation"] = int(gen_elem.text)
+                            except ValueError:
+                                pass
+                
+            # TODO: Add more detailed parsing for traits, disciplines, etc.
+            
+            return character
+            
+        except ET.ParseError:
+            raise ValueError("Invalid XML in GEX file")
+        except Exception as e:
+            raise ValueError(f"Failed to parse GEX file: {str(e)}")
+    
+    @classmethod
+    def extract_character_info(cls, file_path: str) -> Tuple[Dict[str, Any], str]:
+        """Extract basic character info from a file, detecting the format.
+        
+        Args:
+            file_path: Path to the character file
+            
+        Returns:
+            Tuple of (character data dictionary, file format)
+            
+        Raises:
+            FileNotFoundError: If the file doesn't exist
+            ValueError: If the file format is not supported
+        """
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+            
+        # Determine file type based on extension
+        if file_path.lower().endswith('.gvc'):
+            return cls.parse_gv3_character(file_path), "gv3"
+        elif file_path.lower().endswith('.gex'):
+            return cls.parse_gex_character(file_path), "gex"
+        else:
+            raise ValueError(f"Unsupported file format: {file_path}")
+            
+    @classmethod
+    def import_character(cls, file_path: str, target_dir: Optional[str] = None) -> str:
+        """Import a character from a GV3 or GEX file and save it to the Coterie format.
+        
+        Args:
+            file_path: Path to the character file
+            target_dir: Optional directory to save the character to
+            
+        Returns:
+            Path to the imported character file
+            
+        Raises:
+            FileNotFoundError: If the file doesn't exist
+            ValueError: If the file format is not supported
+        """
+        # Extract character data and format
+        character_data, format_type = cls.extract_character_info(file_path)
+        
+        # If no target directory specified, use the default character directory
+        if target_dir is None:
+            base_dir = Path(__file__).resolve().parent.parent.parent
+            target_dir = base_dir / 'characters'
+            
+            # Create directory if it doesn't exist
+            os.makedirs(target_dir, exist_ok=True)
+        
+        # Generate filename based on character name
+        safe_name = re.sub(r'[^\w\-_.]', '_', character_data["name"] or "unnamed")
+        target_file = os.path.join(target_dir, f"{safe_name}.json")
+        
+        # Save character data
+        with open(target_file, 'w', encoding='utf-8') as f:
+            json.dump(character_data, f, indent=2)
+            
+        return target_file 

@@ -1,4 +1,4 @@
-# Grapevine 4.0 Installation Guide
+# Coterie Installation Guide
 
 ## System Requirements
 
@@ -21,39 +21,39 @@
 ### Windows Installation
 
 #### Using Installer (Recommended)
-1. Download the Grapevine-4.0-Setup.exe from the releases page
+1. Download the Coterie-Setup.exe from the releases page
 2. Run the installer
 3. Follow the installation wizard
-4. Launch Grapevine from the Start Menu
+4. Launch Coterie from the Start Menu
 
 #### Manual Installation
 1. Install Python 3.8 or higher from python.org
-2. Download Grapevine-4.0.zip
+2. Download Coterie.zip
 3. Extract to desired location
 4. Open command prompt in extracted folder
 5. Run: `pip install -r requirements.txt`
-6. Run: `python -m grapevine`
+6. Run: `python -m coterie`
 
 ### macOS Installation
 
 #### Using DMG (Recommended)
-1. Download Grapevine-4.0.dmg
+1. Download Coterie.dmg
 2. Mount the DMG file
-3. Drag Grapevine to Applications
+3. Drag Coterie to Applications
 4. Launch from Applications folder
 
 #### Using Homebrew
 ```bash
 brew install python
-brew install grapevine
+brew install coterie
 ```
 
 #### Manual Installation
 1. Install Python using Homebrew: `brew install python`
-2. Download and extract Grapevine-4.0.tar.gz
+2. Download and extract Coterie.tar.gz
 3. Open Terminal in extracted folder
 4. Run: `pip3 install -r requirements.txt`
-5. Run: `python3 -m grapevine`
+5. Run: `python3 -m coterie`
 
 ### Linux Installation
 
@@ -62,13 +62,13 @@ brew install grapevine
 ```bash
 sudo apt update
 sudo apt install python3-pip
-pip3 install grapevine
+pip3 install coterie
 ```
 
 ##### Fedora
 ```bash
 sudo dnf install python3-pip
-pip3 install grapevine
+pip3 install coterie
 ```
 
 #### Manual Installation
@@ -77,15 +77,15 @@ pip3 install grapevine
    sudo apt update
    sudo apt install python3 python3-pip
    ```
-2. Download and extract Grapevine-4.0.tar.gz
+2. Download and extract Coterie.tar.gz
 3. Navigate to extracted folder
 4. Run: `pip3 install -r requirements.txt`
-5. Run: `python3 -m grapevine`
+5. Run: `python3 -m coterie`
 
 ## First-Time Setup
 
 ### Database Configuration
-1. Launch Grapevine
+1. Launch Coterie
 2. Choose database location when prompted
 3. Wait for initial database creation
 4. Create admin account if requested
@@ -130,7 +130,7 @@ pip3 install grapevine
 ## Updating
 
 ### Automatic Updates
-1. Launch Grapevine
+1. Launch Coterie
 2. Accept update prompt
 3. Wait for download and installation
 4. Restart application
@@ -145,27 +145,27 @@ pip3 install grapevine
 
 ### Windows
 1. Use Control Panel > Programs
-2. Select Grapevine
+2. Select Coterie
 3. Click Uninstall
 4. Delete remaining data if desired
 
 ### macOS
 1. Delete from Applications
-2. Remove ~/Library/Application Support/Grapevine
+2. Remove ~/Library/Application Support/Coterie
 3. Remove preferences if desired
 
 ### Linux
 ```bash
-pip3 uninstall grapevine
-rm -rf ~/.config/grapevine
+pip3 uninstall coterie
+rm -rf ~/.config/coterie
 ```
 
 ## Support
 
 ### Getting Help
-- Visit: grapevine.example.com/support
-- Email: support@grapevine.example.com
-- GitHub Issues: github.com/grapevine/issues
+- Visit: coterie.example.com/support
+- Email: support@coterie.example.com
+- GitHub Issues: github.com/coterie/issues
 
 ### Resources
 - User Manual

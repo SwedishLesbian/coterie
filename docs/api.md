@@ -1,4 +1,4 @@
-# Grapevine 4.0 API Documentation
+# Coterie API Documentation
 
 ## Core Modules
 

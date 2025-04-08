@@ -1,9 +1,9 @@
-# Grapevine 4.0 FAQ
+# Coterie FAQ
 
 ## General Questions
 
-### What is Grapevine?
-Grapevine is a character management system for World of Darkness tabletop roleplaying games, focusing on Vampire: The Masquerade and related games.
+### What is Coterie?
+Coterie is a character management system for World of Darkness tabletop roleplaying games, focusing on Vampire: The Masquerade and related games.
 
 ### What's new in version 4.0?
 - Complete Python rewrite
@@ -30,14 +30,14 @@ Minimum:
 - 500MB storage
 - 1280x720 display
 
-### Why won't Grapevine start?
+### Why won't Coterie start?
 Common causes:
 1. Missing Python installation
 2. Incomplete dependencies
 3. Database access issues
 4. Graphics driver problems
 
-### How do I update Grapevine?
+### How do I update Coterie?
 - Automatic updates when available
 - Manual download from website
 - Using package manager (Linux)
@@ -52,7 +52,7 @@ Common causes:
 5. Save character
 
 ### Can I import characters from older versions?
-Yes, Grapevine 4.0 supports importing from:
+Yes, Coterie 4.0 supports importing from:
 - Grapevine 3.x (.gv3)
 - Grapevine 2.x (.gv2)
 - Text files (.txt)
@@ -91,9 +91,9 @@ Not currently. Multi-user support is planned for a future release.
 
 ### Where is my data stored?
 Default locations:
-- Windows: %APPDATA%\Grapevine
-- macOS: ~/Library/Application Support/Grapevine
-- Linux: ~/.local/share/grapevine
+- Windows: %APPDATA%\Coterie
+- macOS: ~/Library/Application Support/Coterie
+- Linux: ~/.local/share/coterie
 
 ### Can I move my database?
 Yes:
@@ -156,9 +156,9 @@ Check:
 
 ### Where are the log files?
 Location:
-- Windows: %APPDATA%\Grapevine\logs
-- macOS: ~/Library/Logs/Grapevine
-- Linux: ~/.local/share/grapevine/logs
+- Windows: %APPDATA%\Coterie\logs
+- macOS: ~/Library/Logs/Coterie
+- Linux: ~/.local/share/coterie/logs
 
 ### How do I get help?
 Resources:
@@ -188,3 +188,12 @@ Yes:
 - House rules
 - Custom traits
 - Character data 
+
+## Data Import and Export
+
+### Can I import my characters from Grapevine 3.x?
+
+Yes, Coterie supports importing from:
+- Grapevine 3.x (.gv3)
+- Grapevine 2.x (.gv2)
+- Text files (.txt) 

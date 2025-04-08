@@ -1,4 +1,4 @@
-# Grapevine 4.0 Quick Start Guide
+# Coterie Quick Start Guide
 
 ## Getting Started in 5 Minutes
 

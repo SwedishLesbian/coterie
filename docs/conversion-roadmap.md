@@ -1,4 +1,4 @@
-# Grapevine to Coterie Conversion Roadmap
+# Coterie Conversion Roadmap
 
 ## Overview
 
