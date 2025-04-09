@@ -10,7 +10,7 @@ Coterie is a modern Python port of the original Grapevine character and chronicl
 
 ### Project Context
 
-We are converting the Grapevine 3.01 Visual Basic application to Python 3.8+. This is a character management system for Mind's Eye Theater LARP (Live Action Role-Playing) based on White Wolf's World of Darkness setting. The original VB source code is available in the repository as a reference (`docs/VB-Grapevine-SourceCode.md`).
+We are converting the Grapevine 3.01 Visual Basic application to Python 3.8+. This is a character management system for Mind's Eye Theater LARP (Live Action Role-Playing) based on White Wolf's World of Darkness setting. The original VB source code is available in the repository archives as a reference.
 
 The project is named "Coterie" and follows a component-based architecture with:
 - SQLAlchemy ORM for database management
@@ -20,13 +20,15 @@ The project is named "Coterie" and follows a component-based architecture with:
 
 ### Current Status
 
-We are in the early stages of development (Phase 1), having completed:
+We are implementing the Mind's Eye Theater LARP trait system, having completed:
 - Project structure and infrastructure
 - Basic SQLAlchemy models for characters
 - Core UI framework with PyQt6
 - Character creation dialog
 - Basic application flow
 - Import dialog for both .gvc and .gex files
+- LARP trait widget implementation
+- Database models for adjective-based traits
 
 Refer to `docs/status.md` for the complete and current status of the project. For the most recent development session details and to pick up where we left off, see `docs/development-session-summary.md`.
 
@@ -44,11 +46,11 @@ When working on this project:
 
 See `docs/conversion-checklist.md` and `docs/component-roadmap.md` for the complete task list. Current priorities:
 
-1. Implement the CharacterList view
-2. Complete character import/export cycle  
-3. Add validation to the character creation dialog
-4. Implement character data loading/saving
-5. Begin work on Werewolf character sheet
+1. Complete the LARP trait system implementation
+2. Implement the Challenge Resolution System for LARP play
+3. Extend support to other character types (Werewolf, Mage, etc.)
+4. Complete character import/export cycle
+5. Add validation to the character creation dialog
 
 ### Document Updates
 
@@ -69,7 +71,6 @@ As development progresses, please update:
 - [Conversion Checklist](conversion-checklist.md) - Detailed checklist of tasks
 - [Component Roadmap](component-roadmap.md) - Component-specific development plan
 - [VB Structure](vb-structure.md) - Original VB codebase structure
-- [VB Source Code](VB-Grapevine-SourceCode.md) - Original VB source code reference
 
 ### Technical Documentation
 
@@ -78,11 +79,18 @@ As development progresses, please update:
 - [UI Components](ui-components.md) - UI component details
 - [API Documentation](api.md) - API reference
 - [Conversion Guide](conversion-guide.md) - Guide for developers working on the conversion
+- [LARP Trait System](larp-trait-system.md) - Documentation of the Mind's Eye Theater trait system
 
 ### Development Resources
 
 - [Contributing Guide](contributing.md) - How to contribute to the project
 - [Issue Tracking](fixes.md) - Known issues and fixes
+
+### User Documentation
+
+- [Installation Guide](user/installation.md) - How to install the application
+- [Quick Start Guide](user/quickstart.md) - Getting started with Coterie
+- [FAQ](user/faq.md) - Frequently asked questions
 
 ## Project Structure
 
