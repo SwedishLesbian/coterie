@@ -10,6 +10,9 @@ from pathlib import Path
 # Add import for the trait converter
 from coterie.utils.trait_converter import TraitConverter
 from coterie.models.larp_trait import LarpTrait, TraitCategory
+from coterie.database.engine import get_session
+from coterie.models.base import Trait, Character
+from coterie.models.vampire import Vampire
 
 class DataLoader:
     """Utility for loading and caching game data from JSON files."""
@@ -907,10 +910,6 @@ class DataLoader:
             Vampire object ready to be added to the database
         """
         from datetime import datetime
-        from coterie.database.session import get_session
-        from coterie.models.vampire import Vampire
-        from coterie.models.base import Trait
-        from coterie.models.larp_trait import LarpTrait, TraitCategory
         
         # Get a database session
         session = get_session()
@@ -951,7 +950,7 @@ class DataLoader:
             
             # Add to session to get an ID
             session.add(vampire)
-            session.flush()  # This assigns an ID without committing
+            session.commit()  # Commit to DB to ensure all relationships are saved
             
             # Add LARP traits if present
             if 'larp_traits' in character_data and character_data['larp_traits']:
@@ -984,9 +983,7 @@ class DataLoader:
         except Exception as e:
             session.rollback()
             raise ValueError(f"Failed to create vampire from data: {str(e)}")
-        finally:
-            session.close()
-        
+    
     @staticmethod
     def load_json_file(file_path: str) -> Dict:
         """Load data from a JSON file.
@@ -1002,4 +999,105 @@ class DataLoader:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading JSON file: {e}")
-            return {} 
+            return {}
+
+    @staticmethod
+    def load_character(character_id: int) -> Optional[Any]:
+        """
+        Safely load a character from the database with proper session handling.
+        
+        Args:
+            character_id: ID of the character to load
+            
+        Returns:
+            Character object or None if not found
+        """
+        from coterie.models.base import Character
+        
+        session = get_session()
+        try:
+            # Fetch the character from the database
+            character = session.query(Character).filter(Character.id == character_id).first()
+            
+            # If found, prepare it for UI use
+            if character:
+                # First, while the character is attached to this session, refresh it
+                session.refresh(character)
+                
+                # Close this session before returning
+                session.expunge(character)
+                session.close()
+                
+                # Now prepare the character in a new session to preload all attributes
+                return DataLoader.prepare_character_for_ui(character)
+            
+            return None
+            
+        except Exception as e:
+            print(f"Error loading character {character_id}: {e}")
+            return None
+        finally:
+            # Only close if it hasn't been closed already
+            if session and session.is_active:
+                session.close()
+
+    @staticmethod
+    def prepare_character_for_ui(character: Any) -> Any:
+        """
+        Prepare a character for use in the UI by ensuring all required data is loaded.
+        This helps prevent lazy loading issues when the object is detached from the session.
+        
+        Args:
+            character: Character object to prepare
+            
+        Returns:
+            Prepared character object
+        """
+        if not character:
+            return None
+            
+        # Create a new session and attach the character to it
+        session = get_session()
+        try:
+            # Add the character to the session
+            session.add(character)
+            
+            # Force access to key attributes to ensure they're loaded
+            _ = character.id
+            _ = character.name
+            _ = character.player
+            _ = character.nature
+            _ = character.demeanor
+            _ = character.type
+            
+            # Access type-specific attributes
+            from coterie.models.vampire import Vampire
+            if isinstance(character, Vampire):
+                _ = character.clan
+                _ = character.generation
+                _ = character.sect
+                _ = character.conscience
+                _ = character.self_control
+                _ = character.courage
+                _ = character.path
+                _ = character.willpower
+                _ = character.blood
+                
+            # Force load all collection attributes
+            if hasattr(character, 'traits'):
+                traits = list(character.traits)  # Force loading full collection
+                
+            if hasattr(character, 'larp_traits'):
+                larp_traits = list(character.larp_traits)  # Force loading full collection
+                # Also load each larp_trait's categories
+                for trait in larp_traits:
+                    if hasattr(trait, 'categories'):
+                        _ = list(trait.categories)  # Force loading categories
+                
+            return character
+            
+        except Exception as e:
+            print(f"Error preparing character for UI: {e}")
+            return character
+        finally:
+            session.close() 

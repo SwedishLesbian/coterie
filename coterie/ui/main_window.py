@@ -23,6 +23,7 @@ from coterie.ui.dialogs.character_creation import CharacterCreationDialog
 from coterie.ui.dialogs.data_manager_dialog import DataManagerDialog
 from coterie.ui.widgets.character_list_widget import CharacterListWidget
 from coterie.ui.sheets.vampire_sheet import VampireSheet
+from coterie.utils.data_loader import DataLoader
 
 logger = logging.getLogger(__name__)
 
@@ -252,20 +253,34 @@ class MainWindow(QMainWindow):
         """Refresh the character list."""
         try:
             session = get_session()
-            characters = session.query(Character).all()
-            
-            # Update character list
-            self.character_list.set_characters(characters)
-            
-            # Update status bar
-            self.status_bar.showMessage(f"Loaded {len(characters)} characters")
+            try:
+                # Use safer query approach with explicit column loading
+                characters = session.query(Character).all()
+                
+                # Use detached copies to avoid session issues
+                detached_characters = []
+                for character in characters:
+                    # Ensure essential attributes are loaded/accessed before
+                    # passing to UI components to prevent lazy loading errors
+                    _ = character.id
+                    _ = character.name
+                    _ = character.type
+                    _ = character.player
+                    _ = character.status
+                    detached_characters.append(character)
+                
+                # Update character list with detached copies
+                self.character_list.set_characters(detached_characters)
+                
+                # Update status bar
+                self.status_bar.showMessage(f"Loaded {len(characters)} characters")
+            finally:
+                session.close()
             
         except Exception as e:
             error_msg = f"Failed to load characters: {str(e)}"
             logger.error(error_msg)
             QMessageBox.critical(self, "Error", error_msg)
-        finally:
-            session.close()
             
     def _on_new_character(self) -> None:
         """Handle new character creation."""
@@ -298,14 +313,19 @@ class MainWindow(QMainWindow):
                     last_modified=datetime.now()
                 )
                 
+                # Add to database and commit
                 session.add(character)
                 session.commit()
+                
+                # Prepare the character for UI by preloading all attributes
+                # This prevents lazy loading issues when the session is closed
+                prepared_character = DataLoader.prepare_character_for_ui(character)
                 
                 # Refresh character list
                 self._refresh_characters()
                 
-                # Open the new character
-                self._open_character(character)
+                # Open the new character using the prepared object
+                self._open_character(prepared_character, use_existing_object=True)
                 
                 self.status_bar.showMessage(f"Created new Vampire character: {data['name']}")
                 logger.info(f"Created new Vampire character: {data['name']}")
@@ -327,11 +347,12 @@ class MainWindow(QMainWindow):
         finally:
             session.close()
             
-    def _open_character(self, character: Character) -> None:
+    def _open_character(self, character: Character, use_existing_object: bool = False) -> None:
         """Open a character sheet in a new tab.
         
         Args:
             character: Character to open
+            use_existing_object: Whether to use the existing character object
         """
         # Check if character is already open
         if character.id in self.open_character_sheets:
@@ -340,6 +361,14 @@ class MainWindow(QMainWindow):
             return
             
         try:
+            # Use the character object directly if specified, otherwise load from DB
+            if not use_existing_object:
+                # Use DataLoader to safely load character with proper session handling
+                character = DataLoader.load_character(character.id)
+                
+                if not character:
+                    raise ValueError(f"Character with ID {character.id} not found")
+            
             # Create appropriate sheet based on character type
             if isinstance(character, Vampire):
                 sheet = VampireSheet()
@@ -469,8 +498,8 @@ class MainWindow(QMainWindow):
             # Save to database
             session = get_session()
             
-            # Get character
-            character = session.query(Character).filter_by(id=character_id).first()
+            # Get character using DataLoader for proper session handling
+            character = DataLoader.load_character(character_id)
             
             if not character:
                 QMessageBox.warning(self, "Warning", "Character not found.")
@@ -511,6 +540,7 @@ class MainWindow(QMainWindow):
                 
                 # TODO: Handle traits
                 
+            session.add(character)  # Make sure the character is attached to this session
             session.commit()
             
             self.status_bar.showMessage(f"Saved character: {character.name}")

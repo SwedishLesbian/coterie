@@ -21,6 +21,7 @@ from coterie.utils.data_loader import DataLoader
 from coterie.ui.widgets.trait_group_widget import TraitGroupWidget
 from coterie.ui.widgets.trait_widget import TraitWidget
 from coterie.ui.widgets.larp_trait_widget import LarpTraitWidget, LarpTraitCategoryWidget
+from coterie.utils.trait_converter import TraitConverter
 
 class VampireSheet(QWidget):
     """Character sheet display for Vampire: The Masquerade characters."""
@@ -342,33 +343,88 @@ class VampireSheet(QWidget):
         discipline_traits = []
         background_traits = []
         
-        # Process all LARP traits
-        for trait in character.larp_traits:
-            # Check each trait's categories
-            for category in trait.categories:
-                category_name = category.name.lower()
-                
-                # Handle attributes
-                if category_name == "physical":
-                    attribute_traits["Physical"].append(trait.display_name)
-                elif category_name == "social":
-                    attribute_traits["Social"].append(trait.display_name)
-                elif category_name == "mental":
-                    attribute_traits["Mental"].append(trait.display_name)
-                
-                # Handle abilities
-                elif category_name == "talents":
-                    ability_traits["Talents"].append(trait.display_name)
-                elif category_name == "skills":
-                    ability_traits["Skills"].append(trait.display_name)
-                elif category_name == "knowledges":
-                    ability_traits["Knowledges"].append(trait.display_name)
-                
-                # Handle other types
-                elif category_name == "disciplines":
-                    discipline_traits.append(trait.display_name)
-                elif category_name == "backgrounds":
-                    background_traits.append(trait.display_name)
+        # Check if character has LARP traits
+        if hasattr(character, 'larp_traits') and character.larp_traits:
+            # Process all LARP traits
+            for trait in character.larp_traits:
+                # Safety check for categories attribute
+                if not hasattr(trait, 'categories'):
+                    continue
+                    
+                # Check each trait's categories
+                for category in trait.categories:
+                    category_name = category.name.lower()
+                    
+                    # Handle attributes
+                    if category_name == "physical":
+                        attribute_traits["Physical"].append(trait.display_name)
+                    elif category_name == "social":
+                        attribute_traits["Social"].append(trait.display_name)
+                    elif category_name == "mental":
+                        attribute_traits["Mental"].append(trait.display_name)
+                    
+                    # Handle abilities
+                    elif category_name == "talents":
+                        ability_traits["Talents"].append(trait.display_name)
+                    elif category_name == "skills":
+                        ability_traits["Skills"].append(trait.display_name)
+                    elif category_name == "knowledges":
+                        ability_traits["Knowledges"].append(trait.display_name)
+                    
+                    # Handle other types
+                    elif category_name == "disciplines":
+                        discipline_traits.append(trait.display_name)
+                    elif category_name == "backgrounds":
+                        background_traits.append(trait.display_name)
+        else:
+            # Old-style character using dot-based traits - convert to LARP traits on-the-fly
+            # Process legacy traits if they exist
+            if hasattr(character, 'traits'):
+                for trait in character.traits:
+                    # Convert based on category
+                    trait_category = trait.category.lower()
+                    trait_name = trait.name.lower()
+                    trait_value = trait.value
+                    
+                    # Handle attributes
+                    if trait_category in ["physical", "social", "mental"]:
+                        # Convert dot value to adjectives
+                        adjectives = TraitConverter.dot_rating_to_adjectives(
+                            trait_name, trait_value, trait_category
+                        )
+                        
+                        if trait_category == "physical":
+                            attribute_traits["Physical"].extend(adjectives)
+                        elif trait_category == "social":
+                            attribute_traits["Social"].extend(adjectives)
+                        elif trait_category == "mental":
+                            attribute_traits["Mental"].extend(adjectives)
+                    
+                    # Handle abilities
+                    elif trait_category in ["talents", "skills", "knowledges"]:
+                        # Convert dot value to adjectives
+                        adjectives = TraitConverter.dot_rating_to_adjectives(
+                            trait_name, trait_value, trait_category
+                        )
+                        
+                        if trait_category == "talents":
+                            ability_traits["Talents"].extend(adjectives)
+                        elif trait_category == "skills":
+                            ability_traits["Skills"].extend(adjectives)
+                        elif trait_category == "knowledges":
+                            ability_traits["Knowledges"].extend(adjectives)
+                    
+                    # Handle disciplines
+                    elif trait_category == "disciplines":
+                        # Use generic adjectives for disciplines
+                        adjectives = [f"{trait.name} {i}" for i in range(1, trait_value + 1)]
+                        discipline_traits.extend(adjectives)
+                    
+                    # Handle backgrounds
+                    elif trait_category == "backgrounds":
+                        # Use generic adjectives for backgrounds
+                        adjectives = [f"{trait.name} {i}" for i in range(1, trait_value + 1)]
+                        background_traits.extend(adjectives)
         
         # Update widgets with collected traits
         self.attributes.set_category_traits(attribute_traits)
