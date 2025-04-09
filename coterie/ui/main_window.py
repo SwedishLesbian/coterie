@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QTabWidget, QMenuBar, QStatusBar, QToolBar,
-    QPushButton, QLabel, QMessageBox, QApplication
+    QPushButton, QLabel, QMessageBox, QApplication, QSizePolicy
 )
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtCore import Qt
@@ -55,10 +55,15 @@ class MainWindow(QMainWindow):
         self._create_status_bar()
         self._create_main_interface()
         
-        # Connect signals
+        # Connect signals for File menu
         self.new_char_action.triggered.connect(self._on_new_character)
-        self.refresh_action.triggered.connect(self._refresh_characters)
+        self.exit_action.triggered.connect(self.close)
+        
+        # Connect signals for Data menu
         self.data_manager_action.triggered.connect(self._show_data_manager)
+        
+        # Connect signals for toolbar
+        self.refresh_action.triggered.connect(self._refresh_characters)
         
         # Initial load of characters
         self._refresh_characters()
@@ -71,31 +76,11 @@ class MainWindow(QMainWindow):
         file_menu = menubar.addMenu("&File")
         
         self.new_char_action = QAction("&New Character", self)
-        self.new_char_action.setShortcut("Ctrl+N")
         file_menu.addAction(self.new_char_action)
-        
-        self.open_char_action = QAction("&Open Character", self)
-        self.open_char_action.setShortcut("Ctrl+O")
-        file_menu.addAction(self.open_char_action)
-        
-        file_menu.addSeparator()
-        
-        self.export_action = QAction("&Export Character", self)
-        file_menu.addAction(self.export_action)
-        
-        self.import_action = QAction("&Import Character", self)
-        file_menu.addAction(self.import_action)
-        
-        file_menu.addSeparator()
-        
-        self.refresh_action = QAction("&Refresh", self)
-        self.refresh_action.setShortcut("F5")
-        file_menu.addAction(self.refresh_action)
         
         file_menu.addSeparator()
         
         self.exit_action = QAction("E&xit", self)
-        self.exit_action.setShortcut("Alt+F4")
         self.exit_action.triggered.connect(self.close)
         file_menu.addAction(self.exit_action)
         
@@ -114,11 +99,41 @@ class MainWindow(QMainWindow):
         # Game menu (new)
         game_menu = menubar.addMenu("&Game")
         
+        # Add view submenu for tabs
+        view_menu = game_menu.addMenu("&View")
+        
+        # Characters tab
+        self.show_characters_action = QAction("&Characters", self)
+        self.show_characters_action.setCheckable(True)
+        self.show_characters_action.setChecked(True)  # Default to visible
+        self.show_characters_action.triggered.connect(self._toggle_characters_tab)
+        view_menu.addAction(self.show_characters_action)
+        
+        # Chronicle tab
+        self.show_chronicle_action = QAction("&Chronicle", self)
+        self.show_chronicle_action.setCheckable(True)
+        self.show_chronicle_action.setChecked(False)  # Default to hidden
+        self.show_chronicle_action.triggered.connect(self._toggle_chronicle_tab)
+        view_menu.addAction(self.show_chronicle_action)
+        
+        # Plots tab
+        self.show_plots_action = QAction("&Plots", self)
+        self.show_plots_action.setCheckable(True)
+        self.show_plots_action.setChecked(False)  # Default to hidden
+        self.show_plots_action.triggered.connect(self._toggle_plots_tab)
+        view_menu.addAction(self.show_plots_action)
+        
+        # Rumors tab
+        self.show_rumors_action = QAction("&Rumors", self)
+        self.show_rumors_action.setCheckable(True)
+        self.show_rumors_action.setChecked(False)  # Default to hidden
+        self.show_rumors_action.triggered.connect(self._toggle_rumors_tab)
+        view_menu.addAction(self.show_rumors_action)
+        
+        game_menu.addSeparator()
+        
         self.dice_roller_action = QAction("&Dice Roller", self)
         game_menu.addAction(self.dice_roller_action)
-        
-        self.combat_tracker_action = QAction("&Combat Tracker", self)
-        game_menu.addAction(self.combat_tracker_action)
         
         # Players menu (new)
         players_menu = menubar.addMenu("&Players")
@@ -126,20 +141,11 @@ class MainWindow(QMainWindow):
         self.player_manager_action = QAction("&Player Manager", self)
         players_menu.addAction(self.player_manager_action)
         
-        self.player_notes_action = QAction("Player &Notes", self)
-        players_menu.addAction(self.player_notes_action)
-        
         # World menu (new)
         world_menu = menubar.addMenu("&World")
         
         self.locations_action = QAction("&Locations", self)
         world_menu.addAction(self.locations_action)
-        
-        self.npcs_action = QAction("&NPCs", self)
-        world_menu.addAction(self.npcs_action)
-        
-        self.factions_action = QAction("&Factions", self)
-        world_menu.addAction(self.factions_action)
         
         # Chronicle menu
         chronicle_menu = menubar.addMenu("&Chronicle")
@@ -147,20 +153,11 @@ class MainWindow(QMainWindow):
         self.new_chronicle_action = QAction("New &Chronicle", self)
         chronicle_menu.addAction(self.new_chronicle_action)
         
-        self.open_chronicle_action = QAction("&Open Chronicle", self)
-        chronicle_menu.addAction(self.open_chronicle_action)
-        
         # Tools menu
         tools_menu = menubar.addMenu("&Tools")
         
         self.experience_action = QAction("&Experience Points", self)
         tools_menu.addAction(self.experience_action)
-        
-        self.plots_action = QAction("&Plots", self)
-        tools_menu.addAction(self.plots_action)
-        
-        self.rumors_action = QAction("&Rumors", self)
-        tools_menu.addAction(self.rumors_action)
         
         # Sheets and Reports menu (new)
         reports_menu = menubar.addMenu("&Sheets && Reports")
@@ -168,39 +165,27 @@ class MainWindow(QMainWindow):
         self.character_sheet_action = QAction("&Character Sheet", self)
         reports_menu.addAction(self.character_sheet_action)
         
-        self.experience_report_action = QAction("&Experience Report", self)
-        reports_menu.addAction(self.experience_report_action)
-        
-        self.chronicle_report_action = QAction("&Chronicle Report", self)
-        reports_menu.addAction(self.chronicle_report_action)
-        
         # Help menu
         help_menu = menubar.addMenu("&Help")
         
         self.about_action = QAction("&About", self)
+        self.about_action.triggered.connect(self._show_about)
         help_menu.addAction(self.about_action)
         
     def _create_tool_bar(self) -> None:
-        """Create and populate the main toolbar."""
+        """Create the application toolbar."""
         toolbar = QToolBar()
         self.addToolBar(toolbar)
         
-        # Add quick access buttons
-        new_char = QPushButton("New Character")
-        new_char.clicked.connect(self._on_new_character)
-        toolbar.addWidget(new_char)
+        # Add toolbar actions
+        self.refresh_action = QAction("Refresh", self)
+        self.refresh_action.setToolTip("Refresh the character list")
+        toolbar.addAction(self.refresh_action)
         
-        open_char = QPushButton("Open Character")
-        toolbar.addWidget(open_char)
-        
-        experience = QPushButton("Experience")
-        toolbar.addWidget(experience)
-        
-        toolbar.addSeparator()
-        
-        refresh = QPushButton("Refresh")
-        refresh.clicked.connect(self._refresh_characters)
-        toolbar.addWidget(refresh)
+        # Add spacer
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        toolbar.addWidget(spacer)
         
     def _create_status_bar(self) -> None:
         """Create and configure the status bar."""
@@ -226,28 +211,36 @@ class MainWindow(QMainWindow):
         self.character_list.new_button.clicked.connect(self._on_new_character)
         self.characters_layout.addWidget(self.character_list)
         
-        self.tabs.addTab(self.characters_widget, "Characters")
+        self.characters_tab_index = self.tabs.addTab(self.characters_widget, "Characters")
         
-        # Chronicle tab
+        # Chronicle, Plots, and Rumors tabs are not shown by default
+        # They can be opened from the menu when needed
+        
+        # Create widgets for other tabs so they can be added later
+        self._create_chronicle_widget()
+        self._create_plots_widget()
+        self._create_rumors_widget()
+        
+    def _create_chronicle_widget(self) -> None:
+        """Create the Chronicle tab widget."""
         self.chronicle_widget = QWidget()
         self.chronicle_layout = QVBoxLayout(self.chronicle_widget)
         self.chronicle_label = QLabel("No chronicle loaded")
         self.chronicle_layout.addWidget(self.chronicle_label)
-        self.tabs.addTab(self.chronicle_widget, "Chronicle")
         
-        # Plots tab
+    def _create_plots_widget(self) -> None:
+        """Create the Plots tab widget."""
         self.plots_widget = QWidget()
         self.plots_layout = QVBoxLayout(self.plots_widget)
         self.plots_label = QLabel("No plots available")
         self.plots_layout.addWidget(self.plots_label)
-        self.tabs.addTab(self.plots_widget, "Plots")
         
-        # Rumors tab
+    def _create_rumors_widget(self) -> None:
+        """Create the Rumors tab widget."""
         self.rumors_widget = QWidget()
         self.rumors_layout = QVBoxLayout(self.rumors_widget)
         self.rumors_label = QLabel("No rumors available")
         self.rumors_layout.addWidget(self.rumors_label)
-        self.tabs.addTab(self.rumors_widget, "Rumors")
         
     def _refresh_characters(self) -> None:
         """Refresh the character list."""
@@ -405,6 +398,10 @@ class MainWindow(QMainWindow):
         Args:
             index: Index of the tab to close
         """
+        # Don't close the main characters tab
+        if index == self.characters_tab_index:
+            return
+            
         # Check if this is a character sheet tab
         for character_id, tab_index in list(self.open_character_sheets.items()):
             if tab_index == index:
@@ -415,6 +412,11 @@ class MainWindow(QMainWindow):
         # Close the tab
         self.tabs.removeTab(index)
         
+        # Update tab indices for other character sheets
+        for character_id, tab_index in list(self.open_character_sheets.items()):
+            if tab_index > index:
+                self.open_character_sheets[character_id] = tab_index - 1
+            
     def _delete_character(self, character_id: int) -> None:
         """Delete a character.
         
@@ -564,4 +566,103 @@ class MainWindow(QMainWindow):
         for tab_index in range(self.tabs.count()):
             widget = self.tabs.widget(tab_index)
             if hasattr(widget, 'refresh'):
-                widget.refresh() 
+                widget.refresh()
+                
+    def _toggle_characters_tab(self) -> None:
+        """Toggle the visibility of the characters tab."""
+        # If the tab is not currently displayed, add it
+        if not self._is_tab_open(self.characters_widget):
+            self.characters_tab_index = self.tabs.addTab(self.characters_widget, "Characters")
+            self.tabs.setCurrentIndex(self.characters_tab_index)
+        else:
+            # Tab exists, but we don't want to hide the last main tab
+            # So just ignore unchecking if it's the only open tab
+            has_other_main_tabs = self._count_main_tabs() > 1
+            if not self.show_characters_action.isChecked() and has_other_main_tabs:
+                # Close the tab
+                index = self.tabs.indexOf(self.characters_widget)
+                self.tabs.removeTab(index)
+            else:
+                # Re-check the action since we're not allowing it to be unchecked
+                self.show_characters_action.setChecked(True)
+                
+    def _toggle_chronicle_tab(self) -> None:
+        """Toggle the visibility of the chronicle tab."""
+        if self.show_chronicle_action.isChecked():
+            # Add the tab if it doesn't exist
+            if not self._is_tab_open(self.chronicle_widget):
+                index = self.tabs.addTab(self.chronicle_widget, "Chronicle")
+                self.tabs.setCurrentIndex(index)
+        else:
+            # Remove the tab if it exists
+            if self._is_tab_open(self.chronicle_widget):
+                index = self.tabs.indexOf(self.chronicle_widget)
+                self.tabs.removeTab(index)
+                
+    def _toggle_plots_tab(self) -> None:
+        """Toggle the visibility of the plots tab."""
+        if self.show_plots_action.isChecked():
+            # Add the tab if it doesn't exist
+            if not self._is_tab_open(self.plots_widget):
+                index = self.tabs.addTab(self.plots_widget, "Plots")
+                self.tabs.setCurrentIndex(index)
+        else:
+            # Remove the tab if it exists
+            if self._is_tab_open(self.plots_widget):
+                index = self.tabs.indexOf(self.plots_widget)
+                self.tabs.removeTab(index)
+                
+    def _toggle_rumors_tab(self) -> None:
+        """Toggle the visibility of the rumors tab."""
+        if self.show_rumors_action.isChecked():
+            # Add the tab if it doesn't exist
+            if not self._is_tab_open(self.rumors_widget):
+                index = self.tabs.addTab(self.rumors_widget, "Rumors")
+                self.tabs.setCurrentIndex(index)
+        else:
+            # Remove the tab if it exists
+            if self._is_tab_open(self.rumors_widget):
+                index = self.tabs.indexOf(self.rumors_widget)
+                self.tabs.removeTab(index)
+                
+    def _is_tab_open(self, widget: QWidget) -> bool:
+        """Check if a tab containing the given widget is open.
+        
+        Args:
+            widget: Widget to check for
+            
+        Returns:
+            True if the tab is open, False otherwise
+        """
+        for i in range(self.tabs.count()):
+            if self.tabs.widget(i) == widget:
+                return True
+        return False
+        
+    def _count_main_tabs(self) -> int:
+        """Count the number of main application tabs (not character sheets).
+        
+        Returns:
+            Number of main tabs
+        """
+        main_widgets = [
+            self.characters_widget,
+            self.chronicle_widget,
+            self.plots_widget,
+            self.rumors_widget
+        ]
+        
+        count = 0
+        for i in range(self.tabs.count()):
+            if self.tabs.widget(i) in main_widgets:
+                count += 1
+                
+        return count
+        
+    def _show_about(self) -> None:
+        """Show the about dialog."""
+        QMessageBox.information(
+            self,
+            "About Coterie",
+            "Coterie v0.1\n\nA character and chronicle management system for Mind's Eye Theater LARP."
+        ) 
