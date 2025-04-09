@@ -11,15 +11,18 @@ from sqlalchemy.orm import Session
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QTabWidget, QMenuBar, QStatusBar, QToolBar,
-    QPushButton, QLabel, QMessageBox, QApplication, QSizePolicy
+    QPushButton, QLabel, QMessageBox, QApplication, QSizePolicy,
+    QListWidget, QListWidgetItem
 )
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtCore import Qt
 
-from coterie.database.engine import get_session
+from coterie.database.engine import get_session, init_db
 from coterie.models.base import Character
 from coterie.models.vampire import Vampire
+from coterie.models.chronicle import Chronicle
 from coterie.ui.dialogs.character_creation import CharacterCreationDialog
+from coterie.ui.dialogs.chronicle_creation import ChronicleCreationDialog
 from coterie.ui.dialogs.data_manager_dialog import DataManagerDialog
 from coterie.ui.widgets.character_list_widget import CharacterListWidget
 from coterie.ui.sheets.vampire_sheet import VampireSheet
@@ -41,6 +44,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Coterie v0.1")
         self.setMinimumSize(1024, 768)
         
+        # Initialize database schema
+        init_db()
+        
         # Create the central widget and layout
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -48,6 +54,9 @@ class MainWindow(QMainWindow):
         
         # Character sheet references
         self.open_character_sheets = {}  # id -> tab index
+        
+        # Active chronicle
+        self.active_chronicle = None
         
         # Create UI components
         self._create_menu_bar()
@@ -62,10 +71,14 @@ class MainWindow(QMainWindow):
         # Connect signals for Data menu
         self.data_manager_action.triggered.connect(self._show_data_manager)
         
+        # Connect signals for Chronicle menu
+        self.new_chronicle_action.triggered.connect(self._on_new_chronicle)
+        
         # Connect signals for toolbar
         self.refresh_action.triggered.connect(self._refresh_characters)
         
-        # Initial load of characters
+        # Initial load of chronicles and characters
+        self._refresh_chronicles()
         self._refresh_characters()
         
     def _create_menu_bar(self) -> None:
@@ -90,67 +103,52 @@ class MainWindow(QMainWindow):
         self.preferences_action = QAction("&Preferences", self)
         edit_menu.addAction(self.preferences_action)
         
-        # Data menu (new)
+        # Data menu
         data_menu = menubar.addMenu("&Data")
         
         self.data_manager_action = QAction("&Data Manager", self)
         data_menu.addAction(self.data_manager_action)
         
-        # Game menu (new)
+        # Game menu - Add Character List option here
         game_menu = menubar.addMenu("&Game")
         
-        # Add view submenu for tabs
-        view_menu = game_menu.addMenu("&View")
-        
-        # Characters tab
+        # Characters tab option
         self.show_characters_action = QAction("&Characters", self)
-        self.show_characters_action.setCheckable(True)
-        self.show_characters_action.setChecked(True)  # Default to visible
         self.show_characters_action.triggered.connect(self._toggle_characters_tab)
-        view_menu.addAction(self.show_characters_action)
+        game_menu.addAction(self.show_characters_action)
         
-        # Chronicle tab
-        self.show_chronicle_action = QAction("&Chronicle", self)
-        self.show_chronicle_action.setCheckable(True)
-        self.show_chronicle_action.setChecked(False)  # Default to hidden
-        self.show_chronicle_action.triggered.connect(self._toggle_chronicle_tab)
-        view_menu.addAction(self.show_chronicle_action)
-        
-        # Plots tab
-        self.show_plots_action = QAction("&Plots", self)
-        self.show_plots_action.setCheckable(True)
-        self.show_plots_action.setChecked(False)  # Default to hidden
-        self.show_plots_action.triggered.connect(self._toggle_plots_tab)
-        view_menu.addAction(self.show_plots_action)
-        
-        # Rumors tab
-        self.show_rumors_action = QAction("&Rumors", self)
-        self.show_rumors_action.setCheckable(True)
-        self.show_rumors_action.setChecked(False)  # Default to hidden
-        self.show_rumors_action.triggered.connect(self._toggle_rumors_tab)
-        view_menu.addAction(self.show_rumors_action)
-        
-        game_menu.addSeparator()
-        
-        self.dice_roller_action = QAction("&Dice Roller", self)
-        game_menu.addAction(self.dice_roller_action)
-        
-        # Players menu (new)
+        # Players menu
         players_menu = menubar.addMenu("&Players")
         
         self.player_manager_action = QAction("&Player Manager", self)
         players_menu.addAction(self.player_manager_action)
         
-        # World menu (new)
+        # World menu - Add Plots and Rumors options here
         world_menu = menubar.addMenu("&World")
+        
+        # Plots tab option
+        self.show_plots_action = QAction("&Plots", self)
+        self.show_plots_action.triggered.connect(self._toggle_plots_tab)
+        world_menu.addAction(self.show_plots_action)
+        
+        # Rumors tab option
+        self.show_rumors_action = QAction("&Rumors", self)
+        self.show_rumors_action.triggered.connect(self._toggle_rumors_tab)
+        world_menu.addAction(self.show_rumors_action)
         
         self.locations_action = QAction("&Locations", self)
         world_menu.addAction(self.locations_action)
         
-        # Chronicle menu
+        # Chronicle menu - Add Chronicle tab option here
         chronicle_menu = menubar.addMenu("&Chronicle")
         
-        self.new_chronicle_action = QAction("New &Chronicle", self)
+        # Chronicle tab option
+        self.show_chronicle_action = QAction("&Chronicle Manager", self)
+        self.show_chronicle_action.triggered.connect(self._toggle_chronicle_tab)
+        chronicle_menu.addAction(self.show_chronicle_action)
+        
+        self.new_chronicle_action = QAction("&New Chronicle", self)
+        self.new_chronicle_action.triggered.connect(self._on_new_chronicle)
         chronicle_menu.addAction(self.new_chronicle_action)
         
         # Tools menu
@@ -159,7 +157,7 @@ class MainWindow(QMainWindow):
         self.experience_action = QAction("&Experience Points", self)
         tools_menu.addAction(self.experience_action)
         
-        # Sheets and Reports menu (new)
+        # Sheets and Reports menu
         reports_menu = menubar.addMenu("&Sheets && Reports")
         
         self.character_sheet_action = QAction("&Character Sheet", self)
@@ -200,7 +198,19 @@ class MainWindow(QMainWindow):
         self.tabs.tabCloseRequested.connect(self._close_tab)
         self.layout.addWidget(self.tabs)
         
-        # Characters tab
+        # Create the Characters widget
+        self._create_characters_widget()
+        
+        # Create the Chronicle widget and add it as the default tab
+        self._create_chronicle_widget()
+        self.tabs.addTab(self.chronicle_widget, "Chronicle")
+        
+        # Create other tabs that can be added later
+        self._create_plots_widget()
+        self._create_rumors_widget()
+        
+    def _create_characters_widget(self) -> None:
+        """Create the Characters tab widget."""
         self.characters_widget = QWidget()
         self.characters_layout = QVBoxLayout(self.characters_widget)
         
@@ -211,36 +221,219 @@ class MainWindow(QMainWindow):
         self.character_list.new_button.clicked.connect(self._on_new_character)
         self.characters_layout.addWidget(self.character_list)
         
-        self.characters_tab_index = self.tabs.addTab(self.characters_widget, "Characters")
-        
-        # Chronicle, Plots, and Rumors tabs are not shown by default
-        # They can be opened from the menu when needed
-        
-        # Create widgets for other tabs so they can be added later
-        self._create_chronicle_widget()
-        self._create_plots_widget()
-        self._create_rumors_widget()
-        
     def _create_chronicle_widget(self) -> None:
         """Create the Chronicle tab widget."""
         self.chronicle_widget = QWidget()
         self.chronicle_layout = QVBoxLayout(self.chronicle_widget)
-        self.chronicle_label = QLabel("No chronicle loaded")
-        self.chronicle_layout.addWidget(self.chronicle_label)
         
+        # Add a heading
+        heading_label = QLabel("Chronicle Management")
+        heading_label.setStyleSheet("font-size: 16pt; font-weight: bold;")
+        self.chronicle_layout.addWidget(heading_label)
+        
+        # Create a list widget for chronicles
+        self.chronicle_list = QListWidget()
+        self.chronicle_list.setMinimumHeight(200)
+        self.chronicle_list.itemDoubleClicked.connect(self._set_active_chronicle)
+        self.chronicle_layout.addWidget(self.chronicle_list)
+        
+        # Add placeholder for chronicle list when empty
+        self.chronicles_placeholder = QLabel("No Chronicles Found")
+        self.chronicles_placeholder.setStyleSheet("color: gray; margin-top: 20px;")
+        self.chronicles_placeholder.setVisible(False)
+        self.chronicle_layout.addWidget(self.chronicles_placeholder)
+        
+        # Add button for creating a new chronicle
+        new_chronicle_button = QPushButton("Create New Chronicle")
+        new_chronicle_button.setMinimumHeight(40)
+        new_chronicle_button.clicked.connect(self._on_new_chronicle)
+        self.chronicle_layout.addWidget(new_chronicle_button)
+        
+        # Add stretch to push everything up
+        self.chronicle_layout.addStretch()
+        
+    def _refresh_chronicles(self) -> None:
+        """Refresh the list of chronicles."""
+        try:
+            session = get_session()
+            try:
+                # Fetch all chronicles
+                chronicles = session.query(Chronicle).all()
+                
+                # Clear the list
+                self.chronicle_list.clear()
+                
+                # Add chronicles to the list
+                for chronicle in chronicles:
+                    item = QListWidgetItem(f"{chronicle.name} (Narrator: {chronicle.narrator})")
+                    item.setData(Qt.ItemDataRole.UserRole, chronicle.id)
+                    
+                    # Make active chronicle bold
+                    if self.active_chronicle and self.active_chronicle.id == chronicle.id:
+                        font = item.font()
+                        font.setBold(True)
+                        item.setFont(font)
+                        
+                    self.chronicle_list.addItem(item)
+                
+                # Show placeholder if no chronicles
+                if not chronicles:
+                    self.chronicles_placeholder.setVisible(True)
+                    self.chronicle_list.setVisible(False)
+                else:
+                    self.chronicles_placeholder.setVisible(False)
+                    self.chronicle_list.setVisible(True)
+                    
+                self.status_bar.showMessage(f"Loaded {len(chronicles)} chronicles")
+            finally:
+                session.close()
+        except Exception as e:
+            error_msg = f"Failed to load chronicles: {str(e)}"
+            logger.error(error_msg)
+            QMessageBox.critical(self, "Error", error_msg)
+        
+    def _on_new_chronicle(self) -> None:
+        """Show the dialog for creating a new chronicle."""
+        dialog = ChronicleCreationDialog(self)
+        dialog.chronicle_created.connect(self._create_chronicle)
+        dialog.exec()
+        
+    def _create_chronicle(self, data: Dict[str, Any]) -> None:
+        """Create a new chronicle in the database.
+        
+        Args:
+            data: Dictionary containing chronicle data
+        """
+        try:
+            session = get_session()
+            
+            # Create a new Chronicle object
+            chronicle = Chronicle(
+                name=data["name"],
+                narrator=data["narrator"],
+                description=data.get("description", ""),
+                start_date=data["start_date"],
+                last_modified=data["last_modified"],
+                is_active=data["is_active"]
+            )
+            
+            # Add to database
+            session.add(chronicle)
+            session.commit()
+            
+            # Set as active chronicle
+            self.active_chronicle = chronicle
+            
+            # Refresh the chronicle list
+            self._refresh_chronicles()
+            
+            # Show success message
+            self.status_bar.showMessage(f"Created new chronicle: {data['name']}")
+            logger.info(f"Created new chronicle: {data['name']}")
+            
+        except Exception as e:
+            error_msg = f"Failed to create chronicle: {str(e)}"
+            logger.error(error_msg)
+            QMessageBox.critical(self, "Error", error_msg)
+            if session:
+                session.rollback()
+        finally:
+            session.close()
+            
+    def _set_active_chronicle(self, item: QListWidgetItem) -> None:
+        """Set the active chronicle.
+        
+        Args:
+            item: The QListWidgetItem for the chronicle
+        """
+        chronicle_id = item.data(Qt.ItemDataRole.UserRole)
+        
+        try:
+            session = get_session()
+            
+            # Fetch the chronicle
+            chronicle = session.query(Chronicle).filter_by(id=chronicle_id).first()
+            
+            if not chronicle:
+                QMessageBox.warning(self, "Warning", "Chronicle not found.")
+                return
+                
+            # Set as active chronicle
+            self.active_chronicle = chronicle
+            
+            # Refresh the chronicle list to update display
+            session.close()
+            self._refresh_chronicles()
+            
+            # Show success message
+            self.status_bar.showMessage(f"Active chronicle: {chronicle.name}")
+            logger.info(f"Set active chronicle: {chronicle.name}")
+            
+        except Exception as e:
+            error_msg = f"Failed to set active chronicle: {str(e)}"
+            logger.error(error_msg)
+            QMessageBox.critical(self, "Error", error_msg)
+        finally:
+            if session:
+                session.close()
+    
     def _create_plots_widget(self) -> None:
         """Create the Plots tab widget."""
         self.plots_widget = QWidget()
         self.plots_layout = QVBoxLayout(self.plots_widget)
-        self.plots_label = QLabel("No plots available")
-        self.plots_layout.addWidget(self.plots_label)
+        
+        # Add a heading
+        heading_label = QLabel("Plots Management")
+        heading_label.setStyleSheet("font-size: 16pt; font-weight: bold;")
+        self.plots_layout.addWidget(heading_label)
+        
+        # Add explanation label
+        info_label = QLabel(
+            "Plots are story elements that drive your chronicle forward. "
+            "Create and manage plots to track your chronicle's storylines."
+        )
+        info_label.setWordWrap(True)
+        self.plots_layout.addWidget(info_label)
+        
+        # Add button for creating a new plot
+        new_plot_button = QPushButton("Create New Plot")
+        new_plot_button.setMinimumHeight(40)
+        self.plots_layout.addWidget(new_plot_button)
+        
+        # Add placeholder for plot list
+        self.plots_layout.addWidget(QLabel("No plots available yet"))
+        
+        # Add stretch to push everything up
+        self.plots_layout.addStretch()
         
     def _create_rumors_widget(self) -> None:
         """Create the Rumors tab widget."""
         self.rumors_widget = QWidget()
         self.rumors_layout = QVBoxLayout(self.rumors_widget)
-        self.rumors_label = QLabel("No rumors available")
-        self.rumors_layout.addWidget(self.rumors_label)
+        
+        # Add a heading
+        heading_label = QLabel("Rumors Management")
+        heading_label.setStyleSheet("font-size: 16pt; font-weight: bold;")
+        self.rumors_layout.addWidget(heading_label)
+        
+        # Add explanation label
+        info_label = QLabel(
+            "Rumors are pieces of information that characters can learn in the game. "
+            "Create and manage rumors to enhance your chronicle's intrigue."
+        )
+        info_label.setWordWrap(True)
+        self.rumors_layout.addWidget(info_label)
+        
+        # Add button for creating a new rumor
+        new_rumor_button = QPushButton("Create New Rumor")
+        new_rumor_button.setMinimumHeight(40)
+        self.rumors_layout.addWidget(new_rumor_button)
+        
+        # Add placeholder for rumor list
+        self.rumors_layout.addWidget(QLabel("No rumors available yet"))
+        
+        # Add stretch to push everything up
+        self.rumors_layout.addStretch()
         
     def _refresh_characters(self) -> None:
         """Refresh the character list."""
@@ -306,6 +499,10 @@ class MainWindow(QMainWindow):
                     last_modified=datetime.now()
                 )
                 
+                # Assign to active chronicle if available
+                if self.active_chronicle:
+                    character.chronicle_id = self.active_chronicle.id
+                
                 # Add to database and commit
                 session.add(character)
                 session.commit()
@@ -320,8 +517,13 @@ class MainWindow(QMainWindow):
                 # Open the new character using the prepared object
                 self._open_character(prepared_character, use_existing_object=True)
                 
-                self.status_bar.showMessage(f"Created new Vampire character: {data['name']}")
-                logger.info(f"Created new Vampire character: {data['name']}")
+                # Create status message
+                message = f"Created new Vampire character: {data['name']}"
+                if self.active_chronicle:
+                    message += f" in chronicle {self.active_chronicle.name}"
+                    
+                self.status_bar.showMessage(message)
+                logger.info(message)
                 
             else:
                 # Handle other character types
@@ -398,25 +600,21 @@ class MainWindow(QMainWindow):
         Args:
             index: Index of the tab to close
         """
-        # Don't close the main characters tab
-        if index == self.characters_tab_index:
-            return
-            
         # Check if this is a character sheet tab
         for character_id, tab_index in list(self.open_character_sheets.items()):
             if tab_index == index:
                 # Remove reference
                 del self.open_character_sheets[character_id]
+                
+                # Update tab indices for other character sheets
+                for other_id, other_index in list(self.open_character_sheets.items()):
+                    if other_index > index:
+                        self.open_character_sheets[other_id] = other_index - 1
                 break
                 
         # Close the tab
         self.tabs.removeTab(index)
         
-        # Update tab indices for other character sheets
-        for character_id, tab_index in list(self.open_character_sheets.items()):
-            if tab_index > index:
-                self.open_character_sheets[character_id] = tab_index - 1
-            
     def _delete_character(self, character_id: int) -> None:
         """Delete a character.
         
@@ -570,60 +768,50 @@ class MainWindow(QMainWindow):
                 
     def _toggle_characters_tab(self) -> None:
         """Toggle the visibility of the characters tab."""
-        # If the tab is not currently displayed, add it
-        if not self._is_tab_open(self.characters_widget):
-            self.characters_tab_index = self.tabs.addTab(self.characters_widget, "Characters")
-            self.tabs.setCurrentIndex(self.characters_tab_index)
+        if self._is_tab_open(self.characters_widget):
+            # If already open, close it
+            index = self.tabs.indexOf(self.characters_widget)
+            self.tabs.removeTab(index)
         else:
-            # Tab exists, but we don't want to hide the last main tab
-            # So just ignore unchecking if it's the only open tab
-            has_other_main_tabs = self._count_main_tabs() > 1
-            if not self.show_characters_action.isChecked() and has_other_main_tabs:
-                # Close the tab
-                index = self.tabs.indexOf(self.characters_widget)
-                self.tabs.removeTab(index)
-            else:
-                # Re-check the action since we're not allowing it to be unchecked
-                self.show_characters_action.setChecked(True)
+            # Add the tab
+            index = self.tabs.addTab(self.characters_widget, "Characters")
+            self.tabs.setCurrentIndex(index)
+            
+            # Refresh the character list when showing the tab
+            self._refresh_characters()
                 
     def _toggle_chronicle_tab(self) -> None:
         """Toggle the visibility of the chronicle tab."""
-        if self.show_chronicle_action.isChecked():
-            # Add the tab if it doesn't exist
-            if not self._is_tab_open(self.chronicle_widget):
-                index = self.tabs.addTab(self.chronicle_widget, "Chronicle")
-                self.tabs.setCurrentIndex(index)
+        if self._is_tab_open(self.chronicle_widget):
+            # If already open, close it
+            index = self.tabs.indexOf(self.chronicle_widget)
+            self.tabs.removeTab(index)
         else:
-            # Remove the tab if it exists
-            if self._is_tab_open(self.chronicle_widget):
-                index = self.tabs.indexOf(self.chronicle_widget)
-                self.tabs.removeTab(index)
+            # Add the tab
+            index = self.tabs.addTab(self.chronicle_widget, "Chronicle")
+            self.tabs.setCurrentIndex(index)
                 
     def _toggle_plots_tab(self) -> None:
         """Toggle the visibility of the plots tab."""
-        if self.show_plots_action.isChecked():
-            # Add the tab if it doesn't exist
-            if not self._is_tab_open(self.plots_widget):
-                index = self.tabs.addTab(self.plots_widget, "Plots")
-                self.tabs.setCurrentIndex(index)
+        if self._is_tab_open(self.plots_widget):
+            # If already open, close it
+            index = self.tabs.indexOf(self.plots_widget)
+            self.tabs.removeTab(index)
         else:
-            # Remove the tab if it exists
-            if self._is_tab_open(self.plots_widget):
-                index = self.tabs.indexOf(self.plots_widget)
-                self.tabs.removeTab(index)
+            # Add the tab
+            index = self.tabs.addTab(self.plots_widget, "Plots")
+            self.tabs.setCurrentIndex(index)
                 
     def _toggle_rumors_tab(self) -> None:
         """Toggle the visibility of the rumors tab."""
-        if self.show_rumors_action.isChecked():
-            # Add the tab if it doesn't exist
-            if not self._is_tab_open(self.rumors_widget):
-                index = self.tabs.addTab(self.rumors_widget, "Rumors")
-                self.tabs.setCurrentIndex(index)
+        if self._is_tab_open(self.rumors_widget):
+            # If already open, close it
+            index = self.tabs.indexOf(self.rumors_widget)
+            self.tabs.removeTab(index)
         else:
-            # Remove the tab if it exists
-            if self._is_tab_open(self.rumors_widget):
-                index = self.tabs.indexOf(self.rumors_widget)
-                self.tabs.removeTab(index)
+            # Add the tab
+            index = self.tabs.addTab(self.rumors_widget, "Rumors")
+            self.tabs.setCurrentIndex(index)
                 
     def _is_tab_open(self, widget: QWidget) -> bool:
         """Check if a tab containing the given widget is open.

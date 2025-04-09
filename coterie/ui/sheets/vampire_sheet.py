@@ -78,6 +78,19 @@ class VampireSheet(QWidget):
         self.player.textChanged.connect(lambda: self.modified.emit())
         info_layout.addRow("Player:", self.player)
         
+        # Chronicle section
+        chronicle_layout = QHBoxLayout()
+        self.chronicle_name = QLineEdit()
+        self.chronicle_name.setReadOnly(True)  # Chronicle name is read-only
+        chronicle_layout.addWidget(self.chronicle_name)
+        
+        # Add button to assign a chronicle
+        self.assign_chronicle_button = QPushButton("Assign")
+        self.assign_chronicle_button.clicked.connect(self._on_assign_chronicle)
+        chronicle_layout.addWidget(self.assign_chronicle_button)
+        
+        info_layout.addRow("Chronicle:", chronicle_layout)
+        
         # Nature and Demeanor
         self.nature = QLineEdit()
         self.nature.textChanged.connect(lambda: self.modified.emit())
@@ -103,6 +116,73 @@ class VampireSheet(QWidget):
         self.sect = QLineEdit()
         self.sect.textChanged.connect(lambda: self.modified.emit())
         info_layout.addRow("Sect:", self.sect)
+        
+    def _on_assign_chronicle(self) -> None:
+        """Show dialog to assign the character to a chronicle."""
+        from PyQt6.QtWidgets import QDialog, QVBoxLayout, QListWidget, QDialogButtonBox, QLabel, QListWidgetItem
+        from PyQt6.QtCore import Qt
+        from coterie.database.engine import get_session
+        from coterie.models.chronicle import Chronicle
+        
+        # Create a dialog
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Assign Chronicle")
+        dialog.setMinimumWidth(400)
+        
+        # Create layout
+        layout = QVBoxLayout(dialog)
+        
+        # Add label
+        layout.addWidget(QLabel("Select a chronicle to assign this character to:"))
+        
+        # Add list widget
+        chronicle_list = QListWidget()
+        layout.addWidget(chronicle_list)
+        
+        # Add buttons
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        button_box.accepted.connect(dialog.accept)
+        button_box.rejected.connect(dialog.reject)
+        layout.addWidget(button_box)
+        
+        # Get chronicles from database
+        session = get_session()
+        try:
+            chronicles = session.query(Chronicle).all()
+            
+            # Add chronicles to list
+            for chronicle in chronicles:
+                item = QListWidgetItem(f"{chronicle.name} (HST: {chronicle.narrator})")
+                item.setData(Qt.ItemDataRole.UserRole, chronicle.id)
+                chronicle_list.addItem(item)
+                
+                # Pre-select the current chronicle if set
+                if self.character and self.character.chronicle_id == chronicle.id:
+                    chronicle_list.setCurrentItem(item)
+                    
+        finally:
+            session.close()
+            
+        # Show dialog
+        if dialog.exec() == QDialog.DialogCode.Accepted and chronicle_list.currentItem():
+            chronicle_id = chronicle_list.currentItem().data(Qt.ItemDataRole.UserRole)
+            
+            # Update the character's chronicle
+            if self.character:
+                session = get_session()
+                try:
+                    self.character.chronicle_id = chronicle_id
+                    session.add(self.character)
+                    session.commit()
+                    
+                    # Update the displayed chronicle name
+                    chronicle = session.query(Chronicle).filter_by(id=chronicle_id).first()
+                    if chronicle:
+                        self.chronicle_name.setText(chronicle.name)
+                        
+                    self.modified.emit()
+                finally:
+                    session.close()
         
     def _create_attributes_section(self, parent_layout: QVBoxLayout) -> None:
         """Create the attributes section.
@@ -286,11 +366,17 @@ class VampireSheet(QWidget):
         Args:
             character: The vampire character to display
         """
+        # Store reference to the character
+        self.character = character
+        
         # Basic information
         self.name.setText(character.name)
         self.player.setText(character.player)
         self.nature.setText(character.nature)
         self.demeanor.setText(character.demeanor)
+        
+        # Chronicle information
+        self._load_chronicle_info(character)
         
         # Vampire-specific information
         self.clan.setText(character.clan)
@@ -320,6 +406,29 @@ class VampireSheet(QWidget):
         
         self.blood.set_value(character.blood)
         self.blood.set_temp_value(character.temp_blood)
+        
+    def _load_chronicle_info(self, character: Vampire) -> None:
+        """Load the character's chronicle information.
+        
+        Args:
+            character: Vampire character to load chronicle info from
+        """
+        if character.chronicle_id:
+            # Get the chronicle from the database
+            from coterie.database.engine import get_session
+            from coterie.models.chronicle import Chronicle
+            
+            session = get_session()
+            try:
+                chronicle = session.query(Chronicle).filter_by(id=character.chronicle_id).first()
+                if chronicle:
+                    self.chronicle_name.setText(chronicle.name)
+                else:
+                    self.chronicle_name.setText("Unknown Chronicle")
+            finally:
+                session.close()
+        else:
+            self.chronicle_name.setText("No Chronicle Assigned")
         
     def _load_larp_traits(self, character: Vampire) -> None:
         """Load LARP traits into appropriate widgets by category.
@@ -447,6 +556,9 @@ class VampireSheet(QWidget):
             "clan": self.clan.text(),
             "generation": self.generation.value(),
             "sect": self.sect.text(),
+            
+            # Chronicle information
+            "chronicle_id": self.character.chronicle_id if hasattr(self.character, 'chronicle_id') else None,
             
             # Virtues and Path
             "conscience": self.conscience.get_value(),

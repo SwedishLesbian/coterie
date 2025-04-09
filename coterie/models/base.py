@@ -23,6 +23,9 @@ class Character(Base):
     biography: Mapped[Optional[str]] = mapped_column(String)
     notes: Mapped[Optional[str]] = mapped_column(String)
     
+    # Chronicle relationship
+    chronicle_id: Mapped[Optional[int]] = mapped_column(ForeignKey("chronicles.id"), nullable=True)
+    
     # Common attributes
     willpower: Mapped[int] = mapped_column(Integer, default=0)
     temp_willpower: Mapped[int] = mapped_column(Integer, default=0)
@@ -46,6 +49,12 @@ class Character(Base):
         "LarpTrait",
         back_populates="character",
         cascade="all, delete-orphan"
+    )
+    
+    # Chronicle relationship
+    chronicle: Mapped[Optional["Chronicle"]] = relationship(
+        "Chronicle",
+        back_populates="characters"
     )
     
     __mapper_args__ = {
