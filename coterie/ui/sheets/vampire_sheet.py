@@ -1,7 +1,8 @@
 """Vampire character sheet display for Coterie.
 
 This module implements the character sheet interface for Vampire: The Masquerade
-characters, displaying all relevant attributes, abilities, and other traits.
+characters, displaying all relevant attributes, abilities, and other traits using
+the Mind's Eye Theater LARP adjective-based trait system.
 """
 
 from typing import Optional, List, Dict
@@ -14,17 +15,13 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 
-from coterie.models.vampire import Vampire, Discipline, Ritual, Bond
-from coterie.models.base import Trait
+from coterie.models.vampire import Vampire
 from coterie.models.larp_trait import LarpTrait, TraitCategory
 from coterie.utils.data_loader import DataLoader
-from coterie.ui.widgets.trait_group_widget import TraitGroupWidget
-from coterie.ui.widgets.trait_widget import TraitWidget
 from coterie.ui.widgets.larp_trait_widget import LarpTraitWidget, LarpTraitCategoryWidget
-from coterie.utils.trait_converter import TraitConverter
 
 class VampireSheet(QWidget):
-    """Character sheet display for Vampire: The Masquerade characters."""
+    """Character sheet display for Vampire: The Masquerade LARP characters."""
     
     modified = pyqtSignal()
     
@@ -116,6 +113,11 @@ class VampireSheet(QWidget):
         self.sect = QLineEdit()
         self.sect.textChanged.connect(lambda: self.modified.emit())
         info_layout.addRow("Sect:", self.sect)
+        
+        # Storyteller
+        self.storyteller = QLineEdit()
+        self.storyteller.textChanged.connect(lambda: self.modified.emit())
+        info_layout.addRow("Storyteller:", self.storyteller)
         
     def _on_assign_chronicle(self) -> None:
         """Show dialog to assign the character to a chronicle."""
@@ -269,33 +271,17 @@ class VampireSheet(QWidget):
         virtues_layout = QVBoxLayout(virtues_group)
         parent_layout.addWidget(virtues_group)
         
-        # Create individual trait widgets for virtues
-        self.conscience = TraitWidget(
-            name="Conscience",
-            max_value=5,
-            show_temp=True,
-            category="virtue"
+        # Create LARP trait widgets for virtues
+        self.virtues = LarpTraitCategoryWidget(
+            category_name="Virtues",
+            trait_categories={
+                "Conscience": [],
+                "Self-Control": [],
+                "Courage": []
+            }
         )
-        self.conscience.value_changed.connect(lambda v: self.modified.emit())
-        virtues_layout.addWidget(self.conscience)
-        
-        self.self_control = TraitWidget(
-            name="Self-Control",
-            max_value=5,
-            show_temp=True,
-            category="virtue"
-        )
-        self.self_control.value_changed.connect(lambda v: self.modified.emit())
-        virtues_layout.addWidget(self.self_control)
-        
-        self.courage = TraitWidget(
-            name="Courage",
-            max_value=5,
-            show_temp=True,
-            category="virtue"
-        )
-        self.courage.value_changed.connect(lambda v: self.modified.emit())
-        virtues_layout.addWidget(self.courage)
+        self.virtues.categoryChanged.connect(lambda c, t: self.modified.emit())
+        virtues_layout.addWidget(self.virtues)
         
         # Path of Enlightenment
         path_group = QGroupBox("Path of Enlightenment")
@@ -307,15 +293,10 @@ class VampireSheet(QWidget):
         self.path.textChanged.connect(lambda: self.modified.emit())
         path_layout.addRow("Path:", self.path)
         
-        # Path rating
-        self.path_rating = TraitWidget(
-            name="Path Rating",
-            max_value=10,
-            show_temp=True,
-            category="path"
-        )
-        self.path_rating.value_changed.connect(lambda v: self.modified.emit())
-        path_layout.addRow("Rating:", self.path_rating)
+        # Path rating LARP traits
+        self.path_traits = LarpTraitWidget("Path Rating")
+        self.path_traits.traitChanged.connect(lambda n, t: self.modified.emit())
+        path_layout.addRow("Path Rating:", self.path_traits)
         
     def _create_stats_section(self, parent_layout: QVBoxLayout) -> None:
         """Create the stats section (willpower, blood pool).
@@ -328,23 +309,13 @@ class VampireSheet(QWidget):
         parent_layout.addWidget(stats_group)
         
         # Willpower
-        self.willpower = TraitWidget(
-            name="Willpower",
-            max_value=10,
-            show_temp=True,
-            category="stat"
-        )
-        self.willpower.value_changed.connect(lambda v: self.modified.emit())
+        self.willpower = LarpTraitWidget("Willpower")
+        self.willpower.traitChanged.connect(lambda n, t: self.modified.emit())
         stats_layout.addWidget(self.willpower)
         
         # Blood Pool
-        self.blood = TraitWidget(
-            name="Blood Pool",
-            max_value=20,
-            show_temp=True,
-            category="stat"
-        )
-        self.blood.value_changed.connect(lambda v: self.modified.emit())
+        self.blood = LarpTraitWidget("Blood Pool")
+        self.blood.traitChanged.connect(lambda n, t: self.modified.emit())
         stats_layout.addWidget(self.blood)
         
     def _create_description_section(self, parent_layout: QVBoxLayout) -> None:
@@ -357,8 +328,18 @@ class VampireSheet(QWidget):
         description_layout = QFormLayout(description_group)
         parent_layout.addWidget(description_group)
         
-        # Fields to add: Concept, Chronicle, Sire, Title, etc.
-        # These will be implemented in a future update
+        # Fields to add: Concept, Sire, Title, etc.
+        self.concept = QLineEdit()
+        self.concept.textChanged.connect(lambda: self.modified.emit())
+        description_layout.addRow("Concept:", self.concept)
+        
+        self.sire = QLineEdit()
+        self.sire.textChanged.connect(lambda: self.modified.emit())
+        description_layout.addRow("Sire:", self.sire)
+        
+        self.title = QLineEdit()
+        self.title.textChanged.connect(lambda: self.modified.emit())
+        description_layout.addRow("Title:", self.title)
         
     def load_character(self, character: Vampire) -> None:
         """Load a vampire character into the sheet.
@@ -372,6 +353,7 @@ class VampireSheet(QWidget):
         # Basic information
         self.name.setText(character.name)
         self.player.setText(character.player)
+        self.storyteller.setText(character.narrator)  # Use narrator field for Storyteller
         self.nature.setText(character.nature)
         self.demeanor.setText(character.demeanor)
         
@@ -383,29 +365,16 @@ class VampireSheet(QWidget):
         self.generation.setValue(character.generation)
         self.sect.setText(character.sect)
         
+        # Load concept, sire, and title if available
+        if hasattr(character, 'concept'):
+            self.concept.setText(character.concept)
+        if hasattr(character, 'sire'):
+            self.sire.setText(character.sire)
+        if hasattr(character, 'title'):
+            self.title.setText(character.title)
+        
         # Load LARP traits
         self._load_larp_traits(character)
-        
-        # Virtues and Path
-        self.conscience.set_value(character.conscience)
-        self.conscience.set_temp_value(character.temp_conscience)
-        
-        self.self_control.set_value(character.self_control)
-        self.self_control.set_temp_value(character.temp_self_control)
-        
-        self.courage.set_value(character.courage)
-        self.courage.set_temp_value(character.temp_courage)
-        
-        self.path.setText(character.path)
-        self.path_rating.set_value(character.path_traits)
-        self.path_rating.set_temp_value(character.temp_path_traits)
-        
-        # Stats
-        self.willpower.set_value(character.willpower)
-        self.willpower.set_temp_value(character.temp_willpower)
-        
-        self.blood.set_value(character.blood)
-        self.blood.set_temp_value(character.temp_blood)
         
     def _load_chronicle_info(self, character: Vampire) -> None:
         """Load the character's chronicle information.
@@ -449,12 +418,20 @@ class VampireSheet(QWidget):
             "Knowledges": []
         }
         
+        virtue_traits = {
+            "Conscience": [],
+            "Self-Control": [],
+            "Courage": []
+        }
+        
         discipline_traits = []
         background_traits = []
+        path_traits = []
+        willpower_traits = []
+        blood_traits = []
         
-        # Check if character has LARP traits
+        # Process all LARP traits if available
         if hasattr(character, 'larp_traits') and character.larp_traits:
-            # Process all LARP traits
             for trait in character.larp_traits:
                 # Safety check for categories attribute
                 if not hasattr(trait, 'categories'):
@@ -480,66 +457,35 @@ class VampireSheet(QWidget):
                     elif category_name == "knowledges":
                         ability_traits["Knowledges"].append(trait.display_name)
                     
+                    # Handle virtues
+                    elif category_name == "conscience":
+                        virtue_traits["Conscience"].append(trait.display_name)
+                    elif category_name == "self-control":
+                        virtue_traits["Self-Control"].append(trait.display_name)
+                    elif category_name == "courage":
+                        virtue_traits["Courage"].append(trait.display_name)
+                    
                     # Handle other types
                     elif category_name == "disciplines":
                         discipline_traits.append(trait.display_name)
                     elif category_name == "backgrounds":
                         background_traits.append(trait.display_name)
-        else:
-            # Old-style character using dot-based traits - convert to LARP traits on-the-fly
-            # Process legacy traits if they exist
-            if hasattr(character, 'traits'):
-                for trait in character.traits:
-                    # Convert based on category
-                    trait_category = trait.category.lower()
-                    trait_name = trait.name.lower()
-                    trait_value = trait.value
-                    
-                    # Handle attributes
-                    if trait_category in ["physical", "social", "mental"]:
-                        # Convert dot value to adjectives
-                        adjectives = TraitConverter.dot_rating_to_adjectives(
-                            trait_name, trait_value, trait_category
-                        )
-                        
-                        if trait_category == "physical":
-                            attribute_traits["Physical"].extend(adjectives)
-                        elif trait_category == "social":
-                            attribute_traits["Social"].extend(adjectives)
-                        elif trait_category == "mental":
-                            attribute_traits["Mental"].extend(adjectives)
-                    
-                    # Handle abilities
-                    elif trait_category in ["talents", "skills", "knowledges"]:
-                        # Convert dot value to adjectives
-                        adjectives = TraitConverter.dot_rating_to_adjectives(
-                            trait_name, trait_value, trait_category
-                        )
-                        
-                        if trait_category == "talents":
-                            ability_traits["Talents"].extend(adjectives)
-                        elif trait_category == "skills":
-                            ability_traits["Skills"].extend(adjectives)
-                        elif trait_category == "knowledges":
-                            ability_traits["Knowledges"].extend(adjectives)
-                    
-                    # Handle disciplines
-                    elif trait_category == "disciplines":
-                        # Use generic adjectives for disciplines
-                        adjectives = [f"{trait.name} {i}" for i in range(1, trait_value + 1)]
-                        discipline_traits.extend(adjectives)
-                    
-                    # Handle backgrounds
-                    elif trait_category == "backgrounds":
-                        # Use generic adjectives for backgrounds
-                        adjectives = [f"{trait.name} {i}" for i in range(1, trait_value + 1)]
-                        background_traits.extend(adjectives)
+                    elif category_name == "path":
+                        path_traits.append(trait.display_name)
+                    elif category_name == "willpower":
+                        willpower_traits.append(trait.display_name)
+                    elif category_name == "blood":
+                        blood_traits.append(trait.display_name)
         
         # Update widgets with collected traits
         self.attributes.set_category_traits(attribute_traits)
         self.abilities.set_category_traits(ability_traits)
+        self.virtues.set_category_traits(virtue_traits)
         self.disciplines.set_traits(discipline_traits)
         self.backgrounds.set_traits(background_traits)
+        self.path_traits.set_traits(path_traits)
+        self.willpower.set_traits(willpower_traits)
+        self.blood.set_traits(blood_traits)
         
     def get_character_data(self) -> Dict:
         """Get the character data from the sheet.
@@ -551,31 +497,18 @@ class VampireSheet(QWidget):
         data = {
             "name": self.name.text(),
             "player": self.player.text(),
+            "narrator": self.storyteller.text(),  # Store as narrator in db
             "nature": self.nature.text(),
             "demeanor": self.demeanor.text(),
             "clan": self.clan.text(),
             "generation": self.generation.value(),
             "sect": self.sect.text(),
+            "concept": self.concept.text(),
+            "sire": self.sire.text(),
+            "title": self.title.text(),
             
             # Chronicle information
             "chronicle_id": self.character.chronicle_id if hasattr(self.character, 'chronicle_id') else None,
-            
-            # Virtues and Path
-            "conscience": self.conscience.get_value(),
-            "temp_conscience": self.conscience.get_temp_value(),
-            "self_control": self.self_control.get_value(),
-            "temp_self_control": self.self_control.get_temp_value(),
-            "courage": self.courage.get_value(),
-            "temp_courage": self.courage.get_temp_value(),
-            "path": self.path.text(),
-            "path_traits": self.path_rating.get_value(),
-            "temp_path_traits": self.path_rating.get_temp_value(),
-            
-            # Stats
-            "willpower": self.willpower.get_value(),
-            "temp_willpower": self.willpower.get_temp_value(),
-            "blood": self.blood.get_value(),
-            "temp_blood": self.blood.get_temp_value(),
             
             # LARP Traits
             "larp_traits": self._collect_all_larp_traits()
@@ -600,9 +533,17 @@ class VampireSheet(QWidget):
         ability_traits = self.abilities.get_category_traits()
         for subcategory, traits in ability_traits.items():
             larp_traits[subcategory.lower()] = traits
+            
+        # Get virtues
+        virtue_traits = self.virtues.get_category_traits()
+        for subcategory, traits in virtue_traits.items():
+            larp_traits[subcategory.lower()] = traits
         
-        # Get disciplines and backgrounds
+        # Get other trait types
         larp_traits["disciplines"] = self.disciplines.get_traits()
         larp_traits["backgrounds"] = self.backgrounds.get_traits()
+        larp_traits["path"] = self.path_traits.get_traits()
+        larp_traits["willpower"] = self.willpower.get_traits()
+        larp_traits["blood"] = self.blood.get_traits()
         
         return larp_traits 
