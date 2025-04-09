@@ -4329,7 +4329,7 @@ Fame ●●●●● Entire Country
 
 ```
 Generation
-GenerationMax. Traits Max. Abilities Blood Willpower
+Generation Max. Traits Max. Abilities Blood/Blood Per Turn Starting Willpower/Willpower Max
 Thirteen 10 5 10 / 1 2 / 6
 Twelve 10 5 11 / 1 2 / 8
 Eleven 11 5 12 / 1 4 / 8
@@ -4340,7 +4340,7 @@ Seven 16 6 20 / 5 7 / 14
 Six 18 7 30 / 6 8 / 16
 Five 20 8 40 / 8 9 / 18
 Four 25 9 50 / 10 10 / 20
-Three 30???
+Three 30 /?/?/?
 ```
 ```
 Max. Traits shows your maximum number of total Traits in your primary area of
