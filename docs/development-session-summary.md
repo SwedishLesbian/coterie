@@ -8,7 +8,13 @@ This document provides a summary of our development progress to help pick up whe
 
 ### Completed Work
 
-1. **Menu System Implementation**
+1. **Character Sheet UI Improvements**
+   - Integrated character notes directly into main character sheet
+   - Added multi-format support for notes (Plaintext, Markdown, HTML)
+   - Improved UI layout with scrollable main view
+   - Enhanced notes section with format selector and appropriate text handling
+
+2. **Menu System Implementation**
    - Added menu file parser for Grapevine XML menu files
    - Created menu data models for storing traits and categories
    - Implemented trait selection dialog with search and filtering
@@ -16,14 +22,14 @@ This document provides a summary of our development progress to help pick up whe
    - Added support for importing specific menu files
    - Updated documentation for menu system
 
-2. **UI Improvements and Terminology Updates**
+3. **UI Improvements and Terminology Updates**
    - Changed "Narrator" to "HST" throughout the application
    - Added active chronicle to window title bar
    - Renamed "Players" menu to "People" with staff and player management
    - Added "All Chronicles" view for global character and player lists
    - Fixed chronicle assignment bug with LARP traits
 
-3. **LARP Trait System Implementation**
+4. **LARP Trait System Implementation**
    - Implemented the `dot_rating_to_adjectives` method in `TraitConverter` class
    - Updated `VampireSheet` to use `LarpTraitWidget` and `LarpTraitCategoryWidget`
    - Modified `ImportDialog` to correctly handle LARP traits
@@ -31,7 +37,7 @@ This document provides a summary of our development progress to help pick up whe
    - Created helper methods to suggest appropriate clan disciplines
    - Implemented the `create_vampire_from_dict` method
 
-4. **Chronicle Management Enhancements**
+5. **Chronicle Management Enhancements**
    - Added active chronicle display in window title bar
    - Implemented chronicle assignment dialog
    - Created "All Chronicles" view with global lists
@@ -45,6 +51,7 @@ This document provides a summary of our development progress to help pick up whe
 - Trait conflicts are handled through an interactive dialog
 - Documentation is up-to-date with latest changes
 - Menu system supports both interactive and non-interactive imports
+- Character notes support multiple text formats and are integrated into the main sheet
 
 ### Next Steps
 
