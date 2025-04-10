@@ -1,34 +1,38 @@
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Tuple
 from sqlalchemy.orm import Session
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ParseError
 
 from .menu_parser import MenuParser
 from ..models.menu import MenuItem, MenuCategory
+from ..ui.dialogs.trait_conflict import TraitConflictDialog
 
 logger = logging.getLogger(__name__)
 
 class MenuImporter:
     """Utility class for importing Grapevine menu files."""
     
-    def __init__(self, session: Session):
+    def __init__(self, session: Session, parent_widget=None):
         """
         Initialize the menu importer.
         
         Args:
             session: SQLAlchemy session for database operations
+            parent_widget: Parent widget for dialogs
         """
         self.session = session
         self.parser = MenuParser()
+        self.parent = parent_widget
         
-    def import_menu_file(self, file_path: str) -> bool:
+    def import_menu_file(self, file_path: str, interactive: bool = True) -> bool:
         """
         Import a single menu file.
         
         Args:
             file_path: Path to the .gvm file to import
+            interactive: Whether to show conflict resolution dialogs
             
         Returns:
             True if import was successful, False otherwise
@@ -36,6 +40,22 @@ class MenuImporter:
         try:
             logger.info(f"Importing menu file: {file_path}")
             categories, items = MenuParser.parse_menu_file(file_path, self.session)
+            
+            # Handle conflicts if in interactive mode
+            if interactive:
+                for item in items:
+                    similar = self.find_similar_trait(item.name, item.category.name if item.category else None)
+                    if similar:
+                        resolved = TraitConflictDialog.resolve_conflict(item, similar, self.parent)
+                        if resolved == similar:
+                            # Remove the new item if keeping existing
+                            self.session.delete(item)
+                        elif resolved is None:
+                            # Keep both, no action needed
+                            pass
+                        else:
+                            # Use new item, remove existing
+                            self.session.delete(similar)
             
             logger.info(f"Successfully imported {len(categories)} categories and {len(items)} items")
             self.session.commit()
@@ -51,13 +71,14 @@ class MenuImporter:
             self.session.rollback()
             return False
     
-    def import_directory(self, directory: str, pattern: str = "*.gvm") -> Dict[str, bool]:
+    def import_directory(self, directory: str, pattern: str = "*.gvm", interactive: bool = True) -> Dict[str, bool]:
         """
         Import all menu files in a directory.
         
         Args:
             directory: Directory containing menu files
             pattern: Glob pattern for menu files (default: "*.gvm")
+            interactive: Whether to show conflict resolution dialogs
             
         Returns:
             Dictionary mapping file paths to import success status
@@ -70,8 +91,42 @@ class MenuImporter:
             return results
             
         for file_path in dir_path.glob(pattern):
-            results[str(file_path)] = self.import_menu_file(str(file_path))
+            results[str(file_path)] = self.import_menu_file(str(file_path), interactive)
             
+        return results
+    
+    def import_specific_menus(self, menu_names: List[str], directory: str) -> Dict[str, bool]:
+        """
+        Import specific menu files by name.
+        
+        Args:
+            menu_names: List of menu names to import (without .gvm extension)
+            directory: Directory containing menu files
+            
+        Returns:
+            Dictionary mapping menu names to import success status
+        """
+        results = {}
+        dir_path = Path(directory)
+        
+        for name in menu_names:
+            # Try both with and without .gvm extension
+            paths = [
+                dir_path / f"{name}.gvm",
+                dir_path / name
+            ]
+            
+            imported = False
+            for path in paths:
+                if path.exists():
+                    results[name] = self.import_menu_file(str(path))
+                    imported = True
+                    break
+                    
+            if not imported:
+                logger.error(f"Menu file not found: {name}")
+                results[name] = False
+                
         return results
     
     def get_existing_traits(self, category_name: Optional[str] = None) -> List[MenuItem]:

@@ -8,7 +8,7 @@ import sys
 import logging
 import argparse
 from pathlib import Path
-from typing import NoReturn, Optional
+from typing import NoReturn, Optional, List
 
 from PyQt6.QtWidgets import QApplication
 from sqlalchemy.orm import Session
@@ -42,13 +42,15 @@ def init_database() -> None:
     """
     Base.metadata.create_all(engine)
 
-def import_menus(menu_path: str, session: Session) -> bool:
+def import_menus(menu_path: str, session: Session, specific_menus: Optional[List[str]] = None, interactive: bool = True) -> bool:
     """
     Import Grapevine menu files.
     
     Args:
         menu_path: Path to a .gvm file or directory containing .gvm files
         session: Database session
+        specific_menus: Optional list of specific menu names to import
+        interactive: Whether to show conflict resolution dialogs
         
     Returns:
         True if import was successful, False if any errors occurred
@@ -56,10 +58,16 @@ def import_menus(menu_path: str, session: Session) -> bool:
     importer = MenuImporter(session)
     path = Path(menu_path)
     
-    if path.is_file():
-        return importer.import_menu_file(str(path))
+    if specific_menus:
+        if not path.is_dir():
+            logging.error("Menu path must be a directory when importing specific menus")
+            return False
+        results = importer.import_specific_menus(specific_menus, str(path))
+        return all(results.values())
+    elif path.is_file():
+        return importer.import_menu_file(str(path), interactive)
     elif path.is_dir():
-        results = importer.import_directory(str(path))
+        results = importer.import_directory(str(path), interactive=interactive)
         return all(results.values())
     else:
         logging.error(f"Menu path not found: {menu_path}")
@@ -69,6 +77,8 @@ def parse_args() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(description="Coterie - Mind's Eye Theater LARP Character Manager")
     parser.add_argument('--import-menus', type=str, help='Import Grapevine menu files from file or directory')
+    parser.add_argument('--menu-names', type=str, nargs='+', help='Specific menu names to import')
+    parser.add_argument('--non-interactive', action='store_true', help='Import without showing conflict resolution dialogs')
     return parser.parse_args()
 
 def main() -> NoReturn:
@@ -95,7 +105,7 @@ def main() -> NoReturn:
     # Handle menu import if requested
     if args.import_menus:
         with session_factory() as session:
-            if import_menus(args.import_menus, session):
+            if import_menus(args.import_menus, session, args.menu_names, not args.non_interactive):
                 logger.info("Menu import completed successfully")
                 if not any(sys.argv[1:]) or '--import-menus' in sys.argv:
                     sys.exit(0)
