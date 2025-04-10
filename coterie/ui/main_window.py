@@ -81,6 +81,17 @@ class MainWindow(QMainWindow):
         self._refresh_chronicles()
         self._refresh_characters()
         
+        # Update window title with active chronicle
+        self._update_window_title()
+        
+    def _update_window_title(self) -> None:
+        """Update the window title to include the active chronicle."""
+        base_title = "Coterie v0.1"
+        if self.active_chronicle:
+            self.setWindowTitle(f"{base_title} - {self.active_chronicle.name}")
+        else:
+            self.setWindowTitle(base_title)
+        
     def _create_menu_bar(self) -> None:
         """Create and populate the main menu bar."""
         menubar = self.menuBar()
@@ -117,13 +128,20 @@ class MainWindow(QMainWindow):
         self.show_characters_action.triggered.connect(self._toggle_characters_tab)
         game_menu.addAction(self.show_characters_action)
         
-        # Players menu
-        players_menu = menubar.addMenu("&Players")
+        # People menu (formerly Players)
+        people_menu = menubar.addMenu("Peo&ple")
         
+        # Staff management
+        self.staff_manager_action = QAction("&Staff Manager", self)
+        self.staff_manager_action.triggered.connect(self._show_staff_manager)
+        people_menu.addAction(self.staff_manager_action)
+        
+        # Player management
         self.player_manager_action = QAction("&Player Manager", self)
-        players_menu.addAction(self.player_manager_action)
+        self.player_manager_action.triggered.connect(self._show_player_manager)
+        people_menu.addAction(self.player_manager_action)
         
-        # World menu - Add Plots and Rumors options here
+        # World menu
         world_menu = menubar.addMenu("&World")
         
         # Plots tab option
@@ -139,8 +157,15 @@ class MainWindow(QMainWindow):
         self.locations_action = QAction("&Locations", self)
         world_menu.addAction(self.locations_action)
         
-        # Chronicle menu - Add Chronicle tab option here
+        # Chronicle menu
         chronicle_menu = menubar.addMenu("&Chronicle")
+        
+        # All Chronicles option
+        self.all_chronicles_action = QAction("&All Chronicles", self)
+        self.all_chronicles_action.triggered.connect(self._show_all_chronicles)
+        chronicle_menu.addAction(self.all_chronicles_action)
+        
+        chronicle_menu.addSeparator()
         
         # Chronicle tab option
         self.show_chronicle_action = QAction("&Chronicle Manager", self)
@@ -360,6 +385,9 @@ class MainWindow(QMainWindow):
                 
             # Set as active chronicle
             self.active_chronicle = chronicle
+            
+            # Update window title
+            self._update_window_title()
             
             # Refresh the chronicle list to update display
             session.close()
@@ -853,4 +881,40 @@ class MainWindow(QMainWindow):
             self,
             "About Coterie",
             "Coterie v0.1\n\nA character and chronicle management system for Mind's Eye Theater LARP."
-        ) 
+        )
+
+    def _show_all_chronicles(self) -> None:
+        """Show the All Chronicles view with global character and player lists."""
+        # Create All Chronicles dialog/window
+        from PyQt6.QtWidgets import QDialog, QTabWidget, QVBoxLayout
+        
+        dialog = QDialog(self)
+        dialog.setWindowTitle("All Chronicles")
+        dialog.setMinimumSize(800, 600)
+        
+        layout = QVBoxLayout(dialog)
+        
+        # Create tabs
+        tabs = QTabWidget()
+        layout.addWidget(tabs)
+        
+        # Characters tab
+        characters_widget = QWidget()
+        characters_layout = QVBoxLayout(characters_widget)
+        character_list = CharacterListWidget(show_all=True)  # Modified to show all characters
+        characters_layout.addWidget(character_list)
+        tabs.addTab(characters_widget, "All Characters")
+        
+        # Players tab
+        players_widget = QWidget()
+        players_layout = QVBoxLayout(players_widget)
+        # TODO: Add player list widget
+        tabs.addTab(players_widget, "All Players")
+        
+        # Staff tab
+        staff_widget = QWidget()
+        staff_layout = QVBoxLayout(staff_widget)
+        # TODO: Add staff list widget
+        tabs.addTab(staff_widget, "All Staff")
+        
+        dialog.exec() 

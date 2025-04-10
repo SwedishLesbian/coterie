@@ -21,6 +21,11 @@ We are currently in Phase 1 of development, focusing on establishing the core fr
   - ✅ Updated character sheet to use LARP trait system
   - ✅ Enhanced import dialog to properly handle LARP traits
   - ✅ Updated character creation with LARP trait selection
+  - ✅ Implemented automatic data conversion from original files
+- ✅ Basic chronicle management
+  - ✅ Chronicle creation and editing
+  - ✅ Character association with chronicles
+  - ✅ Chronicle metadata tracking
   
 ### In Progress
 
@@ -28,6 +33,8 @@ We are currently in Phase 1 of development, focusing on establishing the core fr
   - Importing from Grapevine files is implemented
   - Exporting to Grapevine format still needed
 - ⏳ Character list view implementation
+- ⏳ Staff and player management interface
+- ⏳ Challenge system implementation
 
 ### Pending Items
 
@@ -35,7 +42,6 @@ We are currently in Phase 1 of development, focusing on establishing the core fr
 - ⬜ Game data management (natures, clans, etc.)
 - ⬜ Notes and custom fields
 - ⬜ Experience tracking and management
-- ⬜ Challenge system for LARP trait bidding
 - ⬜ Character relationships tracking
 
 ## Phase 2 Planning
@@ -77,6 +83,8 @@ In Phase 2, we plan to focus on:
 
 ## Recent Updates
 
+- **[2024-05-XX]** Completed LARP trait system implementation with automatic data conversion
+- **[2024-05-XX]** Added basic chronicle management functionality
 - **[2024-05-XX]** Implemented import dialog with support for both .gvc and .gex files
 - **[2024-05-XX]** Updated project documentation to reflect name change from "Grapevine 4.0" to "Coterie"
 - **[2024-05-XX]** Created comprehensive UI components documentation
@@ -136,40 +144,43 @@ In Phase 2, we plan to focus on:
 
 ## Component Details
 
-### Data Layer (45% Complete)
+### Data Layer (60% Complete)
 - [x] Base character model
 - [x] Vampire character model
 - [x] Basic trait system
+- [x] LARP trait system
+- [x] Chronicle management
 - [x] Database configuration
 - [x] Migration system setup
 - [x] JSON data files for static game data
-- [ ] Chronicle models
 - [ ] Plot/Rumor models
 - [ ] Data validation
 - [ ] Import/Export functionality
 - [ ] Other character type models
 
-### Business Logic (25% Complete)
+### Business Logic (35% Complete)
 - [x] Basic character creation
 - [x] Data loading utility
 - [x] Basic trait management
-- [ ] Complete trait management
+- [x] LARP trait system
+- [x] Basic chronicle management
+- [ ] Staff and player management
 - [ ] Experience point calculations
 - [ ] Character advancement
 - [ ] Game mechanics implementation
-- [ ] Chronicle management
 - [ ] Plot/Rumor management
 - [ ] Data validation rules
 
-### User Interface (30% Complete)
+### User Interface (40% Complete)
 - [x] Main window layout
 - [x] Menu system
 - [x] Basic character creation dialog
 - [x] Trait widgets
 - [x] Trait group widgets
 - [x] Vampire character sheet
+- [x] Basic chronicle interface
 - [ ] Character list view
-- [ ] Chronicle interface
+- [ ] Staff/Player management interface
 - [ ] Plot/Rumor interface
 - [ ] Experience interface
 - [ ] Settings dialog
@@ -179,26 +190,31 @@ In Phase 2, we plan to focus on:
 
 1. ~~Complete trait widget implementation~~ ✓ DONE
 2. ~~Implement vampire character sheet~~ ✓ DONE
-3. Add character list view to main window
-4. Add validation to character creation dialog
+3. ~~Implement LARP trait system~~ ✓ DONE
+4. Add character list view to main window
+5. Complete staff and player management interface
+6. Implement challenge system
 
 ## Blockers
 
-- None currently
+- Staff and player management interface needed before implementing certain game mechanics
+- Challenge system implementation pending UI completion
 
 ## Next Steps
 
 ### Short Term
 1. ~~Create trait widget components~~ ✓ DONE
 2. ~~Complete vampire character sheet~~ ✓ DONE
-3. Implement character list view
-4. Add validation to character creation dialog
+3. ~~Implement LARP trait system~~ ✓ DONE
+4. Implement character list view
+5. Complete staff and player management interface
+6. Add challenge system
 
 ### Medium Term
 1. Add experience point tracking
 2. Implement werewolf character type
-3. Create chronicle management
-4. Add import/export functionality
+3. Enhance chronicle management
+4. Complete import/export functionality
 
 ### Long Term
 1. Implement remaining character types

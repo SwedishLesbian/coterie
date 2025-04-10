@@ -8,7 +8,14 @@ This document provides a summary of our development progress to help pick up whe
 
 ### Completed Work
 
-1. **LARP Trait System Implementation**
+1. **UI Improvements and Terminology Updates**
+   - Changed "Narrator" to "HST" throughout the application
+   - Added active chronicle to window title bar
+   - Renamed "Players" menu to "People" with staff and player management
+   - Added "All Chronicles" view for global character and player lists
+   - Fixed chronicle assignment bug with LARP traits
+
+2. **LARP Trait System Implementation**
    - Implemented the `dot_rating_to_adjectives` method in `TraitConverter` class to convert dot ratings to adjective traits
    - Updated `VampireSheet` to use `LarpTraitWidget` and `LarpTraitCategoryWidget` for trait display
    - Modified `ImportDialog` to correctly handle LARP traits during character import
@@ -16,24 +23,19 @@ This document provides a summary of our development progress to help pick up whe
    - Created helper methods to suggest appropriate clan disciplines and common traits
    - Implemented the `create_vampire_from_dict` method in `DataLoader` to properly create characters with LARP traits
 
-2. **UI Improvements**
-   - Added scrollable trait sections for better usability
-   - Implemented context menus for managing LARP traits (renaming, marking as spent)
-   - Added progress indicators and status messages during import
-   - Created intuitive trait selection interfaces with helper buttons
+3. **Chronicle Management Enhancements**
+   - Added active chronicle display in window title bar
+   - Implemented chronicle assignment dialog with proper trait preservation
+   - Created "All Chronicles" view with global character and player lists
+   - Added staff and player management menu items
+   - Updated chronicle creation dialog to use "HST" terminology
 
-3. **Technical Implementation**
-   - Ensured proper data flow from character creation to database storage
-   - Implemented adjective-based trait conversion for all trait categories (attributes, abilities, disciplines)
-   - Created appropriate widget hierarchies for trait management
-   - Maintained backward compatibility with existing character data
-
-4. **Documentation Cleanup**
-   - Organized documentation directory structure
-   - Archived reference materials (rules, VB source code) to reduce clutter
-   - Updated index.md to reflect current project status
-   - Ensured documentation is consistent with LARP trait system implementation
-   - Restructured documentation sections for better navigation
+4. **Documentation Updates**
+   - Updated project documentation to reflect UI terminology changes
+   - Added documentation for new chronicle management features
+   - Updated development session summary with latest progress
+   - Revised component roadmap to prioritize staff/player management
+   - Updated technical documentation for LARP trait system
 
 ### Current State
 
@@ -42,38 +44,50 @@ This document provides a summary of our development progress to help pick up whe
 - Users can create, import, and manage characters using the LARP trait system
 - The UI provides appropriate interfaces for adjective-based trait management
 - Data conversion from original Grapevine files to LARP traits is handled automatically
-- Documentation structure is clean and well-organized
-
-### System Alignment Progress
-
-We've completed the implementation of the Mind's Eye Theater LARP trait system:
-
-- ✅ **Technical Documentation**: Added detailed documentation of the Mind's Eye Theater LARP trait system
-- ✅ **Data Models**: Created `LarpTrait` and `TraitCategory` models for proper trait representation
-- ✅ **UI Widgets**: Implemented specialized widgets for displaying and managing adjective traits
-- ✅ **Trait Conversion**: Added methods to convert between dot ratings and adjective traits
-- ✅ **Character Sheet**: Updated to use and display LARP traits
-- ✅ **Import Dialog**: Enhanced to properly handle LARP traits during character import
-- ✅ **Character Creation**: Updated to use the LARP trait system for new characters
+- Chronicle management system is in place with proper character assignment
+- Documentation is up-to-date with latest changes
 
 ### Next Steps
 
-1. **Testing and Validation**
-   - Test the import functionality with various character files
-   - Validate that trait conversion works correctly across all trait types
-   - Ensure proper display of traits in the character sheet
-   - Test character creation with different character types
+1. **Staff and Player Management**
+   - Implement staff manager interface
+   - Create player manager dialog
+   - Add role-based permissions system
+   - Integrate with chronicle management
 
 2. **Challenge System Implementation**
-   - Implement the trait-based challenge resolution system
-   - Add trait bidding and selection interfaces
-   - Implement trait spending mechanics
-   - Add trait refresh/recovery functionality
+   - Design challenge resolution interface
+   - Implement trait bidding system
+   - Add trait spending mechanics
+   - Create trait refresh/recovery functionality
 
 3. **Additional Character Types**
-   - Extend the LARP trait system to other character types (Werewolf, Mage, etc.)
-   - Implement appropriate trait categories for each character type
-   - Create specialized character sheets with LARP trait support
+   - Extend LARP trait system to other character types
+   - Create specialized character sheets
+   - Update import/export functionality
+   - Add appropriate validation rules
+
+4. **Testing and Validation**
+   - Test chronicle assignment with various character types
+   - Validate LARP trait conversion across all categories
+   - Test staff and player management features
+   - Verify proper trait preservation during chronicle changes
+
+### Known Issues to Address
+
+1. Staff and player management interfaces need implementation
+2. Some parts of the chronicle assignment process need optimization
+3. UI styling needs refinement for better user experience
+4. ⚠️ IN PROGRESS: Staff and player management system implementation
+
+### Additional Notes
+
+- The renaming from "Narrator" to "HST" is now complete throughout the codebase
+- All new components should follow the patterns established in the UI components documentation
+- Important correction: Coterie is for Mind's Eye Theater LARP system, not tabletop World of Darkness
+- Coterie will NEVER be used for tabletop characters, only for LARP characters
+- The trait adjective lists in `TraitConverter` may need refinement based on LARP rulebook
+- Remember to update this summary after each significant development session
 
 ## Project Details
 

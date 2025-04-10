@@ -20,7 +20,7 @@ The project is named "Coterie" and follows a component-based architecture with:
 
 ### Current Status
 
-We are implementing the Mind's Eye Theater LARP trait system, having completed:
+We have completed several major features:
 - Project structure and infrastructure
 - Basic SQLAlchemy models for characters
 - Core UI framework with PyQt6
@@ -29,6 +29,16 @@ We are implementing the Mind's Eye Theater LARP trait system, having completed:
 - Import dialog for both .gvc and .gex files
 - LARP trait widget implementation
 - Database models for adjective-based traits
+- Chronicle management system
+- Active chronicle display in title bar
+- People menu (formerly Players) with staff/player management
+- All Chronicles view with global lists
+
+Current focus areas:
+- Implementing staff and player management interfaces
+- Enhancing the chronicle management system
+- Completing the LARP trait system implementation
+- Adding challenge resolution mechanics
 
 Refer to `docs/status.md` for the complete and current status of the project. For the most recent development session details and to pick up where we left off, see `docs/development-session-summary.md`.
 
@@ -46,7 +56,7 @@ When working on this project:
 
 See `docs/conversion-checklist.md` and `docs/component-roadmap.md` for the complete task list. Current priorities:
 
-1. Complete the LARP trait system implementation
+1. Complete the staff and player management interfaces
 2. Implement the Challenge Resolution System for LARP play
 3. Extend support to other character types (Werewolf, Mage, etc.)
 4. Complete character import/export cycle

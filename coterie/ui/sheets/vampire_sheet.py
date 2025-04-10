@@ -114,10 +114,10 @@ class VampireSheet(QWidget):
         self.sect.textChanged.connect(lambda: self.modified.emit())
         info_layout.addRow("Sect:", self.sect)
         
-        # Storyteller
+        # HST (formerly Storyteller)
         self.storyteller = QLineEdit()
         self.storyteller.textChanged.connect(lambda: self.modified.emit())
-        info_layout.addRow("Storyteller:", self.storyteller)
+        info_layout.addRow("HST:", self.storyteller)
         
     def _on_assign_chronicle(self) -> None:
         """Show dialog to assign the character to a chronicle."""
@@ -173,7 +173,16 @@ class VampireSheet(QWidget):
             if self.character:
                 session = get_session()
                 try:
+                    # Store current traits before assignment
+                    current_traits = self.character.larp_traits if hasattr(self.character, 'larp_traits') else []
+                    
+                    # Update chronicle
                     self.character.chronicle_id = chronicle_id
+                    
+                    # Ensure traits are preserved
+                    if hasattr(self.character, 'larp_traits'):
+                        self.character.larp_traits = current_traits
+                    
                     session.add(self.character)
                     session.commit()
                     

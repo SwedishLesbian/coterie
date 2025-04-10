@@ -49,7 +49,7 @@ class ChronicleCreationDialog(QDialog):
         self.name.setPlaceholderText("Enter a name for your chronicle")
         form_layout.addRow("Name:", self.name)
         
-        # Chronicle HST (renamed from narrator)
+        # Chronicle HST (formerly narrator)
         self.narrator = QLineEdit()
         self.narrator.setPlaceholderText("Enter the HST's name")
         form_layout.addRow("HST:", self.narrator)
