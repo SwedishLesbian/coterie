@@ -1,444 +1,227 @@
-"""Dialog for managing game data files."""
+"""Dialog for managing game data."""
 
-import json
 import os
-from typing import Optional, Dict, List, Any
+import json
+from pathlib import Path
+from typing import Dict, Any, Optional, List
 from PyQt6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QListWidget, 
-    QSplitter, QWidget, QTextEdit, QPushButton, 
-    QMessageBox, QListWidgetItem, QLabel,
-    QComboBox, QLineEdit, QInputDialog, QFileDialog,
-    QTableWidget, QTableWidgetItem, QHeaderView,
-    QGroupBox, QFormLayout
+    QDialog, QVBoxLayout, QHBoxLayout, QLabel,
+    QPushButton, QListWidget, QMessageBox,
+    QFileDialog, QProgressBar
 )
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import Qt, pyqtSignal
 
-from coterie.utils.data_loader import DataLoader
-
+from coterie.utils.data_loader import (
+    load_data, get_category, get_descriptions,
+    get_item_description, clear_cache, load_json_file
+)
 
 class DataManagerDialog(QDialog):
-    """Dialog for managing game data files."""
+    """Dialog for managing game data."""
     
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
-        """Initialize the data manager dialog.
-        
-        Args:
-            parent: Optional parent widget
-        """
+    data_changed = pyqtSignal()
+    
+    def __init__(self, parent=None):
+        """Initialize the dialog."""
         super().__init__(parent)
         
         self.setWindowTitle("Data Manager")
-        self.resize(900, 600)
         self.setModal(True)
         
-        # Main layout
-        layout = QVBoxLayout(self)
+        # Create layout
+        layout = QVBoxLayout()
         
-        # Header label
-        header = QLabel("Manage Game Data")
-        header.setStyleSheet("font-size: 16px; font-weight: bold;")
-        layout.addWidget(header)
+        # Add list widget
+        self.list_widget = QListWidget()
+        layout.addWidget(self.list_widget)
         
-        # Create splitter for file list and editor
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        layout.addWidget(splitter, 1)  # 1 = stretch factor
+        # Add buttons
+        button_layout = QHBoxLayout()
         
-        # Left panel for file list
-        left_panel = QWidget()
-        left_layout = QVBoxLayout(left_panel)
-        left_layout.setContentsMargins(0, 0, 0, 0)
+        self.import_button = QPushButton("Import")
+        self.import_button.clicked.connect(self.import_data)
+        button_layout.addWidget(self.import_button)
         
-        # File list
-        self.file_list = QListWidget()
-        self.file_list.currentItemChanged.connect(self._on_file_selected)
-        left_layout.addWidget(self.file_list)
+        self.export_button = QPushButton("Export")
+        self.export_button.clicked.connect(self.export_data)
+        button_layout.addWidget(self.export_button)
         
-        # Buttons for file operations
-        file_buttons = QHBoxLayout()
-        left_layout.addLayout(file_buttons)
+        self.delete_button = QPushButton("Delete")
+        self.delete_button.clicked.connect(self.delete_data)
+        button_layout.addWidget(self.delete_button)
         
-        self.refresh_button = QPushButton("Refresh")
-        self.refresh_button.clicked.connect(self._load_file_list)
-        file_buttons.addWidget(self.refresh_button)
+        layout.addLayout(button_layout)
         
-        file_buttons.addStretch()
+        # Add progress bar
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setVisible(False)
+        layout.addWidget(self.progress_bar)
         
-        self.create_button = QPushButton("New File")
-        self.create_button.clicked.connect(self._create_new_file)
-        file_buttons.addWidget(self.create_button)
+        self.setLayout(layout)
         
-        # Right panel for editing
-        right_panel = QWidget()
-        right_layout = QVBoxLayout(right_panel)
-        right_layout.setContentsMargins(0, 0, 0, 0)
-        
-        # Category selector
-        self.category_selector = QComboBox()
-        self.category_selector.currentTextChanged.connect(self._on_category_changed)
-        right_layout.addWidget(self.category_selector)
-        
-        # Category editor
-        self.editor = QTableWidget()
-        self.editor.setColumnCount(2)
-        self.editor.setHorizontalHeaderLabels(["Item", "Description"])
-        self.editor.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        right_layout.addWidget(self.editor)
-        
-        # Editor buttons
-        editor_buttons = QHBoxLayout()
-        right_layout.addLayout(editor_buttons)
-        
-        self.add_item_button = QPushButton("Add Item")
-        self.add_item_button.clicked.connect(self._add_item)
-        editor_buttons.addWidget(self.add_item_button)
-        
-        self.add_category_button = QPushButton("Add Category")
-        self.add_category_button.clicked.connect(self._add_category)
-        editor_buttons.addWidget(self.add_category_button)
-        
-        editor_buttons.addStretch()
-        
-        self.save_button = QPushButton("Save")
-        self.save_button.clicked.connect(self._save_current_file)
-        editor_buttons.addWidget(self.save_button)
-        
-        # Add panels to splitter
-        splitter.addWidget(left_panel)
-        splitter.addWidget(right_panel)
-        splitter.setSizes([200, 700])  # Default sizes
-        
-        # Bottom buttons
-        buttons = QHBoxLayout()
-        layout.addLayout(buttons)
-        
-        buttons.addStretch()
-        
-        self.close_button = QPushButton("Close")
-        self.close_button.clicked.connect(self.accept)
-        buttons.addWidget(self.close_button)
-        
-        # Current data
-        self.current_file = ""
-        self.current_data = {}
-        
-        # Load file list
-        self._load_file_list()
-        
-    def _load_file_list(self) -> None:
-        """Load the list of data files."""
-        self.file_list.clear()
-        
-        # Get path to data directory
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-        data_dir = os.path.join(base_dir, "data")
-        
-        # List JSON files
-        for filename in sorted(os.listdir(data_dir)):
-            if filename.endswith(".json"):
-                item = QListWidgetItem(filename)
-                item.setData(Qt.ItemDataRole.UserRole, os.path.join(data_dir, filename))
-                self.file_list.addItem(item)
-                
-    def _on_file_selected(self, current: QListWidgetItem, previous: QListWidgetItem) -> None:
-        """Handle file selection.
-        
-        Args:
-            current: Currently selected item
-            previous: Previously selected item
-        """
-        if not current:
-            return
-            
-        # Check if there are unsaved changes
-        if self.current_file and self._has_unsaved_changes():
-            response = QMessageBox.question(
-                self,
-                "Unsaved Changes",
-                f"Save changes to {os.path.basename(self.current_file)}?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
-            )
-            
-            if response == QMessageBox.StandardButton.Yes:
-                self._save_current_file()
-            elif response == QMessageBox.StandardButton.Cancel:
-                # Reselect previous item
-                self.file_list.setCurrentItem(previous)
-                return
-        
-        # Load selected file
-        file_path = current.data(Qt.ItemDataRole.UserRole)
-        self._load_file(file_path)
-        
-    def _load_file(self, file_path: str) -> None:
-        """Load a data file.
-        
-        Args:
-            file_path: Path to the file
-        """
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                self.current_data = json.load(f)
-            
-            self.current_file = file_path
-            
-            # Update category selector
-            self.category_selector.clear()
-            
-            # Add all categories
-            for category in self.current_data.keys():
-                if category != "descriptions" and isinstance(self.current_data[category], list):
-                    self.category_selector.addItem(category)
-                    
-            # Select first category
-            if self.category_selector.count() > 0:
-                self.category_selector.setCurrentIndex(0)
-                self._on_category_changed(self.category_selector.currentText())
-            else:
-                self.editor.setRowCount(0)
-                
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Error loading file: {str(e)}")
-            
-    def _on_category_changed(self, category: str) -> None:
-        """Handle category selection.
-        
-        Args:
-            category: Selected category
-        """
-        if not category or category not in self.current_data:
-            self.editor.setRowCount(0)
-            return
-            
-        # Get items in the category
-        items = self.current_data[category]
-        
-        # Get descriptions
-        descriptions = self.current_data.get("descriptions", {})
-        
-        # Update editor
-        self.editor.setRowCount(len(items))
-        
-        for i, item in enumerate(items):
-            # Skip if item is not a string (handles dictionaries or other non-string types)
-            if not isinstance(item, str):
-                continue
-                
-            # Item name
-            name_item = QTableWidgetItem(item)
-            self.editor.setItem(i, 0, name_item)
-            
-            # Description
-            description = descriptions.get(item, "")
-            desc_item = QTableWidgetItem(description)
-            self.editor.setItem(i, 1, desc_item)
-            
-    def _save_current_file(self) -> None:
-        """Save the current file."""
-        if not self.current_file:
-            return
-            
-        try:
-            # Update current data from editor
-            self._update_data_from_editor()
-            
-            # Save to file
-            with open(self.current_file, 'w', encoding='utf-8') as f:
-                json.dump(self.current_data, f, indent=4)
-                
-            # Clear data loader cache to reflect changes
-            DataLoader.clear_cache()
-            
-            QMessageBox.information(self, "Success", "File saved successfully.")
-            
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Error saving file: {str(e)}")
-            
-    def _update_data_from_editor(self) -> None:
-        """Update current data from editor."""
-        # Get current category
-        category = self.category_selector.currentText()
-        if not category or category not in self.current_data:
-            return
-            
-        # Create new category list
-        items = []
-        
-        # Ensure descriptions exists
-        if "descriptions" not in self.current_data:
-            self.current_data["descriptions"] = {}
-            
-        # Get current descriptions
-        descriptions = self.current_data["descriptions"]
-        
-        # Update from editor
-        for row in range(self.editor.rowCount()):
-            # Get item name
-            name_item = self.editor.item(row, 0)
-            if not name_item or not name_item.text().strip():
-                continue
-                
-            item_name = name_item.text().strip()
-            items.append(item_name)
-            
-            # Get description
-            desc_item = self.editor.item(row, 1)
-            if desc_item and desc_item.text().strip():
-                descriptions[item_name] = desc_item.text().strip()
-            elif item_name in descriptions:
-                # Remove empty description
-                descriptions.pop(item_name)
-                
-        # Update category
-        self.current_data[category] = items
-        
-    def _has_unsaved_changes(self) -> bool:
-        """Check if there are unsaved changes.
-        
-        Returns:
-            True if there are unsaved changes
-        """
-        if not self.current_file:
-            return False
-            
-        # Get current category
-        category = self.category_selector.currentText()
-        if not category or category not in self.current_data:
-            return False
-            
-        # Check if item count matches
-        if len(self.current_data[category]) != self.editor.rowCount():
-            return True
-            
-        # Get current descriptions
-        descriptions = self.current_data.get("descriptions", {})
-        
-        # Check each item
-        for row in range(self.editor.rowCount()):
-            # Check item name
-            name_item = self.editor.item(row, 0)
-            if not name_item:
-                continue
-                
-            item_name = name_item.text().strip()
-            
-            # Check if item is in original list
-            if row >= len(self.current_data[category]) or self.current_data[category][row] != item_name:
-                return True
-                
-            # Check description
-            desc_item = self.editor.item(row, 1)
-            desc = desc_item.text().strip() if desc_item else ""
-            
-            if desc != descriptions.get(item_name, ""):
-                return True
-                
-        return False
-        
-    def _add_item(self) -> None:
-        """Add a new item to the current category."""
-        # Get current category
-        category = self.category_selector.currentText()
-        if not category or category not in self.current_data:
-            return
-            
-        # Add new row
-        row = self.editor.rowCount()
-        self.editor.setRowCount(row + 1)
-        
-        # Set focus to the new item
-        self.editor.setItem(row, 0, QTableWidgetItem("New Item"))
-        self.editor.setItem(row, 1, QTableWidgetItem(""))
-        self.editor.editItem(self.editor.item(row, 0))
-        
-    def _add_category(self) -> None:
-        """Add a new category to the current file."""
-        if not self.current_file:
-            return
-            
-        # Get category name
-        category, ok = QInputDialog.getText(
-            self,
-            "Add Category",
-            "Enter category name:"
-        )
-        
-        if not ok or not category.strip():
-            return
-            
-        category = category.strip()
-        
-        # Check if category already exists
-        if category in self.current_data:
-            QMessageBox.warning(self, "Warning", f"Category '{category}' already exists.")
-            return
-            
-        # Add category
-        self.current_data[category] = []
-        
-        # Update category selector
-        self.category_selector.addItem(category)
-        self.category_selector.setCurrentText(category)
-        
-    def _create_new_file(self) -> None:
-        """Create a new data file."""
-        # Get file name
-        file_name, ok = QInputDialog.getText(
-            self,
-            "New Data File",
-            "Enter file name (without .json extension):"
-        )
-        
-        if not ok or not file_name.strip():
-            return
-            
-        file_name = file_name.strip()
-        
-        # Add extension if missing
-        if not file_name.endswith(".json"):
-            file_name += ".json"
-            
-        # Get data directory
-        base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-        data_dir = os.path.join(base_dir, "data")
-        
-        # Check if file already exists
-        file_path = os.path.join(data_dir, file_name)
-        if os.path.exists(file_path):
-            QMessageBox.warning(self, "Warning", f"File '{file_name}' already exists.")
-            return
-            
-        # Create empty file
-        try:
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump({"items": [], "descriptions": {}}, f, indent=4)
-                
-            # Reload file list
-            self._load_file_list()
-            
-            # Select the new file
-            for i in range(self.file_list.count()):
-                item = self.file_list.item(i)
-                if item.text() == file_name:
-                    self.file_list.setCurrentItem(item)
-                    break
-                    
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Error creating file: {str(e)}")
+        # Load data
+        self.refresh_list()
     
-    def accept(self) -> None:
-        """Handle dialog acceptance."""
-        # Check for unsaved changes
-        if self.current_file and self._has_unsaved_changes():
-            response = QMessageBox.question(
-                self,
-                "Unsaved Changes",
-                f"Save changes to {os.path.basename(self.current_file)}?",
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
-            )
+    def refresh_list(self) -> None:
+        """Refresh the list of data files."""
+        self.list_widget.clear()
+        
+        # Get data directory
+        data_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data'
+        
+        if not data_dir.exists():
+            return
             
-            if response == QMessageBox.StandardButton.Yes:
-                self._save_current_file()
-            elif response == QMessageBox.StandardButton.Cancel:
+        # Add all JSON files
+        for file_path in data_dir.glob('*.json'):
+            self.list_widget.addItem(file_path.name)
+    
+    def import_data(self) -> None:
+        """Import data from a file."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Import Data",
+            "",
+            "JSON files (*.json)"
+        )
+        
+        if not file_path:
+            return
+            
+        try:
+            # Load the data
+            data = load_json_file(file_path)
+            
+            if not data:
+                QMessageBox.warning(
+                    self,
+                    "Import Error",
+                    "Failed to load data from file."
+                )
                 return
                 
-        super().accept() 
+            # Get target path
+            file_name = os.path.basename(file_path)
+            data_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data'
+            target_path = data_dir / file_name
+            
+            # Create data directory if needed
+            data_dir.mkdir(exist_ok=True)
+            
+            # Save the data
+            with open(target_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2)
+                
+            # Refresh list and notify
+            self.refresh_list()
+            self.data_changed.emit()
+            
+            QMessageBox.information(
+                self,
+                "Import Success",
+                "Data imported successfully."
+            )
+            
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Import Error",
+                f"Failed to import data: {str(e)}"
+            )
+    
+    def export_data(self) -> None:
+        """Export data to a file."""
+        current_item = self.list_widget.currentItem()
+        
+        if not current_item:
+            QMessageBox.warning(
+                self,
+                "Export Error",
+                "Please select a data file to export."
+            )
+            return
+            
+        file_name = current_item.text()
+        
+        try:
+            # Load the data
+            data = load_data(file_name)
+            
+            # Get export path
+            file_path, _ = QFileDialog.getSaveFileName(
+                self,
+                "Export Data",
+                file_name,
+                "JSON files (*.json)"
+            )
+            
+            if not file_path:
+                return
+                
+            # Save the data
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2)
+                
+            QMessageBox.information(
+                self,
+                "Export Success",
+                "Data exported successfully."
+            )
+            
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Export Error",
+                f"Failed to export data: {str(e)}"
+            )
+    
+    def delete_data(self) -> None:
+        """Delete a data file."""
+        current_item = self.list_widget.currentItem()
+        
+        if not current_item:
+            QMessageBox.warning(
+                self,
+                "Delete Error",
+                "Please select a data file to delete."
+            )
+            return
+            
+        file_name = current_item.text()
+        
+        # Confirm deletion
+        result = QMessageBox.question(
+            self,
+            "Confirm Delete",
+            f"Are you sure you want to delete {file_name}?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        
+        if result != QMessageBox.StandardButton.Yes:
+            return
+            
+        try:
+            # Get file path
+            data_dir = Path(__file__).resolve().parent.parent.parent.parent / 'data'
+            file_path = data_dir / file_name
+            
+            # Delete file
+            file_path.unlink()
+            
+            # Clear cache and refresh
+            clear_cache()
+            self.refresh_list()
+            self.data_changed.emit()
+            
+            QMessageBox.information(
+                self,
+                "Delete Success",
+                "Data file deleted successfully."
+            )
+            
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Delete Error",
+                f"Failed to delete data file: {str(e)}"
+            ) 

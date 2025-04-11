@@ -1,8 +1,10 @@
-from typing import Dict, List, Optional, Tuple
+"""Parser for Grapevine menu files."""
+
 import xml.etree.ElementTree as ET
+from typing import Dict, List, Optional, Set, Tuple
 from sqlalchemy.orm import Session
 
-from ..models.menu import MenuItem, MenuCategory
+from ..models.menu import Menu, MenuCategory, MenuItem
 
 class MenuParser:
     """Parser for Grapevine XML menu files."""

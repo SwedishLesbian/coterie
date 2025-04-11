@@ -1,12 +1,16 @@
+"""Menu importer for handling Grapevine menu files."""
+
+import os
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 from sqlalchemy.orm import Session
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import ParseError
+from PyQt6.QtWidgets import QApplication
 
 from .menu_parser import MenuParser
-from ..models.menu import MenuItem, MenuCategory
+from ..models.menu import Menu, MenuCategory, MenuItem
 from ..ui.dialogs.trait_conflict import TraitConflictDialog
 
 logger = logging.getLogger(__name__)

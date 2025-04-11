@@ -8,13 +8,23 @@ This document provides a summary of our development progress to help pick up whe
 
 ### Completed Work
 
-1. **Character Sheet UI Improvements**
+1. **Staff and Player Management Implementation**
+   - Created Staff and Player database models with chronicle relationships
+   - Implemented StaffManagerDialog for managing staff members
+   - Implemented PlayerManagerDialog for managing players
+   - Added staff roles (HST, Assistant HST, Narrator, Plot Staff)
+   - Added player status tracking (Active, Inactive, Suspended)
+   - Integrated with chronicle management system
+   - Added email contact information for players
+   - Implemented proper session handling and database operations
+
+2. **Character Sheet UI Improvements**
    - Integrated character notes directly into main character sheet
    - Added multi-format support for notes (Plaintext, Markdown, HTML)
    - Improved UI layout with scrollable main view
    - Enhanced notes section with format selector and appropriate text handling
 
-2. **Menu System Implementation**
+3. **Menu System Implementation**
    - Added menu file parser for Grapevine XML menu files
    - Created menu data models for storing traits and categories
    - Implemented trait selection dialog with search and filtering
@@ -22,14 +32,14 @@ This document provides a summary of our development progress to help pick up whe
    - Added support for importing specific menu files
    - Updated documentation for menu system
 
-3. **UI Improvements and Terminology Updates**
+4. **UI Improvements and Terminology Updates**
    - Changed "Narrator" to "HST" throughout the application
    - Added active chronicle to window title bar
    - Renamed "Players" menu to "People" with staff and player management
    - Added "All Chronicles" view for global character and player lists
    - Fixed chronicle assignment bug with LARP traits
 
-4. **LARP Trait System Implementation**
+5. **LARP Trait System Implementation**
    - Implemented the `dot_rating_to_adjectives` method in `TraitConverter` class
    - Updated `VampireSheet` to use `LarpTraitWidget` and `LarpTraitCategoryWidget`
    - Modified `ImportDialog` to correctly handle LARP traits
@@ -37,7 +47,7 @@ This document provides a summary of our development progress to help pick up whe
    - Created helper methods to suggest appropriate clan disciplines
    - Implemented the `create_vampire_from_dict` method
 
-5. **Chronicle Management Enhancements**
+6. **Chronicle Management Enhancements**
    - Added active chronicle display in window title bar
    - Implemented chronicle assignment dialog
    - Created "All Chronicles" view with global lists
@@ -52,28 +62,24 @@ This document provides a summary of our development progress to help pick up whe
 - Documentation is up-to-date with latest changes
 - Menu system supports both interactive and non-interactive imports
 - Character notes support multiple text formats and are integrated into the main sheet
+- Staff and player management is fully implemented with role-based organization
+- Chronicles can have associated staff members and players
 
 ### Next Steps
 
-1. **Menu System Enhancements**
-   - Add support for menu file validation
-   - Implement menu export functionality
-   - Add menu editing capabilities
-   - Create menu management interface
-
-2. **Staff and Player Management**
-   - Implement staff manager interface
-   - Create player manager dialog
+1. **Staff and Player Management Enhancements**
    - Add role-based permissions system
-   - Integrate with chronicle management
+   - Implement staff activity tracking
+   - Add player character limits
+   - Create player notification system
 
-3. **Challenge System Implementation**
+2. **Challenge System Implementation**
    - Design challenge resolution interface
    - Implement trait bidding system
    - Add trait spending mechanics
    - Create trait refresh/recovery functionality
 
-4. **Additional Character Types**
+3. **Additional Character Types**
    - Extend LARP trait system to other character types
    - Create specialized character sheets
    - Update import/export functionality
@@ -81,18 +87,18 @@ This document provides a summary of our development progress to help pick up whe
 
 ### Known Issues to Address
 
-1. Staff and player management interfaces need implementation
+1. UI styling needs refinement for better user experience
 2. Some parts of the chronicle assignment process need optimization
-3. UI styling needs refinement for better user experience
-4. ⚠️ IN PROGRESS: Staff and player management system implementation
+3. Need to implement role-based access control
+4. Need to add validation for staff role changes
 
 ### Additional Notes
 
-- The menu system now supports importing from Grapevine XML menu files
-- Trait selection is now done through a searchable tree interface
-- Trait conflicts are resolved through an interactive dialog
-- Menu imports can be done in interactive or non-interactive mode
-- Specific menu files can be imported using the --menu-names option
+- Staff management now follows Mind's Eye Theater terminology (HST instead of Narrator)
+- Player management includes status tracking for game organization
+- All new components follow the patterns in the UI components documentation
+- Staff and player relationships are properly cascaded with chronicles
+- Remember to update this summary after each significant development session
 
 ## Project Details
 

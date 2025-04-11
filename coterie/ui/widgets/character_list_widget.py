@@ -4,19 +4,20 @@ from typing import List, Optional, Dict, Any, Callable
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QListWidget, QListWidgetItem, 
     QMenu, QAbstractItemView, QHBoxLayout, QLabel, 
-    QPushButton, QComboBox
+    QPushButton, QComboBox, QMessageBox
 )
 from PyQt6.QtCore import pyqtSignal, Qt
 
-from coterie.models.base import Character
+from coterie.models.character import Character
 from coterie.models.vampire import Vampire
+from coterie.database.engine import get_session
 
 
 class CharacterListWidget(QWidget):
     """Widget for displaying and managing a list of characters."""
     
-    character_selected = pyqtSignal(Character)
-    character_deleted = pyqtSignal(int)  # Character ID
+    character_selected = pyqtSignal(int)  # Emits character ID
+    character_deleted = pyqtSignal(int)   # Emits character ID
     
     def __init__(self, parent: Optional[QWidget] = None) -> None:
         """Initialize the character list widget.
@@ -62,9 +63,9 @@ class CharacterListWidget(QWidget):
         layout.addLayout(button_layout)
         
         # Refresh button
-        refresh_button = QPushButton("Refresh")
-        refresh_button.clicked.connect(self.refresh)
-        button_layout.addWidget(refresh_button)
+        self.refresh_button = QPushButton("Refresh")
+        self.refresh_button.clicked.connect(self.refresh)
+        button_layout.addWidget(self.refresh_button)
         
         button_layout.addStretch()
         
@@ -172,7 +173,7 @@ class CharacterListWidget(QWidget):
         """Handle selection change in the list widget."""
         character = self.get_selected_character()
         if character:
-            self.character_selected.emit(character)
+            self.character_selected.emit(character.id)
             
     def _show_context_menu(self, position) -> None:
         """Show context menu for character list item.
@@ -188,7 +189,7 @@ class CharacterListWidget(QWidget):
         
         # Add menu items
         open_action = menu.addAction("Open")
-        open_action.triggered.connect(lambda: self.character_selected.emit(character))
+        open_action.triggered.connect(lambda: self.character_selected.emit(character.id))
         
         delete_action = menu.addAction("Delete")
         delete_action.triggered.connect(lambda: self._delete_character(character))
@@ -209,12 +210,39 @@ class CharacterListWidget(QWidget):
         Args:
             character: Character to delete
         """
-        # Emit signal for parent to handle
-        self.character_deleted.emit(character.id)
+        # Confirm deletion
+        result = QMessageBox.question(
+            self,
+            "Confirm Delete",
+            f"Are you sure you want to delete {character.name}?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
         
-        # Remove from internal lists
-        self.characters = [c for c in self.characters if c.id != character.id]
-        self.filtered_characters = [c for c in self.filtered_characters if c.id != character.id]
-        
-        # Update list widget
-        self._update_list_widget() 
+        if result != QMessageBox.StandardButton.Yes:
+            return
+            
+        # Delete character
+        session = get_session()
+        try:
+            session.delete(character)
+            session.commit()
+            
+            # Remove from internal lists
+            self.characters = [c for c in self.characters if c.id != character.id]
+            self.filtered_characters = [c for c in self.filtered_characters if c.id != character.id]
+            
+            # Update list widget
+            self._update_list_widget()
+            
+            # Emit signal for parent to handle
+            self.character_deleted.emit(character.id)
+            
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Delete Error",
+                f"Error deleting character: {str(e)}"
+            )
+            
+        finally:
+            session.close() 

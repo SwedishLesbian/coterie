@@ -17,16 +17,19 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QAction, QIcon
 from PyQt6.QtCore import Qt
 
-from coterie.database.engine import get_session, init_db
-from coterie.models.base import Character
-from coterie.models.vampire import Vampire
-from coterie.models.chronicle import Chronicle
-from coterie.ui.dialogs.character_creation import CharacterCreationDialog
-from coterie.ui.dialogs.chronicle_creation import ChronicleCreationDialog
-from coterie.ui.dialogs.data_manager_dialog import DataManagerDialog
-from coterie.ui.widgets.character_list_widget import CharacterListWidget
-from coterie.ui.sheets.vampire_sheet import VampireSheet
-from coterie.utils.data_loader import DataLoader
+from ..database.engine import get_session, init_db
+from ..models import Character, Chronicle, Vampire
+from .dialogs.character_creation import CharacterCreationDialog
+from .dialogs.chronicle_creation import ChronicleCreationDialog
+from .dialogs.data_manager_dialog import DataManagerDialog
+from .widgets.character_list_widget import CharacterListWidget
+from .sheets.vampire_sheet import VampireSheet
+from ..utils.data_loader import (
+    load_data, get_category, get_descriptions,
+    get_item_description, clear_cache, load_character,
+    prepare_character_for_ui, load_grapevine_file,
+    create_vampire_from_dict
+)
 
 logger = logging.getLogger(__name__)
 
@@ -503,72 +506,48 @@ class MainWindow(QMainWindow):
         dialog.exec()
         
     def _create_character(self, data: Dict[str, Any]) -> None:
-        """Create a new character from the dialog data.
-        
-        Args:
-            data: Dictionary containing character data
-        """
-        try:
-            session = get_session()
-            
-            if data["type"].startswith("Vampire"):
-                # Create a new Vampire character
-                character = Vampire(
-                    name=data["name"],
-                    nature=data["nature"],
-                    demeanor=data["demeanor"],
-                    player=data["player"],
-                    narrator=data["narrator"],
-                    clan=data["clan"],
-                    generation=data["generation"],
-                    sect=data["sect"],
-                    status="Active",  # Set default status
-                    start_date=datetime.now(),
-                    last_modified=datetime.now()
-                )
-                
-                # Assign to active chronicle if available
-                if self.active_chronicle:
-                    character.chronicle_id = self.active_chronicle.id
-                
-                # Add to database and commit
-                session.add(character)
-                session.commit()
-                
-                # Prepare the character for UI by preloading all attributes
-                # This prevents lazy loading issues when the session is closed
-                prepared_character = DataLoader.prepare_character_for_ui(character)
-                
-                # Refresh character list
-                self._refresh_characters()
-                
-                # Open the new character using the prepared object
-                self._open_character(prepared_character, use_existing_object=True)
-                
-                # Create status message
-                message = f"Created new Vampire character: {data['name']}"
-                if self.active_chronicle:
-                    message += f" in chronicle {self.active_chronicle.name}"
-                    
-                self.status_bar.showMessage(message)
-                logger.info(message)
-                
+        """Create a new character from the provided data."""
+        with get_session() as session:
+            # Create the character based on type
+            if data["type"].lower() == "vampire":
+                character = Vampire()
             else:
-                # Handle other character types
-                QMessageBox.information(
-                    self,
-                    "Not Implemented",
-                    f"Creation of {data['type']} characters is not yet implemented."
-                )
+                character = Character()
                 
-        except Exception as e:
-            error_msg = f"Failed to create character: {str(e)}"
-            logger.error(error_msg)
-            QMessageBox.critical(self, "Error", error_msg)
-            if session:
-                session.rollback()
-        finally:
-            session.close()
+            # Set basic attributes
+            character.name = data["name"]
+            character.player_name = data["player"]  # Updated to use player_name
+            character.nature = data["nature"]
+            character.demeanor = data["demeanor"]
+            character.status = "Active"
+            character.start_date = datetime.now()
+            character.last_modified = datetime.now()
+            
+            # Set chronicle if one is active
+            if self.active_chronicle:
+                character.chronicle_id = self.active_chronicle.id
+
+            # Add to database and commit
+            session.add(character)
+            session.commit()
+            
+            # Prepare the character for UI by preloading all attributes
+            # This prevents lazy loading issues when the session is closed
+            prepared_character = prepare_character_for_ui(character)
+            
+            # Refresh character list
+            self._refresh_characters()
+            
+            # Open the new character using the prepared object
+            self._open_character(prepared_character, use_existing_object=True)
+            
+            # Create status message
+            message = f"Created new character: {data['name']}"
+            if self.active_chronicle:
+                message += f" in chronicle {self.active_chronicle.name}"
+                
+            self.status_bar.showMessage(message)
+            logger.info(message)
             
     def _open_character(self, character: Character, use_existing_object: bool = False) -> None:
         """Open a character sheet in a new tab.
@@ -587,7 +566,7 @@ class MainWindow(QMainWindow):
             # Use the character object directly if specified, otherwise load from DB
             if not use_existing_object:
                 # Use DataLoader to safely load character with proper session handling
-                character = DataLoader.load_character(character.id)
+                character = load_character(character.id)
                 
                 if not character:
                     raise ValueError(f"Character with ID {character.id} not found")
@@ -727,7 +706,7 @@ class MainWindow(QMainWindow):
             session = get_session()
             
             # Get character using DataLoader for proper session handling
-            character = DataLoader.load_character(character_id)
+            character = load_character(character_id)
             
             if not character:
                 QMessageBox.warning(self, "Warning", "Character not found.")
@@ -737,7 +716,7 @@ class MainWindow(QMainWindow):
             if isinstance(character, Vampire) and isinstance(sheet, VampireSheet):
                 # Update basic information
                 character.name = data["name"]
-                character.player = data["player"]
+                character.player_name = data["player"]
                 character.nature = data["nature"]
                 character.demeanor = data["demeanor"]
                 
@@ -917,4 +896,20 @@ class MainWindow(QMainWindow):
         # TODO: Add staff list widget
         tabs.addTab(staff_widget, "All Staff")
         
-        dialog.exec() 
+        dialog.exec()
+
+    def _show_staff_manager(self) -> None:
+        """Show the staff manager dialog."""
+        from coterie.ui.dialogs.staff_manager import StaffManagerDialog
+        with get_session() as session:
+            dialog = StaffManagerDialog(session, self.active_chronicle, self)
+            dialog.exec()
+            self._refresh_characters()  # Refresh in case staff assignments changed
+            
+    def _show_player_manager(self) -> None:
+        """Show the player manager dialog."""
+        from coterie.ui.dialogs.player_manager import PlayerManagerDialog
+        with get_session() as session:
+            dialog = PlayerManagerDialog(session, self.active_chronicle, self)
+            dialog.exec()
+            self._refresh_characters()  # Refresh in case player assignments changed 

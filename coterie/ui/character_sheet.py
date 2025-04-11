@@ -1,3 +1,5 @@
+"""Character sheet UI component."""
+
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit,
     QPushButton, QSpinBox, QTextEdit, QTabWidget, QScrollArea,

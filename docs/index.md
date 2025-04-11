@@ -6,6 +6,18 @@ Welcome to the Coterie documentation. This serves as a central reference point f
 
 Coterie is a modern Python port of the original Grapevine character and chronicle management system for Mind's Eye Theater LARP. This project converts the original Visual Basic 6.0 codebase to modern Python with SQLAlchemy and PyQt6. The goal is to maintain compatibility with original Grapevine data while enhancing functionality and providing a modern user interface.
 
+### Key Features
+
+- Character creation and management
+- Chronicle organization and tracking
+- Staff management with role-based organization
+- Player tracking with status management
+- Multi-format character notes (Plaintext, Markdown, HTML)
+- LARP trait system with adjective-based mechanics
+- Modern, intuitive user interface
+- Database-backed storage with SQLAlchemy
+- Cross-platform compatibility
+
 ## For AI Assistance (Cursor)
 
 ### Project Context
@@ -22,7 +34,7 @@ The project is named "Coterie" and follows a component-based architecture with:
 
 We have completed several major features:
 - Project structure and infrastructure
-- Basic SQLAlchemy models for characters
+- Basic SQLAlchemy models for characters, staff, and players
 - Core UI framework with PyQt6
 - Character creation dialog
 - Basic application flow
@@ -31,14 +43,15 @@ We have completed several major features:
 - Database models for adjective-based traits
 - Chronicle management system
 - Active chronicle display in title bar
-- People menu (formerly Players) with staff/player management
+- People menu with staff/player management
 - All Chronicles view with global lists
+- Multi-format character notes support
 
 Current focus areas:
-- Implementing staff and player management interfaces
-- Enhancing the chronicle management system
-- Completing the LARP trait system implementation
+- Enhancing staff and player management features
+- Implementing role-based permissions
 - Adding challenge resolution mechanics
+- Extending support to other character types
 
 Refer to `docs/status.md` for the complete and current status of the project. For the most recent development session details and to pick up where we left off, see `docs/development-session-summary.md`.
 

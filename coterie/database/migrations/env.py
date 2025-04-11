@@ -13,11 +13,19 @@ from alembic import context
 
 from coterie.database.engine import DB_PATH
 from coterie.models.base import Base
+from coterie.models.character import Character
+from coterie.models.chronicle import Chronicle, GameSession
+from coterie.models.player import Player
+from coterie.models.staff import Staff
+from coterie.models.trait import Trait
 from coterie.models.vampire import Vampire, Discipline, Ritual, Bond
 
 # Import all models that should be included in migrations here
 # This is necessary for Alembic to detect model changes
-__all__ = ['Vampire', 'Discipline', 'Ritual', 'Bond']
+__all__ = [
+    'Character', 'Chronicle', 'GameSession', 'Player', 'Staff', 'Trait',
+    'Vampire', 'Discipline', 'Ritual', 'Bond'
+]
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

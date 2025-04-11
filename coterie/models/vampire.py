@@ -1,12 +1,16 @@
-from typing import Optional
+"""Vampire character model for Coterie."""
+
+from typing import Optional, TYPE_CHECKING
 from sqlalchemy import String, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .base import Character, Trait
+from .character import Character
+from .larp_trait import LarpTrait
 
 class Vampire(Character):
     """Vampire: The Masquerade character class."""
     __tablename__ = "vampires"
+    __table_args__ = {'extend_existing': True}
     
     id: Mapped[int] = mapped_column(ForeignKey("characters.id"), primary_key=True)
     
@@ -43,22 +47,27 @@ class Vampire(Character):
         "polymorphic_identity": "vampire",
     }
 
-class Discipline(Trait):
+    def __repr__(self) -> str:
+        return f"<Vampire {self.name} ({self.clan})>"
+
+class Discipline(LarpTrait):
     """Vampire disciplines."""
     __tablename__ = "disciplines"
+    __table_args__ = {'extend_existing': True}
     
-    id: Mapped[int] = mapped_column(ForeignKey("traits.id"), primary_key=True)
+    id: Mapped[int] = mapped_column(ForeignKey("larp_traits.id"), primary_key=True)
     path: Mapped[Optional[str]] = mapped_column(String(100))  # For Thaumaturgy/Necromancy paths
     
     __mapper_args__ = {
         "polymorphic_identity": "discipline",
     }
 
-class Ritual(Trait):
+class Ritual(LarpTrait):
     """Vampire rituals (Thaumaturgy/Necromancy)."""
     __tablename__ = "rituals"
+    __table_args__ = {'extend_existing': True}
     
-    id: Mapped[int] = mapped_column(ForeignKey("traits.id"), primary_key=True)
+    id: Mapped[int] = mapped_column(ForeignKey("larp_traits.id"), primary_key=True)
     level: Mapped[int] = mapped_column(Integer)
     path: Mapped[str] = mapped_column(String(100))
     
@@ -66,11 +75,12 @@ class Ritual(Trait):
         "polymorphic_identity": "ritual",
     }
 
-class Bond(Trait):
+class Bond(LarpTrait):
     """Blood bonds."""
     __tablename__ = "bonds"
+    __table_args__ = {'extend_existing': True}
     
-    id: Mapped[int] = mapped_column(ForeignKey("traits.id"), primary_key=True)
+    id: Mapped[int] = mapped_column(ForeignKey("larp_traits.id"), primary_key=True)
     bondee: Mapped[str] = mapped_column(String(100))  # Who is bound
     bonder: Mapped[str] = mapped_column(String(100))  # Who created the bond
     

@@ -1,14 +1,16 @@
 #!/bin/bash
 
-# Create virtual environment if it doesn't exist
-if [ ! -d ".venv" ]; then
-    python3 -m venv .venv
-fi
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate
 
-# Activate virtual environment
-source .venv/bin/activate
-
-# Install requirements
+# Install dependencies
 pip install -r requirements.txt
+
+# Install the package in development mode
+pip install -e .
+
+# Initialize database
+python -m coterie
 
 echo "Setup complete! You can now run the application with: python main.py" 

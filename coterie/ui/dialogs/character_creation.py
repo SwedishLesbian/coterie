@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QLabel, QLineEdit, QComboBox, QSpinBox,
     QPushButton, QFormLayout, QGroupBox,
     QDialogButtonBox, QTabWidget, QScrollArea,
-    QListWidget, QListWidgetItem, QPushButton
+    QListWidget, QListWidgetItem, QPushButton, QMessageBox
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 
@@ -123,30 +123,18 @@ class CharacterCreationDialog(QDialog):
         self.name = QLineEdit()
         basic_layout.addRow("&Name:", self.name)
         
-        # Nature and Demeanor
-        self.nature = QComboBox()
-        self.nature.setEditable(True)
-        nature_items = [
-            "Architect", "Autocrat", "Bon Vivant", "Bravo",
-            "Caregiver", "Celebrant", "Conformist", "Conniver",
-            "Curmudgeon", "Defender", "Deviant", "Director",
-            "Fanatic", "Gallant", "Judge", "Loner",
-            "Martyr", "Masochist", "Monster", "Pedagogue",
-            "Penitent", "Perfectionist", "Rebel", "Rogue",
-            "Survivor", "Traditionalist", "Trickster", "Visionary"
-        ]
-        self.nature.addItems(nature_items)
-        basic_layout.addRow("N&ature:", self.nature)
+        # Player field
+        self.player_name = QLineEdit()
+        basic_layout.addRow("&Player:", self.player_name)
         
-        self.demeanor = QComboBox()
-        self.demeanor.setEditable(True)
-        self.demeanor.addItems(nature_items)
+        # Nature and Demeanor
+        self.nature = QLineEdit()
+        basic_layout.addRow("&Nature:", self.nature)
+        
+        self.demeanor = QLineEdit()
         basic_layout.addRow("&Demeanor:", self.demeanor)
         
         # Player information
-        self.player = QLineEdit()
-        basic_layout.addRow("&Player:", self.player)
-        
         self.narrator = QLineEdit()
         basic_layout.addRow("&Narrator:", self.narrator)
         
@@ -410,9 +398,9 @@ class CharacterCreationDialog(QDialog):
         data = {
             "type": self.char_type.currentText(),
             "name": self.name.text(),
-            "nature": self.nature.currentText(),
-            "demeanor": self.demeanor.currentText(),
-            "player": self.player.text(),
+            "nature": self.nature.text(),
+            "demeanor": self.demeanor.text(),
+            "player": self.player_name.text(),
             "narrator": self.narrator.text()
         }
         
@@ -450,4 +438,24 @@ class CharacterCreationDialog(QDialog):
         """Handle dialog acceptance."""
         # Emit the character data
         self.character_created.emit(self.get_character_data())
-        super().accept() 
+        super().accept()
+
+    def _validate_data(self) -> bool:
+        """Validate the form data."""
+        if not self.name.text().strip():
+            QMessageBox.warning(self, "Invalid Input", "Please enter a character name.")
+            return False
+            
+        if not self.player_name.text().strip():
+            QMessageBox.warning(self, "Invalid Input", "Please enter a player name.")
+            return False
+            
+        if not self.nature.text().strip():
+            QMessageBox.warning(self, "Invalid Input", "Please enter a nature.")
+            return False
+            
+        if not self.demeanor.text().strip():
+            QMessageBox.warning(self, "Invalid Input", "Please enter a demeanor.")
+            return False
+            
+        return True 

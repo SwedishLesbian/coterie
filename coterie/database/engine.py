@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from coterie.models.base import Base
 
@@ -28,44 +28,7 @@ def get_session():
 
 def init_db():
     """Initialize the database schema."""
-    Base.metadata.create_all(engine)
-    
-    # Run migrations
-    run_migrations()
-    
-def run_migrations():
-    """Run any necessary database migrations."""
-    session = get_session()
-    try:
-        # Check if chronicles table exists
-        result = session.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name='chronicles'"))
-        if result.fetchone() is None:
-            # Create chronicles table
-            session.execute(text("""
-                CREATE TABLE IF NOT EXISTS chronicles (
-                    id INTEGER PRIMARY KEY,
-                    name VARCHAR(100) NOT NULL,
-                    description TEXT,
-                    narrator VARCHAR(100) NOT NULL,
-                    start_date DATETIME NOT NULL,
-                    last_modified DATETIME NOT NULL,
-                    is_active BOOLEAN DEFAULT 1
-                )
-            """))
-            
-        # Check if chronicle_id column exists in characters table
-        result = session.execute(text("PRAGMA table_info(characters)"))
-        columns = [column[1] for column in result.fetchall()]
-        
-        if 'chronicle_id' not in columns:
-            # Add chronicle_id column to characters table
-            session.execute(text("""
-                ALTER TABLE characters ADD COLUMN chronicle_id INTEGER REFERENCES chronicles(id)
-            """))
-            
-        session.commit()
-    except Exception as e:
-        session.rollback()
-        print(f"Migration error: {e}")
-    finally:
-        session.close() 
+    # Drop all tables first to ensure clean state
+    Base.metadata.drop_all(engine)
+    # Create all tables from our SQLAlchemy models
+    Base.metadata.create_all(engine) 

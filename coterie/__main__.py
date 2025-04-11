@@ -13,10 +13,10 @@ from typing import NoReturn, Optional, List
 from PyQt6.QtWidgets import QApplication
 from sqlalchemy.orm import Session
 
-from coterie.database.engine import engine, APP_DATA, session_factory
-from coterie.models.base import Base
-from coterie.ui.main_window import MainWindow
-from coterie.utils.menu_importer import MenuImporter
+from .database.engine import engine, APP_DATA, session_factory
+from .models.base import Base
+from .ui.main_window import MainWindow
+from .utils.menu_importer import MenuImporter
 
 
 def setup_logging() -> None:

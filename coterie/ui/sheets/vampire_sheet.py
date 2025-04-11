@@ -5,25 +5,31 @@ characters, displaying all relevant attributes, abilities, and other traits usin
 the Mind's Eye Theater LARP adjective-based trait system.
 """
 
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Any
 from pathlib import Path
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
     QLabel, QLineEdit, QSpinBox, QGroupBox,
-    QScrollArea, QPushButton, QTabWidget
+    QScrollArea, QPushButton, QTabWidget, QFrame, QGridLayout,
+    QComboBox, QTextEdit, QMessageBox
 )
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 
 from coterie.models.vampire import Vampire
 from coterie.models.larp_trait import LarpTrait, TraitCategory
-from coterie.utils.data_loader import DataLoader
+from coterie.utils.data_loader import (
+    load_data, get_category, get_descriptions,
+    get_item_description, clear_cache, load_character,
+    prepare_character_for_ui
+)
 from coterie.ui.widgets.larp_trait_widget import LarpTraitWidget, LarpTraitCategoryWidget
 
 class VampireSheet(QWidget):
     """Character sheet display for Vampire: The Masquerade LARP characters."""
     
     modified = pyqtSignal()
+    character_changed = pyqtSignal()
     
     def __init__(self, parent=None):
         """Initialize the vampire character sheet.
@@ -49,14 +55,114 @@ class VampireSheet(QWidget):
         self.content_layout = QVBoxLayout(self.content_widget)
         self.scroll_area.setWidget(self.content_widget)
         
-        # Add trait sections
-        self._create_attributes_section(self.content_layout)
-        self._create_abilities_section(self.content_layout)
-        self._create_disciplines_section(self.content_layout)
-        self._create_backgrounds_section(self.content_layout)
-        self._create_virtues_section(self.content_layout)
-        self._create_stats_section(self.content_layout)
-        self._create_description_section(self.content_layout)
+        # Create tabs
+        self.tabs = QTabWidget()
+        self.content_layout.addWidget(self.tabs)
+        
+        # Create basic info tab
+        self.basic_tab = QWidget()
+        self.basic_layout = QFormLayout(self.basic_tab)
+        self.tabs.addTab(self.basic_tab, "Basic Info")
+        
+        # Add basic info fields
+        self.name_edit = QLineEdit()
+        self.name_edit.textChanged.connect(lambda: self.modified.emit())
+        self.basic_layout.addRow("Name:", self.name_edit)
+        
+        self.player_edit = QLineEdit()
+        self.player_edit.textChanged.connect(lambda: self.modified.emit())
+        self.basic_layout.addRow("Player:", self.player_edit)
+        
+        self.chronicle_edit = QLineEdit()
+        self.chronicle_edit.setReadOnly(True)  # Chronicle name is read-only
+        self.basic_layout.addRow("Chronicle:", self.chronicle_edit)
+        
+        self.clan_combo = QComboBox()
+        self.clan_combo.addItems(get_category("clans", "clans"))
+        self.clan_combo.currentTextChanged.connect(lambda: self.modified.emit())
+        self.basic_layout.addRow("Clan:", self.clan_combo)
+        
+        self.generation_spin = QSpinBox()
+        self.generation_spin.setRange(4, 15)
+        self.generation_spin.setValue(13)
+        self.generation_spin.valueChanged.connect(lambda: self.modified.emit())
+        self.basic_layout.addRow("Generation:", self.generation_spin)
+        
+        self.nature_combo = QComboBox()
+        self.nature_combo.addItems(get_category("natures", "natures"))
+        self.nature_combo.currentTextChanged.connect(lambda: self.modified.emit())
+        self.basic_layout.addRow("Nature:", self.nature_combo)
+        
+        self.demeanor_combo = QComboBox()
+        self.demeanor_combo.addItems(get_category("demeanors", "demeanors"))
+        self.demeanor_combo.currentTextChanged.connect(lambda: self.modified.emit())
+        self.basic_layout.addRow("Demeanor:", self.demeanor_combo)
+        
+        # Create traits tab
+        self.traits_tab = QWidget()
+        self.traits_layout = QVBoxLayout(self.traits_tab)
+        self.tabs.addTab(self.traits_tab, "Traits")
+        
+        # Add trait categories
+        for category in ["Physical", "Social", "Mental", "Skills", "Knowledges"]:
+            group = QGroupBox(category)
+            group_layout = QVBoxLayout(group)
+            
+            widget = LarpTraitCategoryWidget(category)
+            widget.categoryChanged.connect(lambda c, t: self.modified.emit())
+            group_layout.addWidget(widget)
+            
+            self.traits_layout.addWidget(group)
+        
+        # Create disciplines tab
+        self.disciplines_tab = QWidget()
+        self.disciplines_layout = QVBoxLayout(self.disciplines_tab)
+        self.tabs.addTab(self.disciplines_tab, "Disciplines")
+        
+        # Add discipline widgets
+        self.disciplines_group = QGroupBox("Disciplines")
+        self.disciplines_group_layout = QVBoxLayout(self.disciplines_group)
+        
+        for discipline in get_category("disciplines", "disciplines"):
+            widget = LarpTraitWidget(discipline)
+            widget.traitChanged.connect(lambda n, t: self.modified.emit())
+            self.disciplines_group_layout.addWidget(widget)
+            
+        self.disciplines_layout.addWidget(self.disciplines_group)
+        
+        # Create backgrounds tab
+        self.backgrounds_tab = QWidget()
+        self.backgrounds_layout = QVBoxLayout(self.backgrounds_tab)
+        self.tabs.addTab(self.backgrounds_tab, "Backgrounds")
+        
+        # Add background widgets
+        self.backgrounds_group = QGroupBox("Backgrounds")
+        self.backgrounds_group_layout = QVBoxLayout(self.backgrounds_group)
+        
+        for background in get_category("backgrounds", "backgrounds"):
+            widget = LarpTraitWidget(background)
+            widget.traitChanged.connect(lambda n, t: self.modified.emit())
+            self.backgrounds_group_layout.addWidget(widget)
+            
+        self.backgrounds_layout.addWidget(self.backgrounds_group)
+        
+        # Create notes tab
+        self.notes_tab = QWidget()
+        self.notes_layout = QVBoxLayout(self.notes_tab)
+        self.tabs.addTab(self.notes_tab, "Notes")
+        
+        # Add notes editor
+        self.notes_edit = QTextEdit()
+        self.notes_edit.setPlaceholderText("Enter character notes here...")
+        self.notes_layout.addWidget(self.notes_edit)
+        
+        # Add save button
+        self.save_button = QPushButton("Save")
+        self.save_button.clicked.connect(self.save_character)
+        self.main_layout.addWidget(self.save_button)
+        
+        # Store character ID
+        self.character_id = None
         
     def _create_character_info_section(self) -> None:
         """Create the character information section."""
@@ -71,9 +177,9 @@ class VampireSheet(QWidget):
         info_layout.addRow("Name:", self.name)
         
         # Player name
-        self.player = QLineEdit()
-        self.player.textChanged.connect(lambda: self.modified.emit())
-        info_layout.addRow("Player:", self.player)
+        self.player_name = QLineEdit()
+        self.player_name.textChanged.connect(lambda: self.modified.emit())
+        info_layout.addRow("Player:", self.player_name)
         
         # Chronicle section
         chronicle_layout = QHBoxLayout()
@@ -195,219 +301,60 @@ class VampireSheet(QWidget):
                 finally:
                     session.close()
         
-    def _create_attributes_section(self, parent_layout: QVBoxLayout) -> None:
-        """Create the attributes section.
-        
-        Args:
-            parent_layout: Parent layout to add to
-        """
-        attributes_group = QGroupBox("Attributes")
-        attributes_layout = QVBoxLayout(attributes_group)
-        parent_layout.addWidget(attributes_group)
-        
-        # Create LARP trait category widget for attributes
-        self.attributes = LarpTraitCategoryWidget(
-            category_name="Attributes",
-            trait_categories={
-                "Physical": [],
-                "Social": [],
-                "Mental": []
-            }
-        )
-        self.attributes.categoryChanged.connect(lambda c, t: self.modified.emit())
-        attributes_layout.addWidget(self.attributes)
-        
-    def _create_abilities_section(self, parent_layout: QVBoxLayout) -> None:
-        """Create the abilities section.
-        
-        Args:
-            parent_layout: Parent layout to add to
-        """
-        abilities_group = QGroupBox("Abilities")
-        abilities_layout = QVBoxLayout(abilities_group)
-        parent_layout.addWidget(abilities_group)
-        
-        # Create LARP trait category widget for abilities
-        self.abilities = LarpTraitCategoryWidget(
-            category_name="Abilities",
-            trait_categories={
-                "Talents": [],
-                "Skills": [],
-                "Knowledges": []
-            }
-        )
-        self.abilities.categoryChanged.connect(lambda c, t: self.modified.emit())
-        abilities_layout.addWidget(self.abilities)
-        
-    def _create_disciplines_section(self, parent_layout: QVBoxLayout) -> None:
-        """Create the disciplines section.
-        
-        Args:
-            parent_layout: Parent layout to add to
-        """
-        disciplines_group = QGroupBox("Disciplines")
-        disciplines_layout = QVBoxLayout(disciplines_group)
-        parent_layout.addWidget(disciplines_group)
-        
-        # Create LARP trait widget for disciplines
-        self.disciplines = LarpTraitWidget("Disciplines")
-        self.disciplines.traitChanged.connect(lambda n, t: self.modified.emit())
-        disciplines_layout.addWidget(self.disciplines)
-        
-    def _create_backgrounds_section(self, parent_layout: QVBoxLayout) -> None:
-        """Create the backgrounds section.
-        
-        Args:
-            parent_layout: Parent layout to add to
-        """
-        backgrounds_group = QGroupBox("Backgrounds")
-        backgrounds_layout = QVBoxLayout(backgrounds_group)
-        parent_layout.addWidget(backgrounds_group)
-        
-        # Create LARP trait widget for backgrounds
-        self.backgrounds = LarpTraitWidget("Backgrounds")
-        self.backgrounds.traitChanged.connect(lambda n, t: self.modified.emit())
-        backgrounds_layout.addWidget(self.backgrounds)
-        
-    def _create_virtues_section(self, parent_layout: QVBoxLayout) -> None:
-        """Create the virtues and path section.
-        
-        Args:
-            parent_layout: Parent layout to add to
-        """
-        # Virtues group
-        virtues_group = QGroupBox("Virtues")
-        virtues_layout = QVBoxLayout(virtues_group)
-        parent_layout.addWidget(virtues_group)
-        
-        # Create LARP trait widgets for virtues
-        self.virtues = LarpTraitCategoryWidget(
-            category_name="Virtues",
-            trait_categories={
-                "Conscience": [],
-                "Self-Control": [],
-                "Courage": []
-            }
-        )
-        self.virtues.categoryChanged.connect(lambda c, t: self.modified.emit())
-        virtues_layout.addWidget(self.virtues)
-        
-        # Path of Enlightenment
-        path_group = QGroupBox("Path of Enlightenment")
-        path_layout = QFormLayout(path_group)
-        parent_layout.addWidget(path_group)
-        
-        # Path name
-        self.path = QLineEdit("Humanity")
-        self.path.textChanged.connect(lambda: self.modified.emit())
-        path_layout.addRow("Path:", self.path)
-        
-        # Path rating LARP traits
-        self.path_traits = LarpTraitWidget("Path Rating")
-        self.path_traits.traitChanged.connect(lambda n, t: self.modified.emit())
-        path_layout.addRow("Path Rating:", self.path_traits)
-        
-    def _create_stats_section(self, parent_layout: QVBoxLayout) -> None:
-        """Create the stats section (willpower, blood pool).
-        
-        Args:
-            parent_layout: Parent layout to add to
-        """
-        stats_group = QGroupBox("Stats")
-        stats_layout = QVBoxLayout(stats_group)
-        parent_layout.addWidget(stats_group)
-        
-        # Willpower
-        self.willpower = LarpTraitWidget("Willpower")
-        self.willpower.traitChanged.connect(lambda n, t: self.modified.emit())
-        stats_layout.addWidget(self.willpower)
-        
-        # Blood Pool
-        self.blood = LarpTraitWidget("Blood Pool")
-        self.blood.traitChanged.connect(lambda n, t: self.modified.emit())
-        stats_layout.addWidget(self.blood)
-        
-    def _create_description_section(self, parent_layout: QVBoxLayout) -> None:
-        """Create the character description section.
-        
-        Args:
-            parent_layout: Parent layout to add to
-        """
-        description_group = QGroupBox("Description")
-        description_layout = QFormLayout(description_group)
-        parent_layout.addWidget(description_group)
-        
-        # Fields to add: Concept, Sire, Title, etc.
-        self.concept = QLineEdit()
-        self.concept.textChanged.connect(lambda: self.modified.emit())
-        description_layout.addRow("Concept:", self.concept)
-        
-        self.sire = QLineEdit()
-        self.sire.textChanged.connect(lambda: self.modified.emit())
-        description_layout.addRow("Sire:", self.sire)
-        
-        self.title = QLineEdit()
-        self.title.textChanged.connect(lambda: self.modified.emit())
-        description_layout.addRow("Title:", self.title)
-        
-    def load_character(self, character: Vampire) -> None:
-        """Load a vampire character into the sheet.
-        
-        Args:
-            character: The vampire character to display
-        """
-        # Store reference to the character
-        self.character = character
-        
-        # Basic information
-        self.name.setText(character.name)
-        self.player.setText(character.player)
-        self.storyteller.setText(character.narrator)  # Use narrator field for Storyteller
-        self.nature.setText(character.nature)
-        self.demeanor.setText(character.demeanor)
-        
-        # Chronicle information
-        self._load_chronicle_info(character)
-        
-        # Vampire-specific information
-        self.clan.setText(character.clan)
-        self.generation.setValue(character.generation)
-        self.sect.setText(character.sect)
-        
-        # Load concept, sire, and title if available
-        if hasattr(character, 'concept'):
-            self.concept.setText(character.concept)
-        if hasattr(character, 'sire'):
-            self.sire.setText(character.sire)
-        if hasattr(character, 'title'):
-            self.title.setText(character.title)
-        
-        # Load LARP traits
-        self._load_larp_traits(character)
-        
-    def _load_chronicle_info(self, character: Vampire) -> None:
-        """Load the character's chronicle information.
-        
-        Args:
-            character: Vampire character to load chronicle info from
-        """
-        if character.chronicle_id:
-            # Get the chronicle from the database
-            from coterie.database.engine import get_session
-            from coterie.models.chronicle import Chronicle
+    def load_character(self, character_id: int) -> None:
+        """Load a character by ID."""
+        try:
+            # Load character
+            character = load_character(character_id)
             
-            session = get_session()
-            try:
-                chronicle = session.query(Chronicle).filter_by(id=character.chronicle_id).first()
-                if chronicle:
-                    self.chronicle_name.setText(chronicle.name)
-                else:
-                    self.chronicle_name.setText("Unknown Chronicle")
-            finally:
-                session.close()
-        else:
-            self.chronicle_name.setText("No Chronicle Assigned")
-        
+            if not character:
+                QMessageBox.critical(
+                    self,
+                    "Load Error",
+                    f"Failed to load character {character_id}"
+                )
+                return
+                
+            # Store character ID
+            self.character_id = character_id
+            
+            # Update basic info
+            self.name_edit.setText(character.name)
+            self.player_edit.setText(character.player_name)
+            self.chronicle_edit.setText(character.chronicle.name if character.chronicle else "")
+            
+            if hasattr(character, "clan"):
+                index = self.clan_combo.findText(character.clan)
+                if index >= 0:
+                    self.clan_combo.setCurrentIndex(index)
+                    
+            if hasattr(character, "generation"):
+                self.generation_spin.setValue(character.generation)
+                
+            if hasattr(character, "nature"):
+                index = self.nature_combo.findText(character.nature)
+                if index >= 0:
+                    self.nature_combo.setCurrentIndex(index)
+                    
+            if hasattr(character, "demeanor"):
+                index = self.demeanor_combo.findText(character.demeanor)
+                if index >= 0:
+                    self.demeanor_combo.setCurrentIndex(index)
+                    
+            # Update notes
+            if hasattr(character, "notes"):
+                self.notes_edit.setText(character.notes)
+                
+            # Update traits
+            self._load_larp_traits(character)
+            
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Load Error",
+                f"Error loading character: {str(e)}"
+            )
+    
     def _load_larp_traits(self, character: Vampire) -> None:
         """Load LARP traits into appropriate widgets by category.
         
@@ -496,6 +443,66 @@ class VampireSheet(QWidget):
         self.willpower.set_traits(willpower_traits)
         self.blood.set_traits(blood_traits)
         
+    def save_character(self) -> None:
+        """Save the current character."""
+        if not self.character_id:
+            return
+            
+        try:
+            # Load character
+            character = load_character(self.character_id)
+            
+            if not character:
+                QMessageBox.critical(
+                    self,
+                    "Save Error",
+                    f"Failed to load character {self.character_id}"
+                )
+                return
+                
+            # Update basic info
+            character.name = self.name_edit.text()
+            character.player_name = self.player_edit.text()
+            # TODO: Update chronicle
+            
+            if hasattr(character, "clan"):
+                character.clan = self.clan_combo.currentText()
+                
+            if hasattr(character, "generation"):
+                character.generation = self.generation_spin.value()
+                
+            if hasattr(character, "nature"):
+                character.nature = self.nature_combo.currentText()
+                
+            if hasattr(character, "demeanor"):
+                character.demeanor = self.demeanor_combo.currentText()
+                
+            # Update notes
+            if hasattr(character, "notes"):
+                character.notes = self.notes_edit.toPlainText()
+                
+            # Update traits
+            # TODO: Implement trait saving
+            
+            # Save character
+            character.save()
+            
+            # Emit change signal
+            self.character_changed.emit()
+            
+            QMessageBox.information(
+                self,
+                "Save Success",
+                "Character saved successfully."
+            )
+            
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Save Error",
+                f"Error saving character: {str(e)}"
+            )
+        
     def get_character_data(self) -> Dict:
         """Get the character data from the sheet.
         
@@ -504,13 +511,13 @@ class VampireSheet(QWidget):
         """
         # Basic information
         data = {
-            "name": self.name.text(),
-            "player": self.player.text(),
+            "name": self.name_edit.text(),
+            "player_name": self.player_edit.text(),
             "narrator": self.storyteller.text(),  # Store as narrator in db
-            "nature": self.nature.text(),
-            "demeanor": self.demeanor.text(),
-            "clan": self.clan.text(),
-            "generation": self.generation.value(),
+            "nature": self.nature_combo.currentText(),
+            "demeanor": self.demeanor_combo.currentText(),
+            "clan": self.clan_combo.currentText(),
+            "generation": self.generation_spin.value(),
             "sect": self.sect.text(),
             "concept": self.concept.text(),
             "sire": self.sire.text(),
