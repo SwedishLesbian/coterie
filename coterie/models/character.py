@@ -25,7 +25,7 @@ class Character(Base):
     demeanor: Mapped[str] = mapped_column(String(50))
     player_name: Mapped[str] = mapped_column(String(100))  # Renamed from player to avoid confusion
     status: Mapped[str] = mapped_column(String(50))
-    narrator: Mapped[str] = mapped_column(String(100))
+    narrator: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     is_npc: Mapped[bool] = mapped_column(Boolean, default=False)
     start_date: Mapped[datetime] = mapped_column(DateTime)
     last_modified: Mapped[datetime] = mapped_column(DateTime)

@@ -54,6 +54,10 @@ This document provides a summary of our development progress to help pick up whe
    - Added staff and player management menu items
    - Updated chronicle creation dialog to use "HST" terminology
 
+7. **Bug Fix: Character Creation**
+   - Resolved `IntegrityError` on character creation by making the `Character.narrator` field nullable.
+   - Updated `coterie/models/character.py` accordingly.
+
 ### Current State
 
 - The application now supports importing Grapevine menu files
@@ -91,6 +95,9 @@ This document provides a summary of our development progress to help pick up whe
 2. Some parts of the chronicle assignment process need optimization
 3. Need to implement role-based access control
 4. Need to add validation for staff role changes
+5. Menu import needs better error handling for malformed files
+6. Some menu categories may need manual organization
+7. ⚠️ IN PROGRESS: Menu system implementation
 
 ### Additional Notes
 

@@ -57,6 +57,7 @@ In Phase 2, we plan to focus on:
 ## Critical Issues
 
 - ✅ **RESOLVED**: LARP Trait System Implementation - Converted dot-based trait system to adjective-based for Mind's Eye Theater LARP
+- ✅ **RESOLVED**: Character Creation `IntegrityError` - Fixed `NOT NULL` constraint on `characters.narrator` by making the field nullable.
 
 ## Next Development Tasks
 
