@@ -1,0 +1,117 @@
+WoD Font 2 Version A
+
+This font was processed by LdyMox 
+Ldy Mox's WoD Graphics Page
+http://www.wodgraphics.com
+LdyMox@aol.com
+
+Of course the font version doesn't look as good as the real versions, but some look reasonably good, others like the Wraith glyphs were too complicated to add.
+
+To install the font unzip into a Temp directory then goto C:\Windows\Fonts and choose File -->Install New Font and point out where the temp directory where the WoD font is and highlight the font and then make sure the "Copy Fonts to font folder" is checked and click ok. and you can delete the temporary files, but you may want to keep this file since this has the character list :)
+
+The World of Darkness Symbols themselves are copyrighted by White Wolf 
+
+Character List
+~~~~~~~~~~~~~~~
+! Lucifer (Lillith)
+' Dragon(Lillith)
+# Moon(Lillith)
+$ Sacred Place(Lillith)
+% Magic(Lillith)
+& Sacred Place(Lillith)
+' Owl(Lillith)
+( Serpent(Lillith)
+) Danger(Lillith)
+* Caine(Lillith)
++ Blood(Lillith)
+, Kindred(Lillith)
+- Lillith(Lillith)
+. Allies(Lillith)
+/ Sun(Lillith)
+0 World of Darkness
+1 Filled Character Sheet Dot
+2 Empty Character Sheet Dot
+3 Checked Character Sheet Box
+4 Empty Character Sheet Box
+5 Giovanni (Title Word)
+6 Ventrue (Title Word)
+7 Salubri (Title Word)
+8 Nosferatu (Title Word)
+9 Tremere (Title Word)
+: Toreador (Title Word)
+; Gangrel (Title Word)
+< Catiff (Title Word)
+= Brujah (Title Word)
+> Ravnos (Title Word)
+? Assamite (Title Word)
+@ Daughters of Capacony (Title Word)
+A Another Ankh
+B New Sabbat symbol
+C New Tzismise symbol
+D Gargoyles Ankh
+E New Lasombra symbol
+F Silver Fang- Wise Heart
+G Silver Fang- Sun
+H Silver Fang- Moon 
+I Wolf Home Umbral Realm
+J Summer Country Umbral Realm
+K Scar Umbral Realm
+L Pangea Umbral Realm
+M Flux Umbral Realm
+N Cyber Web Umbral Realm
+O binding
+P Battleground Umbral Realm
+Q Atrocity Umbral Realm
+R Arcadia Umbral Realm
+S Aetherial Umbral Realm
+T Abyss Umbral Realm
+U Legendary Umbral Realm
+V Erebus Umbral Realm
+W Ajaba(Were hyena)
+X Rahjah(Bastet)
+Y Moot (Bastet)
+Z Cahlash(Bastet)
+[ Break(Bastet)
+\ Beware(Bastet)
+] Malkavian (Title Word)
+^ Samedi (Title Word)
+_ Followers of Set (Title Word)
+` Boggans(Title Word)
+a Mine, Keep out, Stay away (Bastet)
+b Seline(Bastet)
+c Asura(Bastet)
+d Gaia(Bastet)
+e Nala(Bastet)
+f Panders
+g Harbringers of Skulls
+h Blood Brothers
+i Eaters-of-Souls Wyrm
+j Defiler Wyrm
+k Beast-of-War Wyrm
+l Rage(Title Word)
+m Nosferatu(Sabbat)
+n Malkavian(Sabbat)
+o Salubri(Sabbat)
+p Kiasyd
+q Brujah(Sabbat)
+r Ventrue(Sabbat)
+s Serpents of the Light
+t Toreador (Sabbat)
+u Gangrel (Sabbat)
+v Ravnos(Sabbat)
+w This Place Must be Destroyed (Lillith)
+x All Hail Lillith (Lillith)
+y Human(Lillith)
+z Cat (Lillith)
+{ Eshu (Title Word)
+| Nockers (Title Word)
+} Pooka (Title Word)
+~ Redcaps (Title Word)
+Alt+0161 Sayters (Title Word)
+Alt+0162 Sidhe (Title Word)
+Alt+0163 Sluagh (Title Word)
+Alt+0164 Trolls (Title Word)
+
+hopefully more to come on this font series and have fun, be creative and buy White Wolf stuff
+
+,,,^oo^,,, Moxy

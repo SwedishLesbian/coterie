@@ -1,0 +1,3 @@
+Hunter: The Reckoning	Crack House	crackhouse.ttf
+Hunter	                Dead History Bold	Dead History Bold.ttf
+Hunter Headers	        Dead History Roman	Dead History.ttf

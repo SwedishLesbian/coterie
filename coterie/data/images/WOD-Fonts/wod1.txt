@@ -1,0 +1,176 @@
+This font was processed by LdyMox 
+Ldy Mox's WoD Graphics Page
+http://www.wodgraphics.com
+LdyMox@aol.com
+
+Of course the font version doesn't look as good as the real versions, but some look reasonably good, others like the Wraith glyphs were too complicated to add.
+
+To install the font unzip into a Temp directory then goto C:\Windows\Fonts and choose File -->Install New Font and point out where the temp directory where the WoD font is and highlight the font and then make sure the "Copy Fonts to font folder" is checked and click ok. and you can delete the temporary files, but you may want to keep this file since this has the character list :)
+
+The World of Darkness Symbols themselves are copyrighted by White Wolf 
+
+Character List
+~~~~~~~~~~~~~~~
+!  Bagheera
+"  Bastet
+#  Balam
+$  Bubasti
+%  Ceilican
+&  Kahn
+'  Luna
+(  Spirit(From Mage)
+)  Time
+*  Nuwshia
++  Pumonca
+,  Umbra
+-  Totem
+.  Spirit(Jaggling,Gaffling)
+/  Qualmi
+0  Wisdom
+1  Verbena
+2  Virtual Adepts
+3  Correspondence
+4  Entropy
+5  Forces
+6  Life
+7  Matter
+8  Mind
+9  Prime
+:  Honor
+;  Caern
+<  Simba
+=  Moon Bridge
+>  Swara
+?  Uktena
+@  Glory
+A  Black Fury
+B  Bone Gnawer
+C  Black Spiral Dancer
+D  Children of Gaia
+E  Fianna
+F  Get of Fenris
+G  Glasswalker
+H  Red Talon
+I  Shadow Lord
+J  Silent Strider
+K  Silver Fang
+L  Stargazer
+M  Wendigo
+N  Skull Ring from the book of Nod
+O  Crotan Symbol a friend(StrksWlght) made up
+P  Moot
+Q  Ronin
+R  Rite of Passage
+S  Ahroun
+T  Galliard
+U  Philodox
+V  Theurge
+W  Ragabash
+X  Homid
+Y  Metis
+Z  Lupus
+[  Banes
+\  City
+]  Wilderness
+^  Rite of Binding
+_  Monsters
+`  Celestine
+a  Fomori
+b  Gaia
+c  Weaver
+d  Wyld
+e  Wyrm
+f  Ravnos
+g  Followers of Set
+h  Cappdocian (from top of Character Sheet)
+i  Brujah
+j  Daughters of Cacophony
+k  Gangrel
+l  MaLkaViaN
+m  Nosferatu - Improved from old version
+n  Toreador
+o  Tremere
+p  Ventrue - Improved from Old version
+q  Slanted Ankh
+r  upright Ankh
+s  Akashic Brotherhood
+t  Celestial Chorus
+u  Cult of Ecstasy
+v  Dreamspeakers
+w  Euthanatos
+x  Hallow Ones
+y  Order of Hermes
+z  Sons of Ether
+{  World of Darkness symbol
+|  Park
+}  Rite of the Fetish
+~  Deep Umbra
+Alt+0161  Salubri
+Alt+0162  Assamite
+Alt+0163  Technocracy
+Alt+0164  Abonimation
+Alt+0165  Marauder
+Alt+0166  Ananasi
+Alt+0167  Apocolypse 
+Alt+0168  Brujah
+Alt+0169  Claws
+Alt+0170  Corax
+Alt+0171  Fetish
+Alt+0172  Iteration X
+Alt+0174  Long and Hard Road
+Alt+0176  Malkavian
+Alt+0177  Mokole
+Alt+0178  World of Darkness Symbol
+Alt+0179  New World Order
+Alt+0180  Pentex
+Alt+0181  Progentiors
+Alt+0182  Retribution
+Alt+0184  Rokea
+Alt+0185  Samedi
+Alt+0186  Silver Pack
+Alt+0187  Therapy
+Alt+0188  Tzismise
+Alt+0189  Werewolf
+Alt+0190  Legend
+Alt+0191  Blood Shinta
+Alt+0192  Bone Shinta
+Alt+0193  Bunyip 
+Alt+0194  Croaton 
+Alt+0195  Flesh Shinta
+Alt+0196  Ghost-Flame Shinta
+Alt+0197  Jade Shinta
+Alt+0198  Soul Disciplines
+Alt+0199  Kindred of the East
+Alt+0200  Dance of The Thrashing Dragon
+Alt+0201  Howl of the Devil-Tiger
+Alt+0202  Path of a Thousand Whispers
+Alt+0203  Song of the Shadow
+Alt+0204  Way of The Resplendent Crane
+Alt+0205  White Howler 
+Alt+0206  Ying Yang
+Alt+0207  Wayfare
+Alt+0208  Actor
+Alt+0209  Sovereig
+Alt+0210  Treasure
+Alt+0211  Soothsay
+Alt+0212  Scene
+Alt+0213  Prop
+Alt+0214  Pryetics
+Alt+0215  Primal
+Alt+0216  Nature
+Alt+0217  Legerdem
+Alt+0218  Fey
+Alt+0219  Chicaner
+Alt+0220  Spirit (Changeling)
+Alt+0221  Kinfolk
+Alt+0222  Naga
+Alt+0223  Kitsune
+Alt+0224  Gurahl
+Alt+0225  Ratkin
+
+
+Hopefully they are all right :} 
+  
+                     ,,,^oo^,,, Moxy
+
+

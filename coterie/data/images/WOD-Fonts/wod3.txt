@@ -1,0 +1,229 @@
+WoD Font 3 Version A
+
+This font was processed by LdyMox 
+Ldy Mox's WoD Graphics Page
+http://www.wodgraphics.com
+LdyMox@aol.com
+
+Of course the font version doesn't look as good as the real versions, but some look reasonably good, others like the Wraith glyphs were too complicated to add.
+
+To install the font unzip into a Temp directory then goto C:\Windows\Fonts and choose File -->Install New Font and point out where the temp directory where the WoD font is and highlight the font and then make sure the "Copy Fonts to font folder" is checked and click ok. and you can delete the temporary files, but you may want to keep this file since this has the character list :)
+
+The World of Darkness Symbols themselves are copyrighted by White Wolf 
+
+Character List
+~~~~~~~~~~~~~~~
+
+!  Salubri Antitribu 
+"  Malkavian Antitribu 
+#  Gangrel Antitribu 
+$  Brujah Antitribu 
+%  Ravnos Antitribu 
+&  Toreador Antitribu 
+'  Nosferatu Antitribu 
+(  Ventrue Antitribu 
+)  Pander
+*  Harbringer of Skulls
++ Blood Brothers
+,  Serpents of the Light (Sabbat Setites)
+-  Kiaysd
+.  Baali
+/  Vampire Revised Logo Words
+0  Masquerade Mask
+
+*******
+Below are Garou Glyphs unless otherwise indicated
+********
+1  Snow
+2  Rain
+3  Lightning
+4  Storm
+5  Flood
+6  Winter
+7  Spring
+8  Summer
+9  Autumn
+:   North
+;  South
+<  East
+=  West
+>  Pegasus Totem
+?  Rat Totem
+@  Unicorn Totem
+A  Stag Totem
+B  Fenris Totem
+C  Cockroach Totem
+D  Griffin Totem
+E Grandfather Thunder Totem
+F Owl Totem
+G  South America - Bastet
+H  Asia - Bastet
+I  Equpt - Bastet
+J  Safe Path - Corax
+K  Danger - Corax
+L  Wyrm Spirits - Corax
+M  Weaver Spirits - Corax
+N  Food/ Slaughter - Corax
+O  Paraliment Forming, this way!  - Corax
+P Party! - Corax
+Q  Boar
+R  Cow/Bull
+S  Forest
+T  Mountian
+U  Desert/ Wasteland
+V  Air/ Wind
+W  Earth
+X  Fire
+Y  Water
+Z  Metal- Silver
+[  Dark
+\  Stone
+]  Tree
+^  Bat
+_  Sun
+'  Star
+a  Animal, Beast
+b  Fish
+c  Claw
+d Tooth/Fang
+e  Bone
+f  Deep Umbra
+g  Middle Umbra
+h  Dark Umbra
+i  Moon Bridge
+j  Totem
+k  The Litany
+l  Pack, Alliance
+m  Garou Nation
+n Rage, Frenzy
+o  Gnosis
+p  Lost Cub
+q Impergium
+r  Alpha
+s  Klaive
+t  War of rage
+ut  Rite  
+v  Realm
+w  Africa - Bastet
+x  Europe- Bastet
+y  North America  - Bastet
+z  Ancient, The First Times
+{  Branded, Scarred
+|  Coward, Weakling
+}  Pregent
+~ Friend/Ally
+Alt+0165  Rival
+Alt+0166  Brutatly Destructive, Silver
+Alt+0167 Sharp,Fang
+Alt+0168  Observant, Watch
+Alt+0169  Quick,Speed
+Alt+0170  Hungry
+Alt+0171  Wounded
+Alt+0172  Elder, Wise
+Alt+0174  In memory, remembered, dead
+Alt+0162  Cold
+Alt+0176  Help
+Alt+0177  Sex, Intercourse
+Alt+0178  Love
+Alt+0179  Dance
+Alt+0180  Story
+Alt+0181  Howl, Song
+Alt+0182  Jump
+Alt+0161  Hide, Conceal
+Alt+0184  Danger
+Alt+0185  Create, artist, Author
+Alt+0186  Repair, Mend
+Alt+0187 Put together, join, build
+Alt+0188  Suffering, pain
+Alt+0189  Defiance
+Alt+0190  Regeneration
+Alt+0191  Time; Past, Present, Future
+Alt+0192  Cycle, reaccurance
+Alt+0193  Travel
+Alt+0194  Quest
+Alt+0195  Gun
+Alt+0196  War
+Alt+0197  Peace
+Alt+0198  Sacrafice
+Alt+0199  Birth
+Alt+0200  Death
+Alt+0201  Life
+Alt+0202  Vampire
+Alt+0203  Hive
+Alt+0204  Radiation
+Alt+0205  Toxic Waste
+Alt+0206  Factory/Pollution
+Alt+0207  Falcon Totem
+Alt+0208  Chimera Totem
+Alt+0209  Uktena Totem
+Alt+0210  Wendigo Totem
+Alt+0211  Mercury/Mitanu
+Alt+0212  Vulcan/Hakahe
+Alt+0213  Venus/Tambiyah
+Alt+0214  Mars/Nerigal
+Alt+0215  Earth/Eshtarra
+Alt+0216 Asteroid Belt/Rorg
+Alt+0217  Jupiter/ Zarok
+Alt+0218  Saturn/LuBat
+Alt+0219  Uranus/Ruatma
+Alt+0220  House of the Crescent Moon- Silver Fang
+Alt+0221  Neptune/Shantar
+Alt+0222  Pluto/Meros
+Alt+0223  Moon/Sokhta
+Alt+0224  Sun/Katana-Sonnak
+Alt+0225  Red Star/Anthelios
+Alt+0226  Lodge of the Moon- Silver Fang
+Alt+0227  Lodge of the Sun- Silver Fang
+Alt+0228  House Austere Howl- Silver Fang
+Alt+0229  House Blood Red Crest- Silver Fang
+Alt+0230  House Gleaming Eye- Silver Fang
+Alt+0231  House Unbreakable Hearth- Silver Fang
+Alt+0232  House Wise Heart- Silver Fang
+Alt+0233  House Wyrmfoe- Silver Fang
+Alt+0234  Siberakh
+*******
+End of assumed as Garou Glyphs 
+********
+Alt+0235 Nagaraja
+Alt+0236 True Brujah
+Alt+0237 Lasombra Antitribu 
+Alt+0238  Allies/Imbued/Chosen - Hunter
+Alt+0239  Corruption - Hunter
+Alt+0240  Danger - Hunter 
+Alt+0241  Heralds/Messengers -  Hunter
+Alt+0242  Hope - Hunter
+Alt+0243  The Hunt/MDG/The Mission- Hunter
+Alt+0244  Infested- Hunter
+Alt+0245  Monsters - Hunter
+Alt+0246  Protected - Hunter
+Alt+0247  Puppets - Hunter
+Alt+0248  Safehaven - Hunter
+Alt+0249  Second Sight - Hunter
+Alt+0250  Auspex -  Basic : Jyhad card game
+Alt+0251  Fortitude -  Basic : Jyhad card game
+Alt+0252  Dominate -  Basic : Jyhad card game
+Alt+0253 Celerity -  Basic : Jyhad card game
+Alt+0254  Potence -  Basic : Jyhad card game
+Alt+0255  Protean -  Basic : Jyhad card game
+Alt+0140  Necromancy - Advanced : Jyhad card game
+Alt+0156  Potence -  Advanced : Jyhad card game
+Alt+0138  Dominate -  Advanced : Jyhad card game
+Alt+0154  Obfuscate -  Advanced : Jyhad card game
+Alt+0159  Celerity -  Advanced : Jyhad card game
+Alt+0131  Quietis -  Advanced : Jyhad card game
+Alt+0136  Auspex -  Advanced : Jyhad card game
+Alt+0136  Serpentis -  Advanced : Jyhad card game
+Alt+0152  Presence -  Advanced : Jyhad card game
+Alt+0150  Thaumaturgy -  Advanced : Jyhad card game
+Alt+0151  Fortitude -  Advanced : Jyhad card game
+Alt+0145  Chimestry -  Advanced : Jyhad card game
+Alt+0146  Animalism -  Advanced : Jyhad card game
+Alt+0130  Presence -  Basic : Jyhad card game
+Alt+0147  Obfuscate -  Basic : Jyhad card game
+Alt+0148  Thaumaturgy -  Basic : Jyhad card game
+Alt+0132  Chimestry  -  Basic : Jyhad card game
+Alt+0134  Animalism -  Basic : Jyhad card game
+Alt+0135  Necromancy -  Basic : Jyhad card game
+Alt+0149  Quietis -  Basic : Jyhad card game
+Alt+0133  Protean -  Advanced : Jyhad card game
+Alt+0137  Serpentis -  Basic : Jyhad card game
