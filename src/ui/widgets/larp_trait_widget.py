@@ -285,8 +285,7 @@ class LarpTraitWidget(QWidget):
             traits (list): Traits to add
         """
         for trait in traits:
-            if trait not in self.traits:
-                self.traits.append(trait)
+            self.traits.append(trait)
         
         self._populate_traits()
         self.traitChanged.emit(self.trait_name, self.traits)

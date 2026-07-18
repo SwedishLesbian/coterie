@@ -1036,6 +1036,7 @@ def prepare_character_for_ui(character: Any) -> Any:
         # Use merge() instead of add() to handle objects already attached to other sessions
         character = session.merge(character)
 
+
         # Force access to key attributes to ensure they're loaded
         _ = character.id
         _ = character.name

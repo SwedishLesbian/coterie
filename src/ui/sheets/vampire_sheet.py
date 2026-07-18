@@ -8,6 +8,8 @@ the Mind's Eye Theater LARP adjective-based trait system.
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 from datetime import datetime
+import json
+import os
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
     QLabel, QLineEdit, QSpinBox, QGroupBox,
@@ -73,6 +75,10 @@ class VampireSheet(QWidget):
         self.attributes.categoryChanged.connect(lambda c, t: self.modified.emit())
         self.traits_layout.addWidget(self.attributes)
 
+        # Fix B (Bug 1): wire trait adjective lists so the add-trait dropdown is
+        # populated in each attribute sub-widget.
+        self._load_attribute_adjectives()
+
         # Abilities (flat list, MET style)
         abilities_group = QGroupBox("Abilities")
         abilities_group_layout = QVBoxLayout(abilities_group)
@@ -80,6 +86,28 @@ class VampireSheet(QWidget):
         self.abilities.traitChanged.connect(lambda n, t: self.modified.emit())
         abilities_group_layout.addWidget(self.abilities)
         self.traits_layout.addWidget(abilities_group)
+
+        # Fix C (Bug 4): Negative Traits section — three sub-widgets mirroring
+        # the positive attribute categories.  Each negative trait taken grants
+        # the character one additional Free Trait (max 7 total per LotN Revised).
+        neg_traits_group = QGroupBox("Negative Traits")
+        neg_traits_group_layout = QVBoxLayout(neg_traits_group)
+
+        self.neg_physical = LarpTraitWidget("Physical Negative")
+        self.neg_physical.traitChanged.connect(lambda n, t: self.modified.emit())
+        neg_traits_group_layout.addWidget(self.neg_physical)
+
+        self.neg_social = LarpTraitWidget("Social Negative")
+        self.neg_social.traitChanged.connect(lambda n, t: self.modified.emit())
+        neg_traits_group_layout.addWidget(self.neg_social)
+
+        self.neg_mental = LarpTraitWidget("Mental Negative")
+        self.neg_mental.traitChanged.connect(lambda n, t: self.modified.emit())
+        neg_traits_group_layout.addWidget(self.neg_mental)
+
+        self.traits_layout.addWidget(neg_traits_group)
+
+        # Wire negative-trait adjective lists — loaded in _load_attribute_adjectives()
 
         # === Disciplines Tab ===
         self.disciplines_tab = QWidget()
@@ -89,6 +117,10 @@ class VampireSheet(QWidget):
         self.disciplines = LarpTraitWidget("Disciplines")
         self.disciplines.traitChanged.connect(lambda n, t: self.modified.emit())
         self.disciplines_layout.addWidget(self.disciplines)
+
+        # Fix B (Bug 2): populate the disciplines dropdown from LotN JSON so
+        # the user can pick recognised discipline names instead of free-typing.
+        self._load_discipline_names()
 
         # === Backgrounds Tab ===
         self.backgrounds_tab = QWidget()
@@ -149,6 +181,10 @@ class VampireSheet(QWidget):
         merits_group_layout.addWidget(self.merits)
         self.merits_flaws_layout.addWidget(merits_group)
 
+        # Fix D (Bug 5): populate the merits dropdown from LotN Revised JSON so
+        # the user selects canonical merit names rather than free-typing.
+        self._load_lotn_merits()
+
         flaws_group = QGroupBox("Flaws")
         flaws_group_layout = QVBoxLayout(flaws_group)
         self.flaws = LarpTraitWidget("Flaws")
@@ -169,6 +205,92 @@ class VampireSheet(QWidget):
         self.save_button = QPushButton("Save")
         self.save_button.clicked.connect(self.save_character)
         self.main_layout.addWidget(self.save_button)
+
+    # ------------------------------------------------------------------ #
+    # Data-loading helpers (Fix B, C, D)                                #
+    # ------------------------------------------------------------------ #
+
+    def _data_file(self, *relative_parts: str) -> Path:
+        """Resolve a path relative to the src/data directory."""
+        return Path(__file__).parent.parent.parent / "data" / Path(*relative_parts)
+
+    def _load_attribute_adjectives(self) -> None:
+        """Fix B (Bug 1) + Fix C (Bug 4): Wire trait adjective lists from
+        trait_adjectives.json into the Physical/Social/Mental attribute
+        sub-widgets and the three negative-trait sub-widgets."""
+        try:
+            with open(self._data_file("trait_adjectives.json"), "r") as f:
+                ta = json.load(f)
+        except Exception as e:
+            print(f"[VampireSheet] Could not load trait_adjectives.json: {e}")
+            return
+
+        # Positive attributes
+        phys_widget = self.attributes.trait_widgets.get("Physical")
+        soc_widget  = self.attributes.trait_widgets.get("Social")
+        ment_widget = self.attributes.trait_widgets.get("Mental")
+        if phys_widget and "physical" in ta:
+            phys_widget.set_available_traits(ta["physical"])
+        if soc_widget and "social" in ta:
+            soc_widget.set_available_traits(ta["social"])
+        if ment_widget and "mental" in ta:
+            ment_widget.set_available_traits(ta["mental"])
+
+        # Negative attributes (Fix C)
+        neg = ta.get("negative", {})
+        if neg.get("physical") and hasattr(self, "neg_physical"):
+            self.neg_physical.set_available_traits(neg["physical"])
+        if neg.get("social") and hasattr(self, "neg_social"):
+            self.neg_social.set_available_traits(neg["social"])
+        if neg.get("mental") and hasattr(self, "neg_mental"):
+            self.neg_mental.set_available_traits(neg["mental"])
+
+    def _load_discipline_names(self) -> None:
+        """Fix B (Bug 2): Populate the disciplines widget dropdown with the
+        canonical discipline names from laws_of_the_night_revised.json."""
+        try:
+            with open(self._data_file("powers", "laws_of_the_night_revised.json"), "r") as f:
+                lotn = json.load(f)
+        except Exception as e:
+            print(f"[VampireSheet] Could not load laws_of_the_night_revised.json: {e}")
+            # TODO: wire clan disciplines from laws_of_the_night_revised.json
+            #       when the file is available at src/data/powers/.
+            return
+
+        discipline_names = sorted(lotn.get("disciplines", {}).keys())
+        if discipline_names:
+            self.disciplines.set_available_traits(discipline_names)
+
+    def _load_lotn_merits(self) -> None:
+        """Fix D (Bug 5): Populate the merits widget dropdown with merit names
+        from laws_of_the_night_revised.json (merits dict keyed by category)."""
+        try:
+            with open(self._data_file("powers", "laws_of_the_night_revised.json"), "r") as f:
+                lotn = json.load(f)
+        except Exception as e:
+            print(f"[VampireSheet] Could not load laws_of_the_night_revised.json: {e}")
+            return
+
+        merits_data = lotn.get("merits", {})
+        all_merit_names: List[str] = []
+        if isinstance(merits_data, dict):
+            # Format: {"Physical": [{name, trait_cost, description}, ...], ...}
+            for category_merits in merits_data.values():
+                if isinstance(category_merits, list):
+                    for merit in category_merits:
+                        name = merit.get("name", "")
+                        cost = merit.get("trait_cost", "")
+                        if name:
+                            label = f"{name} ({cost}pt)" if cost else name
+                            all_merit_names.append(label)
+        elif isinstance(merits_data, list):
+            for merit in merits_data:
+                name = merit.get("name", "") if isinstance(merit, dict) else str(merit)
+                if name:
+                    all_merit_names.append(name)
+
+        if all_merit_names:
+            self.merits.set_available_traits(sorted(all_merit_names))
 
     def _create_character_info_section(self) -> None:
         """Create the character information section."""
@@ -216,7 +338,9 @@ class VampireSheet(QWidget):
 
         # Generation
         self.generation = QSpinBox()
-        self.generation.setRange(3, 15)
+        # Fix B (Bug 3): valid Vampire generations are 4-16 (4th gen elders to
+        # 16th gen thin-bloods per Laws of the Night Revised).
+        self.generation.setRange(4, 16)
         self.generation.setValue(13)
         self.generation.valueChanged.connect(lambda: self.modified.emit())
         info_layout.addRow("Generation:", self.generation)
@@ -338,8 +462,14 @@ class VampireSheet(QWidget):
                 QMessageBox.critical(self, "Load Error", "Failed to load character")
                 return
 
+            # Fix A (Bug 6): Store character_id immediately while the object is
+            # still within its originating session scope.  The Vampire model uses
+            # expire_on_commit=False so scalar columns remain readable after
+            # commit, but accessing .id *before* any session.close() call is the
+            # safe pattern — especially when load_character() returns a detached
+            # instance.
+            self.character_id = character.id  # read while guaranteed in-session
             self.character = character
-            self.character_id = character.id
 
             # Update character info section
             self.name.setText(character.name or "")
@@ -398,6 +528,10 @@ class VampireSheet(QWidget):
         blood_traits = []
         merit_traits = []
         flaw_traits = []
+        # Fix C (Bug 4): negative trait lists
+        neg_physical_traits = []
+        neg_social_traits = []
+        neg_mental_traits = []
 
         # Process all LARP traits if available
         if hasattr(character, 'larp_traits') and character.larp_traits:
@@ -445,6 +579,13 @@ class VampireSheet(QWidget):
                         merit_traits.append(trait.display_name)
                     elif category_name == "flaws":
                         flaw_traits.append(trait.display_name)
+                    # Fix C (Bug 4): negative trait categories
+                    elif category_name in ("physical negative", "negative physical"):
+                        neg_physical_traits.append(trait.display_name)
+                    elif category_name in ("social negative", "negative social"):
+                        neg_social_traits.append(trait.display_name)
+                    elif category_name in ("mental negative", "negative mental"):
+                        neg_mental_traits.append(trait.display_name)
 
         # Update widgets with collected traits
         self.attributes.set_category_traits(attribute_traits)
@@ -457,6 +598,10 @@ class VampireSheet(QWidget):
         self.blood_widget.set_traits(blood_traits)
         self.merits.set_traits(merit_traits)
         self.flaws.set_traits(flaw_traits)
+        # Fix C (Bug 4): populate negative trait widgets
+        self.neg_physical.set_traits(neg_physical_traits)
+        self.neg_social.set_traits(neg_social_traits)
+        self.neg_mental.set_traits(neg_mental_traits)
 
     def save_character(self) -> None:
         """Save the current character."""
@@ -556,5 +701,9 @@ class VampireSheet(QWidget):
         larp_traits["blood"] = self.blood_widget.get_traits()
         larp_traits["merits"] = self.merits.get_traits()
         larp_traits["flaws"] = self.flaws.get_traits()
+        # Fix C (Bug 4): include negative traits in collected data
+        larp_traits["physical negative"] = self.neg_physical.get_traits()
+        larp_traits["social negative"] = self.neg_social.get_traits()
+        larp_traits["mental negative"] = self.neg_mental.get_traits()
 
         return larp_traits

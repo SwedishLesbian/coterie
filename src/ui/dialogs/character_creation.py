@@ -195,7 +195,8 @@ class CharacterCreationDialog(QDialog):
         
         # Generation
         self.generation = QSpinBox()
-        self.generation.setRange(4, 15)
+        # Fix B (Bug 3): valid Vampire generations are 4-16 per LotN Revised.
+        self.generation.setRange(4, 16)
         self.generation.setValue(13)
         vampire_layout.addRow("&Generation:", self.generation)
         
